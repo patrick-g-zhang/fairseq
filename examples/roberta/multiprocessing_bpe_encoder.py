@@ -24,7 +24,6 @@ def main():
     - https://dl.fbaipublicfiles.com/fairseq/gpt2_bpe/encoder.json
     - https://dl.fbaipublicfiles.com/fairseq/gpt2_bpe/vocab.bpe
     """
-    pdb.set_trace()
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "--encoder-json",
@@ -70,6 +69,7 @@ def main():
             for output in args.outputs
         ]
 
+        pdb.set_trace()
         encoder = MultiprocessingEncoder(args)
         # pool = Pool(args.workers, initializer=encoder.initializer)
         # encoded_lines = pool.imap(encoder.encode_lines, zip(*inputs), 100)
