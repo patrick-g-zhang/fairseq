@@ -13,6 +13,7 @@ from collections import Counter
 from multiprocessing import Pool
 
 from fairseq.data.encoders.gpt2_bpe import get_encoder
+import pdb
 
 
 def main():
@@ -23,6 +24,7 @@ def main():
     - https://dl.fbaipublicfiles.com/fairseq/gpt2_bpe/encoder.json
     - https://dl.fbaipublicfiles.com/fairseq/gpt2_bpe/vocab.bpe
     """
+    pdb.set_trace()
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "--encoder-json",
