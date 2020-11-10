@@ -73,8 +73,6 @@ def main():
         encoder = MultiprocessingEncoder(args)
         pool = Pool(args.workers, initializer=encoder.initializer)
         encoded_lines = pool.imap(encoder.encode_lines, zip(*inputs), 100)
-        for line_input in zip(*inputs):
-            pdb.set_trace()
         pdb.set_trace()
         # encoder.initializer()
         # encoded_lines = []
