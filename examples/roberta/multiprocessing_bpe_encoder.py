@@ -69,14 +69,13 @@ def main():
             for output in args.outputs
         ]
 
-        pdb.set_trace()
         encoder = MultiprocessingEncoder(args)
         # pool = Pool(args.workers, initializer=encoder.initializer)
         # encoded_lines = pool.imap(encoder.encode_lines, zip(*inputs), 100)
-        pdb.set_trace()
         encoder.initializer()
         encoded_lines = []
         for encoded_line in zip(*inputs):
+            pdb.set_trace()
             encoded_line = encoder.encode_lines(encoded_line)
             encoded_lines.append(encoded_line)
         stats = Counter()
