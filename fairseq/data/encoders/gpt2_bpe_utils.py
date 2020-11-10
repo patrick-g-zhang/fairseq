@@ -111,7 +111,6 @@ class Encoder:
     def encode(self, text):
         bpe_tokens = []
         for token in self.re.findall(self.pat, text):
-            pdb.set_trace()
             token = ''.join(self.byte_encoder[b]
                             for b in token.encode('utf-8'))
 

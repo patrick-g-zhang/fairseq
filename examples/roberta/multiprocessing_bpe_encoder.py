@@ -115,6 +115,7 @@ class MultiprocessingEncoder(object):
         """
         Encode a set of lines. All lines will be encoded together.
         """
+        pdb.set_trace()
         enc_lines = []
         for line in lines:
             line = line.strip()
