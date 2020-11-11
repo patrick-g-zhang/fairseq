@@ -80,7 +80,6 @@ def main():
         #     encoded_lines.append(encoded_line)
         stats = Counter()
         for i, (filt, enc_lines) in enumerate(encoded_lines, start=1):
-            pdb.set_trace()
             if filt == "PASS":
                 for enc_line, output_h in zip(enc_lines, outputs):
                     print(enc_line, file=output_h)
