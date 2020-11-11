@@ -17,9 +17,11 @@ from multiprocessing import Pool
 
 import os
 import shutil
+import pdb
 
 
 def main(args):
+    pdb.set_trace()
     utils.import_user_module(args)
 
     print(args)
@@ -78,14 +80,16 @@ def main(args):
             src_dict = task.load_dictionary(args.srcdict)
         else:
             assert args.trainpref, "--trainpref must be set if --srcdict is not specified"
-            src_dict = build_dictionary([train_path(args.source_lang)], src=True)
+            src_dict = build_dictionary(
+                [train_path(args.source_lang)], src=True)
 
         if target:
             if args.tgtdict:
                 tgt_dict = task.load_dictionary(args.tgtdict)
             else:
                 assert args.trainpref, "--trainpref must be set if --tgtdict is not specified"
-                tgt_dict = build_dictionary([train_path(args.target_lang)], tgt=True)
+                tgt_dict = build_dictionary(
+                    [train_path(args.target_lang)], tgt=True)
         else:
             tgt_dict = None
 
@@ -215,32 +219,40 @@ def main(args):
         if args.dataset_impl == "raw":
             # Copy original text file to destination folder
             output_text_file = dest_path(
-                output_prefix + ".{}-{}".format(args.source_lang, args.target_lang),
+                output_prefix +
+                ".{}-{}".format(args.source_lang, args.target_lang),
                 lang,
             )
             shutil.copyfile(file_name(input_prefix, lang), output_text_file)
         else:
-            make_binary_dataset(vocab, input_prefix, output_prefix, lang, num_workers)
+            make_binary_dataset(vocab, input_prefix,
+                                output_prefix, lang, num_workers)
 
     def make_all(lang, vocab):
         if args.trainpref:
-            make_dataset(vocab, args.trainpref, "train", lang, num_workers=args.workers)
+            make_dataset(vocab, args.trainpref, "train",
+                         lang, num_workers=args.workers)
         if args.validpref:
             for k, validpref in enumerate(args.validpref.split(",")):
                 outprefix = "valid{}".format(k) if k > 0 else "valid"
-                make_dataset(vocab, validpref, outprefix, lang, num_workers=args.workers)
+                make_dataset(vocab, validpref, outprefix,
+                             lang, num_workers=args.workers)
         if args.testpref:
             for k, testpref in enumerate(args.testpref.split(",")):
                 outprefix = "test{}".format(k) if k > 0 else "test"
-                make_dataset(vocab, testpref, outprefix, lang, num_workers=args.workers)
+                make_dataset(vocab, testpref, outprefix,
+                             lang, num_workers=args.workers)
 
     def make_all_alignments():
         if args.trainpref and os.path.exists(args.trainpref + "." + args.align_suffix):
-            make_binary_alignment_dataset(args.trainpref + "." + args.align_suffix, "train.align", num_workers=args.workers)
+            make_binary_alignment_dataset(
+                args.trainpref + "." + args.align_suffix, "train.align", num_workers=args.workers)
         if args.validpref and os.path.exists(args.validpref + "." + args.align_suffix):
-            make_binary_alignment_dataset(args.validpref + "." + args.align_suffix, "valid.align", num_workers=args.workers)
+            make_binary_alignment_dataset(
+                args.validpref + "." + args.align_suffix, "valid.align", num_workers=args.workers)
         if args.testpref and os.path.exists(args.testpref + "." + args.align_suffix):
-            make_binary_alignment_dataset(args.testpref + "." + args.align_suffix, "test.align", num_workers=args.workers)
+            make_binary_alignment_dataset(
+                args.testpref + "." + args.align_suffix, "test.align", num_workers=args.workers)
 
     make_all(args.source_lang, src_dict)
     if target:
@@ -261,7 +273,8 @@ def main(args):
                     for a, s, t in zip_longest(align_file, src_file, tgt_file):
                         si = src_dict.encode_line(s, add_if_not_exist=False)
                         ti = tgt_dict.encode_line(t, add_if_not_exist=False)
-                        ai = list(map(lambda x: tuple(x.split("-")), a.split()))
+                        ai = list(
+                            map(lambda x: tuple(x.split("-")), a.split()))
                         for sai, tai in ai:
                             srcidx = si[int(sai)]
                             tgtidx = ti[int(tai)]
@@ -280,12 +293,14 @@ def main(args):
 
         align_dict = {}
         for srcidx in freq_map.keys():
-            align_dict[srcidx] = max(freq_map[srcidx], key=freq_map[srcidx].get)
+            align_dict[srcidx] = max(
+                freq_map[srcidx], key=freq_map[srcidx].get)
 
         with open(
                 os.path.join(
                     args.destdir,
-                    "alignment.{}-{}.txt".format(args.source_lang, args.target_lang),
+                    "alignment.{}-{}.txt".format(args.source_lang,
+                                                 args.target_lang),
                 ),
                 "w", encoding='utf-8'
         ) as f:
@@ -322,7 +337,8 @@ def binarize_alignments(args, filename, parse_alignment, output_prefix, offset, 
 def dataset_dest_prefix(args, output_prefix, lang):
     base = "{}/{}".format(args.destdir, output_prefix)
     if lang is not None:
-        lang_part = ".{}-{}.{}".format(args.source_lang, args.target_lang, lang)
+        lang_part = ".{}-{}.{}".format(args.source_lang,
+                                       args.target_lang, lang)
     elif args.only_source:
         lang_part = ""
     else:
