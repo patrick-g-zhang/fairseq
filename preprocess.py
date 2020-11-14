@@ -116,7 +116,7 @@ def main(args):
             for worker_id in range(1, num_workers):
                 prefix = "{}{}".format(output_prefix, worker_id)
                 # binarize(args, input_file, vocab, prefix, lang,
-                         # offsets[worker_id], offsets[worker_id + 1])
+                # offsets[worker_id], offsets[worker_id + 1])
                 pool.apply_async(
                     binarize,
                     (
