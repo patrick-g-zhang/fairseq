@@ -60,8 +60,8 @@ def main(args):
         raise FileExistsError(dict_path(args.source_lang))
     if target and not args.tgtdict and os.path.exists(dict_path(args.target_lang)):
         raise FileExistsError(dict_path(args.target_lang))
-
     if args.joined_dictionary:
+
         assert not args.srcdict or not args.tgtdict, \
             "cannot use both --srcdict and --tgtdict with --joined-dictionary"
 
@@ -116,19 +116,22 @@ def main(args):
             pool = Pool(processes=num_workers - 1)
             for worker_id in range(1, num_workers):
                 prefix = "{}{}".format(output_prefix, worker_id)
-                pool.apply_async(
-                    binarize,
-                    (
-                        args,
-                        input_file,
-                        vocab,
-                        prefix,
-                        lang,
-                        offsets[worker_id],
-                        offsets[worker_id + 1]
-                    ),
-                    callback=merge_result
-                )
+                pdb.set_trace()
+                binarize(args, input_file, vocab, prefix, lang,
+                         offsets[worker_id], offsets[worker_id + 1])
+                # pool.apply_async(
+                #     binarize,
+                #     (
+                #         args,
+                #         input_file,
+                #         vocab,
+                #         prefix,
+                #         lang,
+                #         offsets[worker_id],
+                #         offsets[worker_id + 1]
+                #     ),
+                #     callback=merge_result
+                # )
             pool.close()
 
         ds = indexed_dataset.make_builder(dataset_dest_file(args, output_prefix, lang, "bin"),
