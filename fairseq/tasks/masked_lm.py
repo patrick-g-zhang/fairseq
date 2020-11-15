@@ -4,7 +4,7 @@
 # LICENSE file in the root directory of this source tree.
 
 import os
-
+import pdb
 import numpy as np
 
 from fairseq.data import (
@@ -34,7 +34,8 @@ class MaskedLMTask(FairseqTask):
         parser.add_argument('data', help='colon separated path to data directories list, \
                             will be iterated upon during epochs in round-robin manner')
         parser.add_argument('--sample-break-mode', default='complete',
-                            choices=['none', 'complete', 'complete_doc', 'eos'],
+                            choices=['none', 'complete',
+                                     'complete_doc', 'eos'],
                             help='If omitted or "none", fills each sample with tokens-per-sample '
                                  'tokens. If set to "complete", splits samples only at the end '
                                  'of sentence, but may include multiple sentences per sample. '
@@ -88,9 +89,11 @@ class MaskedLMTask(FairseqTask):
             combine=combine,
         )
         if dataset is None:
-            raise FileNotFoundError('Dataset not found: {} ({})'.format(split, split_path))
+            raise FileNotFoundError(
+                'Dataset not found: {} ({})'.format(split, split_path))
 
         # create continuous blocks of tokens
+        pdb.set_trace()
         dataset = TokenBlockDataset(
             dataset,
             dataset.sizes,
@@ -165,7 +168,8 @@ class MaskedLMTask(FairseqTask):
             pad_idx=self.source_dictionary.pad(),
             left_pad=False,
         )
-        src_dataset = PrependTokenDataset(src_dataset, self.source_dictionary.bos())
+        src_dataset = PrependTokenDataset(
+            src_dataset, self.source_dictionary.bos())
         src_dataset = NestedDictionaryDataset(
             {
                 'id': IdDataset(),
