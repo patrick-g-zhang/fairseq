@@ -11,6 +11,7 @@ import torch
 from fairseq.data import data_utils, Dictionary
 
 from . import BaseWrapperDataset, LRUCacheDataset
+import pdb
 
 
 class MaskTokensDataset(BaseWrapperDataset):
@@ -47,8 +48,10 @@ class MaskTokensDataset(BaseWrapperDataset):
         """Return the source and target datasets for masked LM training."""
         dataset = LRUCacheDataset(dataset)
         return (
-            LRUCacheDataset(cls(dataset, *args, **kwargs, return_masked_tokens=False)),
-            LRUCacheDataset(cls(dataset, *args, **kwargs, return_masked_tokens=True)),
+            LRUCacheDataset(cls(dataset, *args, **kwargs,
+                                return_masked_tokens=False)),
+            LRUCacheDataset(cls(dataset, *args, **kwargs,
+                                return_masked_tokens=True)),
         )
 
     def __init__(
@@ -96,6 +99,7 @@ class MaskTokensDataset(BaseWrapperDataset):
 
     @lru_cache(maxsize=8)
     def __getitem__(self, index: int):
+        pdb.set_trace()
         with data_utils.numpy_seed(self.seed, self.epoch, index):
             item = self.dataset[index]
             sz = len(item)
@@ -127,13 +131,15 @@ class MaskTokensDataset(BaseWrapperDataset):
                 if self.mask_whole_words is not None:
                     mask = np.repeat(mask, word_lens)
                 new_item = np.full(len(mask), self.pad_idx)
-                new_item[mask] = item[torch.from_numpy(mask.astype(np.uint8)) == 1]
+                new_item[mask] = item[torch.from_numpy(
+                    mask.astype(np.uint8)) == 1]
                 return torch.from_numpy(new_item)
 
             # decide unmasking and random replacement
             rand_or_unmask_prob = self.random_token_prob + self.leave_unmasked_prob
             if rand_or_unmask_prob > 0.0:
-                rand_or_unmask = mask & (np.random.rand(sz) < rand_or_unmask_prob)
+                rand_or_unmask = mask & (
+                    np.random.rand(sz) < rand_or_unmask_prob)
                 if self.random_token_prob == 0.0:
                     unmask = rand_or_unmask
                     rand_mask = None
