@@ -5,7 +5,7 @@
 """
 RoBERTa: A Robustly Optimized BERT Pretraining Approach.
 """
-
+import pdb
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -101,7 +101,8 @@ class RobertaModel(FairseqLanguageModel):
         if classification_head_name is not None:
             features_only = True
 
-        x, extra = self.decoder(src_tokens, features_only, return_all_hiddens, **kwargs)
+        x, extra = self.decoder(src_tokens, features_only,
+                                return_all_hiddens, **kwargs)
 
         if classification_head_name is not None:
             x = self.classification_heads[classification_head_name](x)
@@ -159,12 +160,15 @@ class RobertaModel(FairseqLanguageModel):
                 continue
 
             head_name = k[len(prefix + 'classification_heads.'):].split('.')[0]
-            num_classes = state_dict[prefix + 'classification_heads.' + head_name + '.out_proj.weight'].size(0)
-            inner_dim = state_dict[prefix + 'classification_heads.' + head_name + '.dense.weight'].size(0)
+            num_classes = state_dict[prefix + 'classification_heads.' +
+                                     head_name + '.out_proj.weight'].size(0)
+            inner_dim = state_dict[prefix + 'classification_heads.' +
+                                   head_name + '.dense.weight'].size(0)
 
             if getattr(self.args, 'load_checkpoint_heads', False):
                 if head_name not in current_head_names:
-                    self.register_classification_head(head_name, num_classes, inner_dim)
+                    self.register_classification_head(
+                        head_name, num_classes, inner_dim)
             else:
                 if head_name not in current_head_names:
                     print(
@@ -178,7 +182,8 @@ class RobertaModel(FairseqLanguageModel):
                 ):
                     print(
                         'WARNING: deleting classification head ({}) from checkpoint '
-                        'with different dimensions than current model: {}'.format(head_name, k)
+                        'with different dimensions than current model: {}'.format(
+                            head_name, k)
                     )
                     keys_to_delete.append(k)
         for k in keys_to_delete:
@@ -348,7 +353,9 @@ class RobertaEncoder(FairseqDecoder):
                 - a dictionary of additional data, where 'inner_states'
                   is a list of hidden states.
         """
-        x, extra = self.extract_features(src_tokens, return_all_hiddens=return_all_hiddens)
+        pdb.set_trace()
+        x, extra = self.extract_features(
+            src_tokens, return_all_hiddens=return_all_hiddens)
         if not features_only:
             x = self.output_layer(x, masked_tokens=masked_tokens)
         return x, extra
@@ -405,7 +412,8 @@ def roberta_large_architecture(args):
 def xlm_architecture(args):
     args.encoder_layers = getattr(args, 'encoder_layers', 16)
     args.encoder_embed_dim = getattr(args, 'encoder_embed_dim', 1280)
-    args.encoder_ffn_embed_dim = getattr(args, 'encoder_ffn_embed_dim', 1280*4)
+    args.encoder_ffn_embed_dim = getattr(
+        args, 'encoder_ffn_embed_dim', 1280 * 4)
     args.encoder_attention_heads = getattr(args, 'encoder_attention_heads', 16)
 
     base_architecture(args)
