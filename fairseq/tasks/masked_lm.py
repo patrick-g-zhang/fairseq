@@ -93,7 +93,6 @@ class MaskedLMTask(FairseqTask):
                 'Dataset not found: {} ({})'.format(split, split_path))
 
         # create continuous blocks of tokens
-        pdb.set_trace()
         dataset = TokenBlockDataset(
             dataset,
             dataset.sizes,
@@ -108,6 +107,7 @@ class MaskedLMTask(FairseqTask):
         dataset = PrependTokenDataset(dataset, self.source_dictionary.bos())
 
         # create masked input and targets
+        pdb.set_trace()
         mask_whole_words = get_whole_word_mask(self.args, self.source_dictionary) \
             if self.args.mask_whole_words else None
 
