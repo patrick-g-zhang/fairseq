@@ -57,6 +57,7 @@ def main():
     assert len(args.inputs) == len(args.outputs), \
         "number of input and output paths should match"
 
+    pdb.set_trace()
     with contextlib.ExitStack() as stack:
         inputs = [
             stack.enter_context(open(input, "r", encoding="utf-8"))
@@ -69,17 +70,17 @@ def main():
             for output in args.outputs
         ]
 
-        # encoder = MultiprocessingEncoder(args)
+        encoder = MultiprocessingEncoder(args)
         # pool = Pool(args.workers, initializer=encoder.initializer)
         # encoded_lines = pool.imap(encoder.encode_lines, zip(*inputs), 100)
-        # encoder.initializer()
-        # encoded_lines = []
+        encoder.initializer()
+        encoded_lines = []
         for encoded_line in zip(*inputs):
             print(encoded_line)
-            pdb.set_trace()
             # pdb.set_trace()
-            # encoded_line = encoder.encode_lines(encoded_line)
-            # encoded_lines.append(encoded_line)
+            pdb.set_trace()
+            encoded_line = encoder.encode_lines(encoded_line)
+            encoded_lines.append(encoded_line)
         stats = Counter()
         for i, (filt, enc_lines) in enumerate(encoded_lines, start=1):
             if filt == "PASS":
