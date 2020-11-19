@@ -21,6 +21,7 @@ import pdb
 
 
 def main(args):
+    pdb.set_trace()
     utils.import_user_module(args)
 
     print(args)
