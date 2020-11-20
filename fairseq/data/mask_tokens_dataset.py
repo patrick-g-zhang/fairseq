@@ -99,6 +99,7 @@ class MaskTokensDataset(BaseWrapperDataset):
 
     @lru_cache(maxsize=8)
     def __getitem__(self, index: int):
+        pdb.set_trace()
         with data_utils.numpy_seed(self.seed, self.epoch, index):
             item = self.dataset[index]
             sz = len(item)

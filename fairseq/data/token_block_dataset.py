@@ -5,7 +5,7 @@
 
 import numpy as np
 import torch
-
+import pdb
 from fairseq.data import FairseqDataset, plasma_utils
 
 
@@ -31,6 +31,7 @@ class TokenBlockDataset(FairseqDataset):
             'complete_doc' break mode). Typically 1 if the sentences have eos
             and 0 otherwise.
     """
+
     def __init__(
         self,
         dataset,
@@ -75,7 +76,8 @@ class TokenBlockDataset(FairseqDataset):
         if break_mode == "eos" and block_size is None:
             block_size = 0
 
-        slice_indices = _get_slice_indices_fast(sizes, break_mode, block_size, document_sep_len)
+        slice_indices = _get_slice_indices_fast(
+            sizes, break_mode, block_size, document_sep_len)
         self._sizes = slice_indices[:, 1] - slice_indices[:, 0]
 
         # build index mapping block indices to the underlying dataset indices
@@ -98,7 +100,8 @@ class TokenBlockDataset(FairseqDataset):
             )
         self._slice_indices = plasma_utils.PlasmaArray(slice_indices)
         self._sizes = plasma_utils.PlasmaArray(self._sizes)
-        self._block_to_dataset_index = plasma_utils.PlasmaArray(block_to_dataset_index)
+        self._block_to_dataset_index = plasma_utils.PlasmaArray(
+            block_to_dataset_index)
 
     @property
     def slice_indices(self):
@@ -117,6 +120,7 @@ class TokenBlockDataset(FairseqDataset):
         return self.dataset.attr(attr, start_ds_idx)
 
     def __getitem__(self, index):
+        pdb.set_trace()
         start_ds_idx, start_offset, end_ds_idx = self.block_to_dataset_index[index]
 
         buffer = torch.cat(
@@ -133,16 +137,17 @@ class TokenBlockDataset(FairseqDataset):
             # *source* is shifted right by 1 (maybe left-padded with eos)
             # *past_target* is shifted right by 2 (left-padded as needed)
             if s == 0:
-                source = torch.cat([item.new([self.eos]), buffer[0 : e - 1]])
+                source = torch.cat([item.new([self.eos]), buffer[0: e - 1]])
                 past_target = torch.cat(
-                    [item.new([self.pad, self.eos]), buffer[0 : e - 2]]
+                    [item.new([self.pad, self.eos]), buffer[0: e - 2]]
                 )
             else:
-                source = buffer[s - 1 : e - 1]
+                source = buffer[s - 1: e - 1]
                 if s == 1:
-                    past_target = torch.cat([item.new([self.eos]), buffer[0 : e - 2]])
+                    past_target = torch.cat(
+                        [item.new([self.eos]), buffer[0: e - 2]])
                 else:
-                    past_target = buffer[s - 2 : e - 2]
+                    past_target = buffer[s - 2: e - 2]
 
             return source, item, past_target
 
