@@ -82,8 +82,6 @@ class MaskedLMTask(FairseqTask):
         data_path = paths[epoch % len(paths)]
         split_path = os.path.join(data_path, split)
 
-        pdb.set_trace()
-
         dataset = data_utils.load_indexed_dataset(
             split_path,
             self.source_dictionary,
@@ -124,6 +122,8 @@ class MaskedLMTask(FairseqTask):
             freq_weighted_replacement=self.args.freq_weighted_replacement,
             mask_whole_words=mask_whole_words,
         )
+
+        pdb.set_trace()
 
         with data_utils.numpy_seed(self.args.seed + epoch):
             shuffle = np.random.permutation(len(src_dataset))
