@@ -174,12 +174,15 @@ def filter_by_size(indices, dataset, max_positions, raise_exception=False):
             ignored = indices[dataset.sizes[indices] > max_positions].tolist()
             indices = indices[dataset.sizes[indices] <= max_positions]
         elif hasattr(dataset, 'sizes') and isinstance(dataset.sizes, list) and len(dataset.sizes) == 1:
-            ignored = indices[dataset.sizes[0][indices] > max_positions].tolist()
+            ignored = indices[dataset.sizes[0]
+                              [indices] > max_positions].tolist()
             indices = indices[dataset.sizes[0][indices] <= max_positions]
         else:
-            indices, ignored = _filter_by_size_dynamic(indices, dataset.size, max_positions)
+            indices, ignored = _filter_by_size_dynamic(
+                indices, dataset.size, max_positions)
     else:
-        indices, ignored = _filter_by_size_dynamic(indices, dataset.size, max_positions)
+        indices, ignored = _filter_by_size_dynamic(
+            indices, dataset.size, max_positions)
 
     if len(ignored) > 0 and raise_exception:
         raise Exception((
