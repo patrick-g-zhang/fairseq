@@ -11,7 +11,7 @@ import shutil
 import traceback
 from collections import OrderedDict
 from typing import Union
-
+import pdb
 import torch
 from fairseq.models import FairseqDecoder, FairseqEncoder
 from torch.serialization import default_restore_location
@@ -55,7 +55,8 @@ def save_checkpoint(args, trainer, epoch_itr, val_loss):
     )
     checkpoint_conds["checkpoint_last.pt"] = not args.no_last_checkpoints
 
-    extra_state = {"train_iterator": epoch_itr.state_dict(), "val_loss": val_loss}
+    extra_state = {"train_iterator": epoch_itr.state_dict(),
+                   "val_loss": val_loss}
     if hasattr(save_checkpoint, "best"):
         extra_state.update({"best": save_checkpoint.best})
 
@@ -84,19 +85,21 @@ def save_checkpoint(args, trainer, epoch_itr, val_loss):
         checkpoints = checkpoint_paths(
             args.save_dir, pattern=r"checkpoint_\d+_(\d+)\.pt"
         )
-        for old_chk in checkpoints[args.keep_interval_updates :]:
+        for old_chk in checkpoints[args.keep_interval_updates:]:
             if os.path.lexists(old_chk):
                 os.remove(old_chk)
 
     if args.keep_last_epochs > 0:
         # remove old epoch checkpoints; checkpoints are sorted in descending order
-        checkpoints = checkpoint_paths(args.save_dir, pattern=r"checkpoint(\d+)\.pt")
-        for old_chk in checkpoints[args.keep_last_epochs :]:
+        checkpoints = checkpoint_paths(
+            args.save_dir, pattern=r"checkpoint(\d+)\.pt")
+        for old_chk in checkpoints[args.keep_last_epochs:]:
             if os.path.lexists(old_chk):
                 os.remove(old_chk)
 
 
 def load_checkpoint(args, trainer, **passthrough_args):
+    pdb.set_trace()
     """
     Load a checkpoint and restore the training iterator.
 
@@ -176,7 +179,8 @@ def load_model_ensemble(filenames, arg_overrides=None, task=None):
             were used during model training
         task (fairseq.tasks.FairseqTask, optional): task to use for loading
     """
-    ensemble, args, _task = load_model_ensemble_and_task(filenames, arg_overrides, task)
+    ensemble, args, _task = load_model_ensemble_and_task(
+        filenames, arg_overrides, task)
     return ensemble, args
 
 
@@ -297,7 +301,8 @@ def _upgrade_state_dict(state):
     # add optimizer_history
     if "optimizer_history" not in state:
         state["optimizer_history"] = [
-            {"criterion_name": "CrossEntropyCriterion", "best_loss": state["best_loss"]}
+            {"criterion_name": "CrossEntropyCriterion",
+                "best_loss": state["best_loss"]}
         ]
         state["last_optimizer_state"] = state["optimizer"]
         del state["optimizer"]
@@ -346,8 +351,10 @@ def _upgrade_state_dict(state):
         state["args"].task = "translation"
 
     # set any missing default values in the task, model or other registries
-    registry.set_defaults(state["args"], tasks.TASK_REGISTRY[state["args"].task])
-    registry.set_defaults(state["args"], models.ARCH_MODEL_REGISTRY[state["args"].arch])
+    registry.set_defaults(
+        state["args"], tasks.TASK_REGISTRY[state["args"].task])
+    registry.set_defaults(
+        state["args"], models.ARCH_MODEL_REGISTRY[state["args"].arch])
     for registry_name, REGISTRY in registry.REGISTRIES.items():
         choice = getattr(state["args"], registry_name, None)
         if choice is not None:
@@ -373,10 +380,12 @@ def prune_state_dict(state_dict, args):
         return state_dict
 
     encoder_layers_to_keep = (
-        args.encoder_layers_to_keep if "encoder_layers_to_keep" in vars(args) else None
+        args.encoder_layers_to_keep if "encoder_layers_to_keep" in vars(
+            args) else None
     )
     decoder_layers_to_keep = (
-        args.decoder_layers_to_keep if "decoder_layers_to_keep" in vars(args) else None
+        args.decoder_layers_to_keep if "decoder_layers_to_keep" in vars(
+            args) else None
     )
 
     if not encoder_layers_to_keep and not decoder_layers_to_keep:
@@ -395,14 +404,17 @@ def prune_state_dict(state_dict, args):
         for i in range(len(keep_layers)):
             mapping_dict[str(keep_layers[i])] = str(i)
 
-        regex = re.compile("^{layer}.*\.layers\.(\d+)".format(layer=layer_name))
+        regex = re.compile(
+            "^{layer}.*\.layers\.(\d+)".format(layer=layer_name))
         return {"substitution_regex": regex, "mapping_dict": mapping_dict}
 
     pruning_passes = []
     if encoder_layers_to_keep:
-        pruning_passes.append(create_pruning_pass(encoder_layers_to_keep, "encoder"))
+        pruning_passes.append(create_pruning_pass(
+            encoder_layers_to_keep, "encoder"))
     if decoder_layers_to_keep:
-        pruning_passes.append(create_pruning_pass(decoder_layers_to_keep, "decoder"))
+        pruning_passes.append(create_pruning_pass(
+            decoder_layers_to_keep, "decoder"))
 
     new_state_dict = {}
     for layer_name in state_dict.keys():
@@ -427,7 +439,7 @@ def prune_state_dict(state_dict, args):
                 new_state_key = (
                     layer_name[: substitution_match.start(1)]
                     + new_layer_number
-                    + layer_name[substitution_match.end(1) :]
+                    + layer_name[substitution_match.end(1):]
                 )
                 new_state_dict[new_state_key] = state_dict[layer_name]
 
@@ -466,7 +478,7 @@ def load_pretrained_component_from_model(
     for key in state["model"].keys():
         if key.startswith(component_type):
             # encoder.input_layers.0.0.weight --> input_layers.0.0.weight
-            component_subkey = key[len(component_type) + 1 :]
+            component_subkey = key[len(component_type) + 1:]
             component_state_dict[component_subkey] = state["model"][key]
     component.load_state_dict(component_state_dict, strict=True)
     return component
