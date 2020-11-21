@@ -120,7 +120,7 @@ class TokenBlockDataset(FairseqDataset):
         return self.dataset.attr(attr, start_ds_idx)
 
     def __getitem__(self, index):
-        pdb.set_trace()
+        # pdb.set_trace()
         start_ds_idx, start_offset, end_ds_idx = self.block_to_dataset_index[index]
 
         buffer = torch.cat(

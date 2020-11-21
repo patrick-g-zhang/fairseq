@@ -29,7 +29,8 @@ class FairseqDecoder(nn.Module):
                 - the decoder's output of shape `(batch, tgt_len, vocab)`
                 - a dictionary with any model-specific outputs
         """
-        x, extra = self.extract_features(prev_output_tokens, encoder_out=encoder_out, **kwargs)
+        x, extra = self.extract_features(
+            prev_output_tokens, encoder_out=encoder_out, **kwargs)
         x = self.output_layer(x)
         return x, extra
 
@@ -60,7 +61,8 @@ class FairseqDecoder(nn.Module):
                 target = sample['target']
             else:
                 target = None
-            out = self.adaptive_softmax.get_log_prob(net_output[0], target=target)
+            out = self.adaptive_softmax.get_log_prob(
+                net_output[0], target=target)
             return out.exp_() if not log_probs else out
 
         logits = net_output[0]
