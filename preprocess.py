@@ -76,6 +76,7 @@ def main(args):
             )
         tgt_dict = src_dict
     else:
+        # for masked ml
         if args.srcdict:
             src_dict = task.load_dictionary(args.srcdict)
         else:
@@ -98,6 +99,7 @@ def main(args):
         tgt_dict.save(dict_path(args.target_lang))
 
     def make_binary_dataset(vocab, input_prefix, output_prefix, lang, num_workers):
+        pdb.set_trace()
         print("| [{}] Dictionary: {} types".format(lang, len(vocab) - 1))
         n_seq_tok = [0, 0]
         replaced = Counter()
