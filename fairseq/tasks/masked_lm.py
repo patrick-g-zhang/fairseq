@@ -107,7 +107,7 @@ class MaskedLMTask(FairseqTask):
         dataset = PrependTokenDataset(dataset, self.source_dictionary.bos())
 
         # create masked input and targets
-        pdb.set_trace()
+        # pdb.set_trace()
         mask_whole_words = get_whole_word_mask(self.args, self.source_dictionary) \
             if self.args.mask_whole_words else None
 
@@ -124,8 +124,8 @@ class MaskedLMTask(FairseqTask):
             mask_whole_words=mask_whole_words,
         )
 
-        src_dataset.__getitem__(1)
-        tgt_dataset.__getitem__(1)
+        # src_dataset.__getitem__(1)
+        # tgt_dataset.__getitem__(1)
 
         with data_utils.numpy_seed(self.args.seed + epoch):
             shuffle = np.random.permutation(len(src_dataset))
