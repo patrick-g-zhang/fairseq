@@ -99,7 +99,6 @@ def main(args):
         tgt_dict.save(dict_path(args.target_lang))
 
     def make_binary_dataset(vocab, input_prefix, output_prefix, lang, num_workers):
-        pdb.set_trace()
         print("| [{}] Dictionary: {} types".format(lang, len(vocab) - 1))
         n_seq_tok = [0, 0]
         replaced = Counter()
@@ -112,6 +111,8 @@ def main(args):
         input_file = "{}{}".format(
             input_prefix, ("." + lang) if lang is not None else ""
         )
+        # the files will be cut for different parts for processing
+        # !!!! pay attention for my dataset
         offsets = Binarizer.find_offsets(input_file, num_workers)
         pool = None
         if num_workers > 1:
@@ -314,12 +315,15 @@ def main(args):
 
 
 def binarize(args, filename, vocab, output_prefix, lang, offset, end, append_eos=True):
+
+    # ds is MMapIndexedDatasetBuilder for indexed Dataset builder
     ds = indexed_dataset.make_builder(dataset_dest_file(args, output_prefix, lang, "bin"),
                                       impl=args.dataset_impl, vocab_size=len(vocab))
 
     def consumer(tensor):
         ds.add_item(tensor)
 
+    # append eos is done here
     res = Binarizer.binarize(filename, vocab, consumer, append_eos=append_eos,
                              offset=offset, end=end)
     ds.finalize(dataset_dest_file(args, output_prefix, lang, "idx"))

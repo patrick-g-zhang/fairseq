@@ -20,8 +20,8 @@ class Dictionary(object):
     def __init__(
         self,
         pad='<pad>',
-        eos='</s>',
-        unk='<unk>',
+        eos='<EOS>',
+        unk='<UNK>',
         bos='<s>',
         extra_special_symbols=None,
     ):
@@ -29,7 +29,7 @@ class Dictionary(object):
         self.symbols = []
         self.count = []
         self.indices = {}
-        self.bos_index = self.add_symbol(bos)
+        self.bos = bos
         self.pad_index = self.add_symbol(pad)
         self.eos_index = self.add_symbol(eos)
         self.unk_index = self.add_symbol(unk)
@@ -75,7 +75,8 @@ class Dictionary(object):
                 return self[i]
 
         if hasattr(self, 'bos_index'):
-            sent = ' '.join(token_string(i) for i in tensor if (i != self.eos()) and (i != self.bos()))
+            sent = ' '.join(token_string(i) for i in tensor if (
+                i != self.eos()) and (i != self.bos()))
         else:
             sent = ' '.join(token_string(i) for i in tensor if i != self.eos())
         return data_utils.process_bpe_symbol(sent, bpe_symbol)
@@ -127,11 +128,13 @@ class Dictionary(object):
         if nwords <= 0:
             nwords = len(self)
 
-        new_indices = dict(zip(self.symbols[:self.nspecial], range(self.nspecial)))
+        new_indices = dict(
+            zip(self.symbols[:self.nspecial], range(self.nspecial)))
         new_symbols = self.symbols[:self.nspecial]
         new_count = self.count[:self.nspecial]
 
-        c = Counter(dict(sorted(zip(self.symbols[self.nspecial:], self.count[self.nspecial:]))))
+        c = Counter(
+            dict(sorted(zip(self.symbols[self.nspecial:], self.count[self.nspecial:]))))
         for symbol, count in c.most_common(nwords - self.nspecial):
             if count >= threshold:
                 new_indices[symbol] = len(new_symbols)
@@ -209,12 +212,16 @@ class Dictionary(object):
         for line in lines[indices_start_line:]:
             idx = line.rfind(' ')
             if idx == -1:
-                raise ValueError("Incorrect dictionary format, expected '<token> <cnt>'")
+                raise ValueError(
+                    "Incorrect dictionary format, expected '<token> <cnt>'")
             word = line[:idx]
             count = int(line[idx + 1:])
+            # self.indices {'<s>': 0, '<pad>': 1, '</s>': 2, '<unk>': 3}
             self.indices[word] = len(self.symbols)
             self.symbols.append(word)
             self.count.append(count)
+        # add CLS
+        self.bos_index = self.add_symbol(self.bos)
 
     def _save(self, f, kv_iterator):
         if isinstance(f, str):
@@ -233,7 +240,8 @@ class Dictionary(object):
     def save(self, f):
         """Stores dictionary into a text file"""
         ex_keys, ex_vals = self._get_meta()
-        self._save(f, zip(ex_keys + self.symbols[self.nspecial:], ex_vals + self.count[self.nspecial:]))
+        self._save(f, zip(
+            ex_keys + self.symbols[self.nspecial:], ex_vals + self.count[self.nspecial:]))
 
     def dummy_sentence(self, length):
         t = torch.Tensor(length).uniform_(self.nspecial + 1, len(self)).long()
@@ -300,7 +308,8 @@ class Dictionary(object):
             for r in results:
                 merge_result(r.get())
         else:
-            merge_result(Dictionary._add_file_to_dictionary_single_worker(filename, tokenize, dict.eos_word))
+            merge_result(Dictionary._add_file_to_dictionary_single_worker(
+                filename, tokenize, dict.eos_word))
 
 
 class TruncatedDictionary(object):
