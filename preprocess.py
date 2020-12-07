@@ -235,6 +235,7 @@ def main(args):
                                 output_prefix, lang, num_workers)
 
     def make_all(lang, vocab):
+        pdb.set_trace()
         if args.trainpref:
             make_dataset(vocab, args.trainpref, "train",
                          lang, num_workers=args.workers)
