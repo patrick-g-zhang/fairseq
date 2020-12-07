@@ -99,7 +99,7 @@ def save_checkpoint(args, trainer, epoch_itr, val_loss):
 
 
 def load_checkpoint(args, trainer, **passthrough_args):
-    pdb.set_trace()
+    # pdb.set_trace()
     """
     Load a checkpoint and restore the training iterator.
 

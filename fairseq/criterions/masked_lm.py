@@ -37,7 +37,7 @@ class MaskedLmLoss(FairseqCriterion):
         # tensor and gives CUDA error.
         if sample_size == 0:
             masked_tokens = None
-        pdb.set_trace()
+        # pdb.set_trace()
 
         logits = model(**sample['net_input'], masked_tokens=masked_tokens)[0]
         targets = model.get_targets(sample, [logits])
