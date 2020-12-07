@@ -21,7 +21,7 @@ import pdb
 
 
 def main(args):
-    pdb.set_trace()
+    # pdb.set_trace()
     utils.import_user_module(args)
 
     print(args)
@@ -119,22 +119,22 @@ def main(args):
             pool = Pool(processes=num_workers - 1)
             for worker_id in range(1, num_workers):
                 prefix = "{}{}".format(output_prefix, worker_id)
-                pdb.set_trace()
-                binarize(args, input_file, vocab, prefix, lang,
-                         offsets[worker_id], offsets[worker_id + 1])
-                # pool.apply_async(
-                #     binarize,
-                #     (
-                #         args,
-                #         input_file,
-                #         vocab,
-                #         prefix,
-                #         lang,
-                #         offsets[worker_id],
-                #         offsets[worker_id + 1]
-                #     ),
-                #     callback=merge_result
-                # )
+                # pdb.set_trace()
+                # binarize(args, input_file, vocab, prefix, lang,
+                         # offsets[worker_id], offsets[worker_id + 1])
+                pool.apply_async(
+                    binarize,
+                    (
+                        args,
+                        input_file,
+                        vocab,
+                        prefix,
+                        lang,
+                        offsets[worker_id],
+                        offsets[worker_id + 1]
+                    ),
+                    callback=merge_result
+                )
             pool.close()
 
         ds = indexed_dataset.make_builder(dataset_dest_file(args, output_prefix, lang, "bin"),
@@ -277,8 +277,10 @@ def main(args):
             with open(src_file_name, "r", encoding='utf-8') as src_file:
                 with open(tgt_file_name, "r", encoding='utf-8') as tgt_file:
                     for a, s, t in zip_longest(align_file, src_file, tgt_file):
-                        si = src_dict.encode_line(s, add_if_not_exist=False)
-                        ti = tgt_dict.encode_line(t, add_if_not_exist=False)
+                        si = src_dict.encode_line(
+                            s, add_if_not_exist=False, append_eos=False)
+                        ti = tgt_dict.encode_line(
+                            t, add_if_not_exist=False, append_eos=False)
                         ai = list(
                             map(lambda x: tuple(x.split("-")), a.split()))
                         for sai, tai in ai:
