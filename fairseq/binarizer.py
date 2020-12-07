@@ -38,6 +38,7 @@ class Binarizer:
             while line:
                 if end > 0 and f.tell() > end:
                     break
+                print(line)
                 ids = dict.encode_line(
                     line=line,
                     line_tokenizer=tokenize,
