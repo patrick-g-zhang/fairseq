@@ -39,13 +39,14 @@ class Binarizer:
                 if end > 0 and f.tell() > end:
                     break
                 ids = dict.encode_line(
-                        line=line,
-                        line_tokenizer=tokenize,
-                        add_if_not_exist=False,
-                        consumer=replaced_consumer,
-                        append_eos=append_eos,
-                        reverse_order=reverse_order,
+                    line=line,
+                    line_tokenizer=tokenize,
+                    add_if_not_exist=False,
+                    consumer=replaced_consumer,
+                    append_eos=append_eos,
+                    reverse_order=reverse_order,
                 )
+                print(ids)
                 nseq += 1
                 ntok += len(ids)
                 consumer(ids)
