@@ -22,7 +22,6 @@ import pdb
 
 
 def main(args, init_distributed=False):
-    pdb.set_trace()
     utils.import_user_module(args)
 
     assert args.max_tokens is not None or args.max_sentences is not None, \
@@ -46,6 +45,7 @@ def main(args, init_distributed=False):
     task = tasks.setup_task(args)
 
     # Load valid dataset (we load training data below, based on the latest checkpoint)
+    pdb.set_trace()
     for valid_sub_split in args.valid_subset.split(','):
         task.load_dataset(valid_sub_split, combine=False, epoch=0)
 
