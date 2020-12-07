@@ -121,7 +121,7 @@ def main(args):
                 prefix = "{}{}".format(output_prefix, worker_id)
                 # pdb.set_trace()
                 # binarize(args, input_file, vocab, prefix, lang,
-                         # offsets[worker_id], offsets[worker_id + 1])
+                # offsets[worker_id], offsets[worker_id + 1])
                 pool.apply_async(
                     binarize,
                     (
@@ -316,7 +316,7 @@ def main(args):
                 print("{} {}".format(src_dict[k], tgt_dict[v]), file=f)
 
 
-def binarize(args, filename, vocab, output_prefix, lang, offset, end, append_eos=True):
+def binarize(args, filename, vocab, output_prefix, lang, offset, end, append_eos=False):
 
     # ds is MMapIndexedDatasetBuilder for indexed Dataset builder
     ds = indexed_dataset.make_builder(dataset_dest_file(args, output_prefix, lang, "bin"),
