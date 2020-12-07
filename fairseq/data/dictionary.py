@@ -29,7 +29,7 @@ class Dictionary(object):
         self.symbols = []
         self.count = []
         self.indices = {}
-        self.bos = bos
+        self.bos_symbol = bos
         self.pad_index = self.add_symbol(pad)
         self.eos_index = self.add_symbol(eos)
         self.unk_index = self.add_symbol(unk)
@@ -221,7 +221,7 @@ class Dictionary(object):
             self.symbols.append(word)
             self.count.append(count)
         # add CLS
-        self.bos_index = self.add_symbol(self.bos)
+        self.bos_index = self.add_symbol(self.bos_symbol)
 
     def _save(self, f, kv_iterator):
         if isinstance(f, str):
