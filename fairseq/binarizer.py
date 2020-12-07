@@ -38,7 +38,7 @@ class Binarizer:
             while line:
                 if end > 0 and f.tell() > end:
                     break
-                print(line)
+                print(append_eos)
                 ids = dict.encode_line(
                     line=line,
                     line_tokenizer=tokenize,
@@ -47,7 +47,6 @@ class Binarizer:
                     append_eos=append_eos,
                     reverse_order=reverse_order,
                 )
-                print(ids)
                 nseq += 1
                 ntok += len(ids)
                 consumer(ids)
