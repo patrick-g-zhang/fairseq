@@ -354,7 +354,7 @@ class RobertaEncoder(FairseqDecoder):
                 - a dictionary of additional data, where 'inner_states'
                   is a list of hidden states.
         """
-        pdb.set_trace()
+        # pdb.set_trace()
         x, extra = self.extract_features(
             src_tokens, return_all_hiddens=return_all_hiddens)
         if not features_only:
