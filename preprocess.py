@@ -142,7 +142,7 @@ def main(args):
         merge_result(
             Binarizer.binarize(
                 input_file, vocab, lambda t: ds.add_item(t),
-                offset=0, end=offsets[1]
+                offset=0, end=offsets[1], append_eos=False
             )
         )
         if num_workers > 1:
