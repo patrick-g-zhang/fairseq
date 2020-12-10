@@ -123,8 +123,10 @@ class MaskTokensDataset(BaseWrapperDataset):
                 num_words = sz // self.continuous_mask
                 last_num = sz % self.continuous_mask
                 word_lens = [self.continuous_mask] * num_words
+                sz = num_words
                 if last_num != 0:
                     word_lens.append(last_num)
+                    sz += 1
 
             # decide elements to mask
             mask = np.full(sz, False)
