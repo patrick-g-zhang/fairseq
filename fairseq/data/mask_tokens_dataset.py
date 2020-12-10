@@ -120,7 +120,12 @@ class MaskTokensDataset(BaseWrapperDataset):
                 word_lens = list(map(len, words))
 
             if self.continuous_mask > 1:
-                self.mask_prob = self.mask_prob / self.continuous_mask
+                num_words = sz // self.continuous_mask
+                last_num = sz % self.continuous_mask
+                word_lens = [self.continuous_mask] * num_words
+                if last_num != 0:
+                    word_lens.append(last_num)
+
             # decide elements to mask
             mask = np.full(sz, False)
             num_mask = int(
@@ -133,8 +138,9 @@ class MaskTokensDataset(BaseWrapperDataset):
             if self.return_masked_tokens:
                 # exit early if we're just returning the masked tokens
                 # (i.e., the targets for masked LM training)
-                if self.mask_whole_words is not None:
+                if self.mask_whole_words is not None or self.continuous_mask > 1:
                     mask = np.repeat(mask, word_lens)
+
                 new_item = np.full(len(mask), self.pad_idx)
                 new_item[mask] = item[torch.from_numpy(
                     mask.astype(np.uint8)) == 1]
@@ -162,7 +168,7 @@ class MaskTokensDataset(BaseWrapperDataset):
             if unmask is not None:
                 mask = mask ^ unmask
 
-            if self.mask_whole_words is not None:
+            if self.mask_whole_words is not None or self.continuous_mask > 1:
                 mask = np.repeat(mask, word_lens)
 
             new_item = np.copy(item)
@@ -170,7 +176,7 @@ class MaskTokensDataset(BaseWrapperDataset):
             if rand_mask is not None:
                 num_rand = rand_mask.sum()
                 if num_rand > 0:
-                    if self.mask_whole_words is not None:
+                    if self.mask_whole_words is not None or self.continuous_mask > 1:
                         rand_mask = np.repeat(rand_mask, word_lens)
                         num_rand = rand_mask.sum()
 
