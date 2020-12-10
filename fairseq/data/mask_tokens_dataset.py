@@ -67,6 +67,7 @@ class MaskTokensDataset(BaseWrapperDataset):
         random_token_prob: float = 0.1,
         freq_weighted_replacement: bool = False,
         mask_whole_words: torch.Tensor = None,
+        continuous_mask: int = 1,
     ):
         assert 0.0 < mask_prob < 1.0
         assert 0.0 <= random_token_prob <= 1.0
@@ -83,6 +84,7 @@ class MaskTokensDataset(BaseWrapperDataset):
         self.leave_unmasked_prob = leave_unmasked_prob
         self.random_token_prob = random_token_prob
         self.mask_whole_words = mask_whole_words
+        self.continuous_mask = continuous_mask
 
         if random_token_prob > 0.0:
             if freq_weighted_replacement:
@@ -108,7 +110,7 @@ class MaskTokensDataset(BaseWrapperDataset):
                 'Dataset contains mask_idx (={}), this is not expected!'.format(
                     self.mask_idx,
                 )
-
+            pdb.set_trace()
             if self.mask_whole_words is not None:
                 word_begins_mask = self.mask_whole_words.gather(0, item)
                 word_begins_idx = word_begins_mask.nonzero().view(-1)
@@ -117,13 +119,16 @@ class MaskTokensDataset(BaseWrapperDataset):
                 assert len(words) == sz
                 word_lens = list(map(len, words))
 
+            if self.continuous_mask > 1:
+                self.mask_prob = self.mask_prob / self.continuous_mask
             # decide elements to mask
             mask = np.full(sz, False)
             num_mask = int(
                 # add a random number for probabilistic rounding
                 self.mask_prob * sz + np.random.rand()
             )
-            mask[np.random.choice(sz, num_mask, replace=False)] = True
+            mask[np.random.choice(
+                sz - self.continuous_mask + 1, num_mask, replace=False)] = True
 
             if self.return_masked_tokens:
                 # exit early if we're just returning the masked tokens

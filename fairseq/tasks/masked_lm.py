@@ -46,6 +46,8 @@ class MaskedLMTask(FairseqTask):
                                  'per sample for BERT dataset')
         parser.add_argument('--mask-prob', default=0.15, type=float,
                             help='probability of replacing a token with mask')
+        parser.add_argument('--continuous-mask', default=1, type=int,
+                            help='continuously mask k words')
         parser.add_argument('--leave-unmasked-prob', default=0.1, type=float,
                             help='probability that a masked token is unmasked')
         parser.add_argument('--random-token-prob', default=0.1, type=float,
@@ -122,6 +124,7 @@ class MaskedLMTask(FairseqTask):
             random_token_prob=self.args.random_token_prob,
             freq_weighted_replacement=self.args.freq_weighted_replacement,
             mask_whole_words=mask_whole_words,
+            continuous_mask=self.args.continuous_mask,
         )
         pdb.set_trace()
         src_dataset.__getitem__(1)
