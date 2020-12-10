@@ -110,7 +110,7 @@ class MaskTokensDataset(BaseWrapperDataset):
                 'Dataset contains mask_idx (={}), this is not expected!'.format(
                     self.mask_idx,
                 )
-            pdb.set_trace()
+
             if self.mask_whole_words is not None:
                 word_begins_mask = self.mask_whole_words.gather(0, item)
                 word_begins_idx = word_begins_mask.nonzero().view(-1)
