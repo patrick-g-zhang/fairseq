@@ -135,7 +135,7 @@ class MaskTokensDataset(BaseWrapperDataset):
                 self.mask_prob * sz + np.random.rand()
             )
             mask[np.random.choice(
-                sz - self.continuous_mask + 1, num_mask, replace=False)] = True
+                sz, num_mask, replace=False)] = True
 
             if self.return_masked_tokens:
                 # exit early if we're just returning the masked tokens
