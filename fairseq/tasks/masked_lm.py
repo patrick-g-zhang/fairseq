@@ -76,7 +76,8 @@ class MaskedLMTask(FairseqTask):
         assert len(paths) > 0
         pdb.set_trace()
         if args.phoneme_dict:
-            dictionary = Dictionary.load(os.path.join(paths[0], 'dict.txt'))
+            dictionary = PhonemeDictionary.load(
+                os.path.join(paths[0], 'dict.txt'))
         else:
             dictionary = Dictionary.load(os.path.join(paths[0], 'dict.txt'))
         print('| dictionary: {} types'.format(len(dictionary)))
