@@ -669,7 +669,7 @@ class RelativePositionMultiheadAttention(nn.Module):
 
 
 @register_model('fastspeech')
-class FastSpeech2():
+class FastSpeech2(FairseqLanguageModel):
 
     def __init__(self, args, encoder):
         super().__init__(encoder)
@@ -687,24 +687,10 @@ class FastSpeech2():
                             help='num encoder layers')
         parser.add_argument('--encoder-embed-dim', type=int, metavar='H',
                             help='encoder embedding dimension')
-        parser.add_argument('--encoder-ffn-embed-dim', type=int, metavar='F',
-                            help='encoder embedding dimension for FFN')
         parser.add_argument('--encoder-attention-heads', type=int, metavar='A',
                             help='num encoder attention heads')
-        parser.add_argument('--activation-fn',
-                            choices=utils.get_available_activation_fns(),
-                            help='activation function to use')
-        parser.add_argument('--pooler-activation-fn',
-                            choices=utils.get_available_activation_fns(),
-                            help='activation function to use for pooler layer')
-        parser.add_argument('--encoder-normalize-before', action='store_true',
-                            help='apply layernorm before each encoder block')
         parser.add_argument('--dropout', type=float, metavar='D',
                             help='dropout probability')
-        parser.add_argument('--attention-dropout', type=float, metavar='D',
-                            help='dropout probability for attention weights')
-        parser.add_argument('--activation-dropout', type=float, metavar='D',
-                            help='dropout probability after activation in FFN')
         parser.add_argument('--pooler-dropout', type=float, metavar='D',
                             help='dropout probability in the masked_lm pooler layers')
         parser.add_argument('--max-positions', type=int,
@@ -727,8 +713,8 @@ class FastSpeech2():
         if not hasattr(args, 'max_positions'):
             args.max_positions = args.tokens_per_sample
 
-        encoder = FastSpeech2Model(args, task.source_dictionary)
-        return cls(args, encoder)
+        model = FastSpeech2Encoder(args, task.source_dictionary)
+        return cls(args, model)
 
     def forward(self, src_tokens, features_only=False, return_all_hiddens=False, classification_head_name=None, **kwargs):
         if classification_head_name is not None:
