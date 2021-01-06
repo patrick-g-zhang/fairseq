@@ -74,7 +74,6 @@ class MaskedLMTask(FairseqTask):
     def setup_task(cls, args, **kwargs):
         paths = args.data.split(':')
         assert len(paths) > 0
-        pdb.set_trace()
         if args.phoneme_dict:
             dictionary = PhonemeDictionary.load(
                 os.path.join(paths[0], 'dict.txt'))
@@ -100,8 +99,6 @@ class MaskedLMTask(FairseqTask):
             self.args.dataset_impl,
             combine=combine,
         )
-
-        pdb.set_trace()
 
         if dataset is None:
             raise FileNotFoundError(
