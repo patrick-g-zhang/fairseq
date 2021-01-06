@@ -56,7 +56,7 @@ class MaskedLMTask(FairseqTask):
                             help='sample random replacement words based on word frequencies')
         parser.add_argument('--mask-whole-words', default=False, action='store_true',
                             help='mask whole words; you may also want to set --bpe')
-        parser.add_argument('--pad-prepend-token', default=True, action='store_false',
+        parser.add_argument('--no-pad-prepend-token', default=True, action='store_false',
                             help='pad prependtoken or not')
 
     def __init__(self, args, dictionary):
@@ -111,7 +111,7 @@ class MaskedLMTask(FairseqTask):
         print('| loaded {} blocks from: {}'.format(len(dataset), split_path))
 
         # prepend beginning-of-sentence token (<s>, equiv. to [CLS] in BERT)
-        if self.args.pad_prepend_token:
+        if self.args.no_pad_prepend_token:
             dataset = PrependTokenDataset(
                 dataset, self.source_dictionary.bos())
 
