@@ -700,8 +700,6 @@ class FastSpeech2(FairseqLanguageModel):
         # args for "Reducing Transformer Depth on Demand with Structured Dropout" (Fan et al., 2019)
         parser.add_argument('--encoder-layerdrop', type=float, metavar='D', default=0,
                             help='LayerDrop probability for encoder')
-        parser.add_argument('--encoder-layers-to-keep', default=None,
-                            help='which layers to *keep* when pruning as a comma-separated list')
 
     @classmethod
     def build_model(cls, args, task):
@@ -940,18 +938,14 @@ class FastSpeech2Encoder(nn.Module):
 @register_model_architecture('fastspeech', 'fastspeech')
 def base_architecture(args):
     args.encoder_layers = getattr(args, 'encoder_layers', 6)
-    args.encoder_embed_dim = getattr(args, 'encoder_embed_dim', 768)
-    args.encoder_ffn_embed_dim = getattr(args, 'encoder_ffn_embed_dim', 3072)
-    args.encoder_attention_heads = getattr(args, 'encoder_attention_heads', 12)
+    args.encoder_embed_dim = getattr(args, 'encoder_embed_dim', 512)
+    args.encoder_attention_heads = getattr(args, 'encoder_attention_heads', 8)
 
     args.activation_fn = getattr(args, 'activation_fn', 'gelu')
     args.pooler_activation_fn = getattr(args, 'pooler_activation_fn', 'tanh')
 
     args.dropout = getattr(args, 'dropout', 0.1)
-    args.attention_dropout = getattr(args, 'attention_dropout', 0.1)
-    args.activation_dropout = getattr(args, 'activation_dropout', 0.0)
     args.pooler_dropout = getattr(args, 'pooler_dropout', 0.0)
-    args.encoder_layers_to_keep = getattr(args, 'encoder_layers_to_keep', None)
     args.encoder_layerdrop = getattr(args, 'encoder_layerdrop', 0.0)
 
 
@@ -964,7 +958,6 @@ def roberta_base_architecture(args):
 def roberta_large_architecture(args):
     args.encoder_layers = getattr(args, 'encoder_layers', 24)
     args.encoder_embed_dim = getattr(args, 'encoder_embed_dim', 1024)
-    args.encoder_ffn_embed_dim = getattr(args, 'encoder_ffn_embed_dim', 4096)
     args.encoder_attention_heads = getattr(args, 'encoder_attention_heads', 16)
     base_architecture(args)
 
