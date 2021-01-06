@@ -75,7 +75,10 @@ class MaskedLMTask(FairseqTask):
         paths = args.data.split(':')
         assert len(paths) > 0
         pdb.set_trace()
-        dictionary = Dictionary.load(os.path.join(paths[0], 'dict.txt'))
+        if args.phoneme_dict:
+            dictionary = Dictionary.load(os.path.join(paths[0], 'dict.txt'))
+        else:
+            dictionary = Dictionary.load(os.path.join(paths[0], 'dict.txt'))
         print('| dictionary: {} types'.format(len(dictionary)))
         return cls(args, dictionary)
 
