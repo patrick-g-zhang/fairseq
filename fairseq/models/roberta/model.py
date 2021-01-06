@@ -78,6 +78,7 @@ class RobertaModel(FairseqLanguageModel):
         """Build a new model instance."""
 
         # make sure all arguments are present
+        pdb.set_trace()
         base_architecture(args)
 
         if not hasattr(args, 'max_positions'):
@@ -186,30 +187,6 @@ class RobertaModel(FairseqLanguageModel):
                 if prefix + 'classification_heads.' + k not in state_dict:
                     print('Overwriting', prefix + 'classification_heads.' + k)
                     state_dict[prefix + 'classification_heads.' + k] = v
-
-
-@register_model('xlmr')
-class XLMRModel(RobertaModel):
-    @classmethod
-    def hub_models(cls):
-        return {
-            'xlmr.base.v0': 'http://dl.fbaipublicfiles.com/fairseq/models/xlmr.base.v0.tar.gz',
-            'xlmr.large.v0': 'http://dl.fbaipublicfiles.com/fairseq/models/xlmr.large.v0.tar.gz',
-        }
-
-    @classmethod
-    def from_pretrained(cls, model_name_or_path, checkpoint_file='model.pt', data_name_or_path='.', bpe='sentencepiece', **kwargs):
-        from fairseq import hub_utils
-        x = hub_utils.from_pretrained(
-            model_name_or_path,
-            checkpoint_file,
-            data_name_or_path,
-            archive_map=cls.hub_models(),
-            bpe=bpe,
-            load_checkpoint_heads=True,
-            **kwargs,
-        )
-        return RobertaHubInterface(x['args'], x['task'], x['models'][0])
 
 
 @register_model('camembert')
