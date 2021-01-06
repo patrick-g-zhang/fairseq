@@ -10,6 +10,7 @@ import numpy as np
 from fairseq.data import (
     data_utils,
     Dictionary,
+    PhonemeDictionary,
     IdDataset,
     MaskTokensDataset,
     NestedDictionaryDataset,
@@ -58,6 +59,8 @@ class MaskedLMTask(FairseqTask):
                             help='mask whole words; you may also want to set --bpe')
         parser.add_argument('--no-pad-prepend-token', default=True, action='store_false',
                             help='pad prependtoken or not')
+        parser.add_argument('--phoneme-dict', default=False, action='store_true',
+                            help='pad prependtoken or not')
 
     def __init__(self, args, dictionary):
         super().__init__(args)
@@ -71,6 +74,7 @@ class MaskedLMTask(FairseqTask):
     def setup_task(cls, args, **kwargs):
         paths = args.data.split(':')
         assert len(paths) > 0
+        pdb.set_trace()
         dictionary = Dictionary.load(os.path.join(paths[0], 'dict.txt'))
         print('| dictionary: {} types'.format(len(dictionary)))
         return cls(args, dictionary)

@@ -14,14 +14,69 @@ from fairseq.binarizer import safe_readline
 from fairseq.data import data_utils
 
 
+class PhonemeDictionary(Dictionary):
+    """docstring for PhonemeDictionary"""
+
+    def __init__(self, pad='<pad>',
+                 eos='<EOS>',
+                 unk='<UNK>',
+                 bos='<s>',
+                 extra_special_symbols=None,
+                 ):
+        self.unk_word, self.pad_word, self.eos_word = unk, pad, eos
+        self.symbols = []
+        self.count = []
+        self.indices = {}
+        self.bos_symbol = bos
+        self.pad_index = self.add_symbol(pad)
+        self.eos_index = self.add_symbol(eos)
+        self.unk_index = self.add_symbol(unk)
+        if extra_special_symbols:
+            for s in extra_special_symbols:
+                self.add_symbol(s)
+        self.nspecial = len(self.symbols)
+
+    def add_from_file(self, f):
+        """
+        Loads a pre-existing dictionary from a text file and adds its symbols
+        to this instance.
+        """
+        if isinstance(f, str):
+            try:
+                with open(f, 'r', encoding='utf-8') as fd:
+                    self.add_from_file(fd)
+            except FileNotFoundError as fnfe:
+                raise fnfe
+            except UnicodeError:
+                raise Exception("Incorrect encoding detected in {}, please "
+                                "rebuild the dataset".format(f))
+            return
+
+        lines = f.readlines()
+        indices_start_line = self._load_meta(lines)
+        for line in lines[indices_start_line:]:
+            idx = line.rfind(' ')
+            if idx == -1:
+                raise ValueError(
+                    "Incorrect dictionary format, expected '<token> <cnt>'")
+            word = line[:idx]
+            count = int(line[idx + 1:])
+            # self.indices {'<s>': 0, '<pad>': 1, '</s>': 2, '<unk>': 3}
+            self.indices[word] = len(self.symbols)
+            self.symbols.append(word)
+            self.count.append(count)
+        # add CLS
+        self.bos_index = self.add_symbol(self.bos_symbol)
+
+
 class Dictionary(object):
     """A mapping from symbols to consecutive integers"""
 
     def __init__(
         self,
         pad='<pad>',
-        eos='<EOS>',
-        unk='<UNK>',
+        eos='</s>',
+        unk='<unk>',
         bos='<s>',
         extra_special_symbols=None,
     ):
@@ -29,7 +84,7 @@ class Dictionary(object):
         self.symbols = []
         self.count = []
         self.indices = {}
-        self.bos_symbol = bos
+        self.bos_index = self.add_symbol(bos)
         self.pad_index = self.add_symbol(pad)
         self.eos_index = self.add_symbol(eos)
         self.unk_index = self.add_symbol(unk)
@@ -220,8 +275,6 @@ class Dictionary(object):
             self.indices[word] = len(self.symbols)
             self.symbols.append(word)
             self.count.append(count)
-        # add CLS
-        self.bos_index = self.add_symbol(self.bos_symbol)
 
     def _save(self, f, kv_iterator):
         if isinstance(f, str):
