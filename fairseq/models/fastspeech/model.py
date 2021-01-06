@@ -860,17 +860,10 @@ class FastSpeech2Encoder(nn.Module):
 
     def __init__(self, args, dictionary):
         super().__init__()
-        arch = args.arch
         self.dictionary = dictionary
         self.padding_idx = dictionary.pad()
-        if isinstance(arch, str):
-            self.arch = list(map(int, arch.strip().split()))
-        else:
-            assert isinstance(arch, (list, tuple))
-            self.arch = arch
         self.enc_layers = args.encoder_layers
         # self.dec_layers = hparams['dec_layers']
-        self.enc_arch = self.arch[:self.enc_layers]
         # self.dec_arch = self.arch[self.enc_layers:self.enc_layers + self.dec_layers]
         self.hidden_size = args.encoder_embed_dim
 
@@ -881,7 +874,6 @@ class FastSpeech2Encoder(nn.Module):
         self.encoder_embed_tokens = nn.Embedding(
             len(dictionary), self.hidden_size, self.padding_idx)
         self.encoder = TransformerEncoder(
-            arch=self.enc_arch,
             embed_tokens=self.encoder_embed_tokens,
             has_relative_attention_bias=self.has_relative_attention_bias,
             relative_attention_num_buckets=self.relative_attention_num_buckets,
@@ -896,7 +888,7 @@ class FastSpeech2Encoder(nn.Module):
             weight=self.encoder_embed_tokens.weight,
         )
 
-    def forward(self, src_tokens, features_only=False, return_all_hiddens=False, masked_tokens=None, **unused):
+    def forward(self, src_tokens, features_only=False, masked_tokens=None, **unused):
         """
         Args:
             src_tokens (LongTensor): input tokens of shape `(batch, src_len)`
@@ -913,19 +905,21 @@ class FastSpeech2Encoder(nn.Module):
                   is a list of hidden states.
         """
         # pdb.set_trace()
-        x, extra = self.extract_features(
-            src_tokens, return_all_hiddens=return_all_hiddens)
+        x = self.extract_features(
+            src_tokens)
         if not features_only:
             x = self.output_layer(x, masked_tokens=masked_tokens)
-        return x, extra
+        return x, None
+        
+    def extract_features(self, src_tokens, **unused):
 
-    def extract_features(self, src_tokens, return_all_hiddens=False, **unused):
-        inner_states, _ = self.sentence_encoder(
-            src_tokens,
-            last_state_only=not return_all_hiddens,
-        )
-        features = inner_states[-1]
-        return features, {'inner_states': inner_states if return_all_hiddens else None}
+
+        encoder_outputs = self.encoder(
+            src_tokens)
+        encoder_outputs = encoder_outputs['encoder_out']  # [T, B, C]
+        src_nonpadding = (src_tokens > 0).float().permute(1, 0)[:, :, None]
+        encoder_outputs = encoder_outputs * src_nonpadding  # [T, B, C]
+        return encoder_outputs.transpose(0, 1)
 
     def output_layer(self, features, masked_tokens=None, **unused):
         return self.lm_head(features, masked_tokens)
@@ -1176,6 +1170,7 @@ class TransformerEncoderLayer(nn.Module):
                              kernel_size=enc_ffn_kernel_size,
                              padding=ffn_padding,
                              use_relative_position=use_relative_position),
+
 
     def forward(self, x, **kwargs):
         return self.op(x, **kwargs)
