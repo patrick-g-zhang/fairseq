@@ -937,7 +937,7 @@ class FastSpeech2Encoder(nn.Module):
         return self.args.max_positions
 
 
-@register_model_architecture('roberta', 'roberta')
+@register_model_architecture('fastspeech', 'fastspeech')
 def base_architecture(args):
     args.encoder_layers = getattr(args, 'encoder_layers', 6)
     args.encoder_embed_dim = getattr(args, 'encoder_embed_dim', 768)
@@ -955,12 +955,12 @@ def base_architecture(args):
     args.encoder_layerdrop = getattr(args, 'encoder_layerdrop', 0.0)
 
 
-@register_model_architecture('roberta', 'roberta_base')
+@register_model_architecture('fastspeech', 'fastspeech_base')
 def roberta_base_architecture(args):
     base_architecture(args)
 
 
-@register_model_architecture('roberta', 'roberta_large')
+@register_model_architecture('fastspeech', 'fastspeech_large')
 def roberta_large_architecture(args):
     args.encoder_layers = getattr(args, 'encoder_layers', 24)
     args.encoder_embed_dim = getattr(args, 'encoder_embed_dim', 1024)
