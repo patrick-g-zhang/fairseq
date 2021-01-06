@@ -62,7 +62,6 @@ def load_indexed_dataset(path, dictionary, dataset_impl=None, combine=False, def
     from fairseq.data.concat_dataset import ConcatDataset
     import fairseq.data.indexed_dataset as indexed_dataset
 
-    pdb.set_trace()
     datasets = []
     for k in itertools.count():
         path_k = path + (str(k) if k > 0 else '')
