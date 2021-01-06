@@ -23,8 +23,6 @@ from fairseq.modules import (
 )
 from fairseq.modules.transformer_sentence_encoder import init_bert_params
 
-from .hub_interface import RobertaHubInterface
-
 
 @register_model('roberta')
 class RobertaModel(FairseqLanguageModel):
