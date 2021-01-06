@@ -14,7 +14,7 @@ import math
 from fairseq import utils
 from fairseq.models import (
     FairseqDecoder,
-    FairseqLanguageModel,
+    FairseqEncoderLanguageModel,
     register_model,
     register_model_architecture,
 )
@@ -26,6 +26,130 @@ from fairseq.modules.transformer_sentence_encoder import init_bert_params
 DEFAULT_MAX_SOURCE_POSITIONS = 2000
 DEFAULT_MAX_TARGET_POSITIONS = 2000
 from torch.nn import Parameter
+
+class SinusoidalPositionalEmbedding(nn.Module):
+    """This module produces sinusoidal positional embeddings of any length.
+
+    Padding symbols are ignored.
+    """
+
+    def __init__(self, embedding_dim, padding_idx, init_size=1024):
+        super().__init__()
+        self.embedding_dim = embedding_dim
+        self.padding_idx = padding_idx
+        self.weights = SinusoidalPositionalEmbedding.get_embedding(
+            init_size,
+            embedding_dim,
+            padding_idx,
+        )
+        self.register_buffer('_float_tensor', torch.FloatTensor(1))
+
+    @staticmethod
+    def get_embedding(num_embeddings, embedding_dim, padding_idx=None):
+        """Build sinusoidal embeddings.
+
+        This matches the implementation in tensor2tensor, but differs slightly
+        from the description in Section 3.5 of "Attention Is All You Need".
+        """
+        half_dim = embedding_dim // 2
+        emb = math.log(10000) / (half_dim - 1)
+        emb = torch.exp(torch.arange(half_dim, dtype=torch.float) * -emb)
+        emb = torch.arange(num_embeddings, dtype=torch.float).unsqueeze(
+            1) * emb.unsqueeze(0)
+        emb = torch.cat([torch.sin(emb), torch.cos(emb)],
+                        dim=1).view(num_embeddings, -1)
+        if embedding_dim % 2 == 1:
+            # zero pad
+            emb = torch.cat([emb, torch.zeros(num_embeddings, 1)], dim=1)
+        if padding_idx is not None:
+            emb[padding_idx, :] = 0
+        return emb
+
+    def forward(self, input, incremental_state=None, timestep=None, **kwargs):
+        """Input is expected to be of size [bsz x seqlen]."""
+        bsz, seq_len = input.shape[:2]
+        max_pos = self.padding_idx + 1 + seq_len
+        if self.weights is None or max_pos > self.weights.size(0):
+            # recompute/expand embeddings if needed
+            self.weights = SinusoidalPositionalEmbedding.get_embedding(
+                max_pos,
+                self.embedding_dim,
+                self.padding_idx,
+            )
+        self.weights = self.weights.to(self._float_tensor)
+
+        if incremental_state is not None:
+            # positions is the same for every token when decoding a single step
+            pos = timestep.view(-1)[0] + 1 if timestep is not None else seq_len
+            return self.weights[self.padding_idx + pos, :].expand(bsz, 1, -1)
+
+        positions = utils.make_positions(input, self.padding_idx)
+        return self.weights.index_select(0, positions.view(-1)).view(bsz, seq_len, -1).detach()
+
+    def max_positions(self):
+        """Maximum number of supported positions."""
+        return int(1e5)  # an arbitrary large number
+
+
+class NewTransformerFFNLayer(nn.Module):
+    def __init__(self, hidden_size, filter_size, padding="SAME", kernel_size=1, dropout=0.):
+        super().__init__()
+        self.kernel_size = kernel_size
+        self.dropout = dropout
+        if padding == 'SAME':
+            self.ffn_1 = nn.Conv1d(
+                hidden_size, filter_size, kernel_size, padding=kernel_size // 2)
+        elif padding == 'LEFT':
+            self.ffn_1 = nn.Sequential(
+                nn.ConstantPad1d((kernel_size - 1, 0), 0.0),
+                nn.Conv1d(hidden_size, filter_size, kernel_size)
+            )
+        self.ffn_2 = Linear(filter_size, hidden_size)
+
+    def forward(self, x, incremental_state=None):
+        # x: T x B x C
+        if incremental_state is not None:
+            saved_state = self._get_input_buffer(incremental_state)
+            if 'prev_input' in saved_state:
+                prev_input = saved_state['prev_input']
+                x = torch.cat((prev_input, x), dim=0)
+            x = x[-self.kernel_size:]
+            saved_state['prev_input'] = x
+            self._set_input_buffer(incremental_state, saved_state)
+
+        x = self.ffn_1(x.permute(1, 2, 0)).permute(2, 0, 1)
+        x = x * self.kernel_size ** -0.5
+
+        if incremental_state is not None:
+            x = x[-1:]
+
+        x = F.relu(x)
+        x = F.dropout(x, self.dropout, training=self.training)
+        x = self.ffn_2(x)
+        return x
+
+    def _get_input_buffer(self, incremental_state):
+        return utils.get_incremental_state(
+            self,
+            incremental_state,
+            'f',
+        ) or {}
+
+    def _set_input_buffer(self, incremental_state, buffer):
+        utils.set_incremental_state(
+            self,
+            incremental_state,
+            'f',
+            buffer,
+        )
+
+    def clear_buffer(self, incremental_state):
+        if incremental_state is not None:
+            saved_state = self._get_input_buffer(incremental_state)
+            if 'prev_input' in saved_state:
+                del saved_state['prev_input']
+            self._set_input_buffer(incremental_state, saved_state)
+
 
 class MultiheadAttention(nn.Module):
     def __init__(self, embed_dim, num_heads, kdim=None, vdim=None, dropout=0., bias=True,
@@ -668,8 +792,15 @@ class RelativePositionMultiheadAttention(nn.Module):
 
 
 
+def Linear(in_features, out_features, bias=True):
+    m = nn.Linear(in_features, out_features, bias)
+    nn.init.xavier_uniform_(m.weight)
+    if bias:
+        nn.init.constant_(m.bias, 0.)
+    return m
+
 @register_model('fastspeech')
-class FastSpeech2(FairseqLanguageModel):
+class FastSpeech2(FairseqEncoderLanguageModel):
 
     def __init__(self, args, encoder):
         super().__init__(encoder)
@@ -691,6 +822,8 @@ class FastSpeech2(FairseqLanguageModel):
                             help='num encoder attention heads')
         parser.add_argument('--dropout', type=float, metavar='D',
                             help='dropout probability')
+        parser.add_argument('--has-relative-attention-bias', action='store_false')
+
         parser.add_argument('--pooler-dropout', type=float, metavar='D',
                             help='dropout probability in the masked_lm pooler layers')
         parser.add_argument('--max-positions', type=int,
@@ -718,7 +851,7 @@ class FastSpeech2(FairseqLanguageModel):
         if classification_head_name is not None:
             features_only = True
 
-        x, extra = self.decoder(src_tokens, features_only,
+        x, extra = self.encoder(src_tokens, features_only,
                                 return_all_hiddens, **kwargs)
 
         if classification_head_name is not None:
@@ -860,24 +993,25 @@ class FastSpeech2Encoder(nn.Module):
 
     def __init__(self, args, dictionary):
         super().__init__()
+        pdb.set_trace()
         self.dictionary = dictionary
         self.padding_idx = dictionary.pad()
         self.enc_layers = args.encoder_layers
         # self.dec_layers = hparams['dec_layers']
         # self.dec_arch = self.arch[self.enc_layers:self.enc_layers + self.dec_layers]
-        self.hidden_size = args.encoder_embed_dim
-
+        self.encoder_embed_dim = args.encoder_embed_dim
+        self.encoder_attention_heads = args.encoder_attention_heads
         self.has_relative_attention_bias = args.has_relative_attention_bias
-        self.relative_attention_num_buckets = args.relative_attention_num_buckets
-        self.max_distance = args.max_distance
 
+        pdb.set_trace()
         self.encoder_embed_tokens = nn.Embedding(
             len(dictionary), self.hidden_size, self.padding_idx)
         self.encoder = TransformerEncoder(
+            enc_layers=self.enc_layers,
+            encoder_embed_dim=self.encoder_embed_dim,
+            num_attention_heads=self.encoder_attention_heads,
             embed_tokens=self.encoder_embed_tokens,
             has_relative_attention_bias=self.has_relative_attention_bias,
-            relative_attention_num_buckets=self.relative_attention_num_buckets,
-            max_distance=self.max_distance,
             max_source_positions=args.max_source_positions
         )
 
@@ -910,7 +1044,7 @@ class FastSpeech2Encoder(nn.Module):
         if not features_only:
             x = self.output_layer(x, masked_tokens=masked_tokens)
         return x, None
-        
+
     def extract_features(self, src_tokens, **unused):
 
 
@@ -956,137 +1090,6 @@ def roberta_large_architecture(args):
     base_architecture(args)
 
 
-def Linear(in_features, out_features, bias=True):
-    m = nn.Linear(in_features, out_features, bias)
-    nn.init.xavier_uniform_(m.weight)
-    if bias:
-        nn.init.constant_(m.bias, 0.)
-    return m
-
-
-class SinusoidalPositionalEmbedding(nn.Module):
-    """This module produces sinusoidal positional embeddings of any length.
-
-    Padding symbols are ignored.
-    """
-
-    def __init__(self, embedding_dim, padding_idx, init_size=1024):
-        super().__init__()
-        self.embedding_dim = embedding_dim
-        self.padding_idx = padding_idx
-        self.weights = SinusoidalPositionalEmbedding.get_embedding(
-            init_size,
-            embedding_dim,
-            padding_idx,
-        )
-        self.register_buffer('_float_tensor', torch.FloatTensor(1))
-
-    @staticmethod
-    def get_embedding(num_embeddings, embedding_dim, padding_idx=None):
-        """Build sinusoidal embeddings.
-
-        This matches the implementation in tensor2tensor, but differs slightly
-        from the description in Section 3.5 of "Attention Is All You Need".
-        """
-        half_dim = embedding_dim // 2
-        emb = math.log(10000) / (half_dim - 1)
-        emb = torch.exp(torch.arange(half_dim, dtype=torch.float) * -emb)
-        emb = torch.arange(num_embeddings, dtype=torch.float).unsqueeze(
-            1) * emb.unsqueeze(0)
-        emb = torch.cat([torch.sin(emb), torch.cos(emb)],
-                        dim=1).view(num_embeddings, -1)
-        if embedding_dim % 2 == 1:
-            # zero pad
-            emb = torch.cat([emb, torch.zeros(num_embeddings, 1)], dim=1)
-        if padding_idx is not None:
-            emb[padding_idx, :] = 0
-        return emb
-
-    def forward(self, input, incremental_state=None, timestep=None, **kwargs):
-        """Input is expected to be of size [bsz x seqlen]."""
-        bsz, seq_len = input.shape[:2]
-        max_pos = self.padding_idx + 1 + seq_len
-        if self.weights is None or max_pos > self.weights.size(0):
-            # recompute/expand embeddings if needed
-            self.weights = SinusoidalPositionalEmbedding.get_embedding(
-                max_pos,
-                self.embedding_dim,
-                self.padding_idx,
-            )
-        self.weights = self.weights.to(self._float_tensor)
-
-        if incremental_state is not None:
-            # positions is the same for every token when decoding a single step
-            pos = timestep.view(-1)[0] + 1 if timestep is not None else seq_len
-            return self.weights[self.padding_idx + pos, :].expand(bsz, 1, -1)
-
-        positions = utils.make_positions(input, self.padding_idx)
-        return self.weights.index_select(0, positions.view(-1)).view(bsz, seq_len, -1).detach()
-
-    def max_positions(self):
-        """Maximum number of supported positions."""
-        return int(1e5)  # an arbitrary large number
-
-
-class NewTransformerFFNLayer(nn.Module):
-    def __init__(self, hidden_size, filter_size, padding="SAME", kernel_size=1, dropout=0.):
-        super().__init__()
-        self.kernel_size = kernel_size
-        self.dropout = dropout
-        if padding == 'SAME':
-            self.ffn_1 = nn.Conv1d(
-                hidden_size, filter_size, kernel_size, padding=kernel_size // 2)
-        elif padding == 'LEFT':
-            self.ffn_1 = nn.Sequential(
-                nn.ConstantPad1d((kernel_size - 1, 0), 0.0),
-                nn.Conv1d(hidden_size, filter_size, kernel_size)
-            )
-        self.ffn_2 = Linear(filter_size, hidden_size)
-
-    def forward(self, x, incremental_state=None):
-        # x: T x B x C
-        if incremental_state is not None:
-            saved_state = self._get_input_buffer(incremental_state)
-            if 'prev_input' in saved_state:
-                prev_input = saved_state['prev_input']
-                x = torch.cat((prev_input, x), dim=0)
-            x = x[-self.kernel_size:]
-            saved_state['prev_input'] = x
-            self._set_input_buffer(incremental_state, saved_state)
-
-        x = self.ffn_1(x.permute(1, 2, 0)).permute(2, 0, 1)
-        x = x * self.kernel_size ** -0.5
-
-        if incremental_state is not None:
-            x = x[-1:]
-
-        x = F.relu(x)
-        x = F.dropout(x, self.dropout, training=self.training)
-        x = self.ffn_2(x)
-        return x
-
-    def _get_input_buffer(self, incremental_state):
-        return utils.get_incremental_state(
-            self,
-            incremental_state,
-            'f',
-        ) or {}
-
-    def _set_input_buffer(self, incremental_state, buffer):
-        utils.set_incremental_state(
-            self,
-            incremental_state,
-            'f',
-            buffer,
-        )
-
-    def clear_buffer(self, incremental_state):
-        if incremental_state is not None:
-            saved_state = self._get_input_buffer(incremental_state)
-            if 'prev_input' in saved_state:
-                del saved_state['prev_input']
-            self._set_input_buffer(incremental_state, saved_state)
-
 
 class EncSALayer(nn.Module):
     def __init__(
@@ -1115,7 +1118,6 @@ class EncSALayer(nn.Module):
             dropout=attention_dropout,
             bias=False,
         )
-
 
         self.layer_norm2 = LayerNorm(c)
         self.ffn = NewTransformerFFNLayer(
@@ -1152,20 +1154,18 @@ class EncSALayer(nn.Module):
 
 class TransformerEncoderLayer(nn.Module):
     def __init__(self,
-                 hidden_size: int = 768,
+                 hidden_size: int=512,
                  num_attention_heads: int = 8,
                  dropout: float = 0.1,
                  enc_ffn_kernel_size: int = 9,
                  ffn_padding='SAME',
                  use_relative_position: bool = False,
                  has_relative_attention_bias: bool = False,
-                 relative_attention_num_buckets: int = 32,
-                 max_distance: int = 128,
+                 relative_attention_num_buckets: int = 96,
+                 max_distance: int = 200,
                  ):
         super().__init__()
-        self.hidden_size = hidden_size
-        self.dropout = dropout
-        self.op = EncSALayer(c=c, num_heads=num_attention_heads, dropout=dropout,
+        self.op = EncSALayer(c=hidden_size, num_heads=num_attention_heads, dropout=dropout,
                              attention_dropout=0.0, relu_dropout=dropout,
                              kernel_size=enc_ffn_kernel_size,
                              padding=ffn_padding,
@@ -1178,22 +1178,20 @@ class TransformerEncoderLayer(nn.Module):
 
 class TransformerEncoder(nn.Module):
     def __init__(self,
-                 arch,
                  embed_tokens,
-                 enc_layers: int = 6,
-                 hidden_size: int = 256,
+                 encoder_embed_dim: int=512,
+                 enc_layers: int = 8,
                  num_attention_heads: int = 2,
                  use_position_embeddings: bool = True,
                  dropout: float = 0.1,
                  has_relative_attention_bias: bool = False,
-                 relative_attention_num_buckets: int = 32,
-                 max_distance: int = 128,
+                 relative_attention_num_buckets: int = 96,
+                 max_distance: int = 200,
                  last_ln: bool = True,
                  max_source_positions: int = 512):
         super().__init__()
-        self.arch = arch
         self.num_layers = enc_layers
-        self.hidden_size = hidden_size
+        self.hidden_size = encoder_embed_dim
         self.num_attention_heads = num_attention_heads
         self.embed_tokens = embed_tokens
         self.padding_idx = embed_tokens.padding_idx

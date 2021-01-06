@@ -33,7 +33,8 @@ class BaseFairseqModel(nn.Module):
     @classmethod
     def build_model(cls, args, task):
         """Build a new model instance."""
-        raise NotImplementedError('Model must implement the build_model method')
+        raise NotImplementedError(
+            'Model must implement the build_model method')
 
     def get_targets(self, sample, net_output):
         """Get targets from either the sample or the net's output."""
@@ -220,8 +221,10 @@ class FairseqEncoderDecoderModel(BaseFairseqModel):
                 - the decoder's output of shape `(batch, tgt_len, vocab)`
                 - a dictionary with any model-specific outputs
         """
-        encoder_out = self.encoder(src_tokens, src_lengths=src_lengths, **kwargs)
-        decoder_out = self.decoder(prev_output_tokens, encoder_out=encoder_out, **kwargs)
+        encoder_out = self.encoder(
+            src_tokens, src_lengths=src_lengths, **kwargs)
+        decoder_out = self.decoder(
+            prev_output_tokens, encoder_out=encoder_out, **kwargs)
         return decoder_out
 
     def forward_decoder(self, prev_output_tokens, **kwargs):
@@ -236,8 +239,10 @@ class FairseqEncoderDecoderModel(BaseFairseqModel):
                 - the decoder's features of shape `(batch, tgt_len, embed_dim)`
                 - a dictionary with any model-specific outputs
         """
-        encoder_out = self.encoder(src_tokens, src_lengths=src_lengths, **kwargs)
-        features = self.decoder.extract_features(prev_output_tokens, encoder_out=encoder_out, **kwargs)
+        encoder_out = self.encoder(
+            src_tokens, src_lengths=src_lengths, **kwargs)
+        features = self.decoder.extract_features(
+            prev_output_tokens, encoder_out=encoder_out, **kwargs)
         return features
 
     def output_layer(self, features, **kwargs):
@@ -315,7 +320,8 @@ class FairseqMultiModel(BaseFairseqModel):
     def forward(self, src_tokens, src_lengths, prev_output_tokens, **kwargs):
         decoder_outs = {}
         for key in self.keys:
-            encoder_out = self.models[key].encoder(src_tokens, src_lengths, **kwargs)
+            encoder_out = self.models[key].encoder(
+                src_tokens, src_lengths, **kwargs)
             decoder_outs[key] = self.models[key].decoder(
                 prev_output_tokens, encoder_out, **kwargs,
             )
@@ -324,7 +330,8 @@ class FairseqMultiModel(BaseFairseqModel):
     def max_positions(self):
         """Maximum length supported by the model."""
         return {
-            key: (self.models[key].encoder.max_positions(), self.models[key].decoder.max_positions())
+            key: (self.models[key].encoder.max_positions(),
+                  self.models[key].decoder.max_positions())
             for key in self.keys
         }
 
@@ -339,6 +346,67 @@ class FairseqMultiModel(BaseFairseqModel):
     @property
     def decoder(self):
         return self.models[self.keys[0]].decoder
+
+
+class FairseqEncoderLanguageModel(BaseFairseqModel):
+    """Base class for decoder-only models.
+
+    Args:
+        decoder (FairseqDecoder): the decoder
+    """
+
+    def __init__(self, decoder):
+        super().__init__()
+        self.encoder = encoder
+        assert isinstance(self.encoder, FairseqDecoder)
+
+    def forward(self, src_tokens, **kwargs):
+        """
+        Run the forward pass for a decoder-only model.
+
+        Feeds a batch of tokens through the decoder to predict the next tokens.
+
+        Args:
+            src_tokens (LongTensor): tokens on which to condition the decoder,
+                of shape `(batch, tgt_len)`
+            src_lengths (LongTensor): source sentence lengths of shape `(batch)`
+
+        Returns:
+            tuple:
+                - the decoder's output of shape `(batch, seq_len, vocab)`
+                - a dictionary with any model-specific outputs
+        """
+        return self.encoder(src_tokens, **kwargs)
+
+    def forward_decoder(self, prev_output_tokens, **kwargs):
+        return self.encoder(prev_output_tokens, **kwargs)
+
+    def extract_features(self, src_tokens, **kwargs):
+        """
+        Similar to *forward* but only return features.
+
+        Returns:
+            tuple:
+                - the decoder's features of shape `(batch, seq_len, embed_dim)`
+                - a dictionary with any model-specific outputs
+        """
+        return self.encoder.extract_features(src_tokens, **kwargs)
+
+    def output_layer(self, features, **kwargs):
+        """Project features to the default output size (typically vocabulary size)."""
+        return self.encoder.output_layer(features, **kwargs)
+
+    def max_positions(self):
+        """Maximum length supported by the model."""
+        return self.encoder.max_positions()
+
+    def max_decoder_positions(self):
+        """Maximum length supported by the decoder."""
+        return self.encoder.max_positions()
+
+    @property
+    def supported_targets(self):
+        return {'future'}
 
 
 class FairseqLanguageModel(BaseFairseqModel):

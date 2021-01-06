@@ -31,7 +31,6 @@ class RobertaModel(FairseqLanguageModel):
         super().__init__(encoder)
         pdb.set_trace()
         self.args = args
-        self.encoder = self.decoder
         # We follow BERT's random weight initialization
         self.apply(init_bert_params)
 
@@ -92,7 +91,7 @@ class RobertaModel(FairseqLanguageModel):
         if classification_head_name is not None:
             features_only = True
         pdb.set_trace()
-        x, extra = self.encoder(src_tokens, features_only,
+        x, extra = self.decoder(src_tokens, features_only,
                                 return_all_hiddens, **kwargs)
 
         if classification_head_name is not None:
