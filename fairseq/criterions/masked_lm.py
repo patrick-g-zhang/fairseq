@@ -55,7 +55,7 @@ class MaskedLmLoss(FairseqCriterion):
             reduction='sum',
             ignore_index=self.padding_idx,
         )
-        pdb.set_trace()
+
         logging_output = {
             'loss': utils.item(loss.data) if reduce else loss.data,
             'nll_loss': utils.item(loss.data) if reduce else loss.data,
