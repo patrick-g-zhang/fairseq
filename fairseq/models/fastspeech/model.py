@@ -1247,6 +1247,7 @@ class TransformerEncoder(nn.Module):
             self.relative_attention_bias = None
 
         self.layers = nn.ModuleList([])
+        pdb.set_trace()
         self.layers.extend([
             TransformerEncoderLayer(
                 hidden_size=self.hidden_size,
