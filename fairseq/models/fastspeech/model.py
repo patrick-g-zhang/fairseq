@@ -1216,6 +1216,7 @@ class TransformerEncoder(nn.Module):
                  max_source_positions: int = 512):
         super().__init__()
         self.dropout = dropout
+        self.max_distance = max_distance
         self.num_layers = enc_layers
         self.hidden_size = encoder_embed_dim
         self.num_attention_heads = num_attention_heads
