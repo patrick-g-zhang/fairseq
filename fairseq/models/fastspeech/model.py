@@ -1070,7 +1070,7 @@ class FastSpeech2Encoder(FairseqDecoder):
 
     def extract_features(self, src_tokens, **unused):
 
-
+        pdb.set_trace()
         encoder_outputs = self.encoder(
             src_tokens)
         encoder_outputs = encoder_outputs['encoder_out']  # [T, B, C]
