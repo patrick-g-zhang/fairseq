@@ -833,6 +833,7 @@ class FastSpeech2(FairseqEncoderLanguageModel):
         # args for "Reducing Transformer Depth on Demand with Structured Dropout" (Fan et al., 2019)
         parser.add_argument('--encoder-layerdrop', type=float, metavar='D', default=0,
                             help='LayerDrop probability for encoder')
+        parser.add_argument('--max-source-positions', type=int, help='max source positions')
 
     @classmethod
     def build_model(cls, args, task):
@@ -1076,6 +1077,7 @@ def base_architecture(args):
     args.pooler_dropout = getattr(args, 'pooler_dropout', 0.0)
     args.encoder_layerdrop = getattr(args, 'encoder_layerdrop', 0.0)
     args.has_relative_attention_bias = getattr(args, 'has_relative_attention_bias', False)
+    args.max_source_positions = getattr(args, 'max_source_positions', 512)
 
 
 @register_model_architecture('fastspeech', 'fastspeech_base')
