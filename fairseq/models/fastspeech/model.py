@@ -1132,7 +1132,6 @@ class EncSALayer(nn.Module):
 
         """
         super().__init__()
-        pdb.set_trace()
         self.c = c
         self.dropout = dropout
         self.layer_norm1 = LayerNorm2(c)
@@ -1189,7 +1188,6 @@ class TransformerEncoderLayer(nn.Module):
                  relative_attention_num_buckets: int = 96,
                  max_distance: int = 200,
                  ):
-        pdb.set_trace()
         super().__init__()
         self.op = EncSALayer(c=hidden_size, num_heads=num_attention_heads, dropout=dropout,
                              attention_dropout=0.0, relu_dropout=dropout,
@@ -1248,7 +1246,6 @@ class TransformerEncoder(nn.Module):
             self.relative_attention_bias = None
 
         self.layers = nn.ModuleList([])
-        pdb.set_trace()
         self.layers.extend([
             TransformerEncoderLayer(
                 hidden_size=self.hidden_size,
