@@ -1075,6 +1075,7 @@ def base_architecture(args):
     args.dropout = getattr(args, 'dropout', 0.1)
     args.pooler_dropout = getattr(args, 'pooler_dropout', 0.0)
     args.encoder_layerdrop = getattr(args, 'encoder_layerdrop', 0.0)
+    args.has_relative_attention_bias = getattr(args, 'has_relative_attention_bias', False)
 
 
 @register_model_architecture('fastspeech', 'fastspeech_base')
