@@ -1026,7 +1026,6 @@ class FastSpeech2Encoder(nn.Module):
         self.encoder_attention_heads = args.encoder_attention_heads
         self.has_relative_attention_bias = args.has_relative_attention_bias
 
-        pdb.set_trace()
         self.encoder_embed_tokens = nn.Embedding(
             len(dictionary), self.encoder_embed_dim, self.padding_idx)
         self.encoder = TransformerEncoder(
@@ -1088,7 +1087,7 @@ class FastSpeech2Encoder(nn.Module):
 
 @register_model_architecture('fastspeech', 'fastspeech')
 def base_architecture(args):
-    args.encoder_layers = getattr(args, 'encoder_layers', 6)
+    args.encoder_layers = getattr(args, 'encoder_layers', 8)
     args.encoder_embed_dim = getattr(args, 'encoder_embed_dim', 512)
     args.encoder_attention_heads = getattr(args, 'encoder_attention_heads', 8)
 
@@ -1189,6 +1188,7 @@ class TransformerEncoderLayer(nn.Module):
                  relative_attention_num_buckets: int = 96,
                  max_distance: int = 200,
                  ):
+        pdb.set_trace()
         super().__init__()
         self.op = EncSALayer(c=hidden_size, num_heads=num_attention_heads, dropout=dropout,
                              attention_dropout=0.0, relu_dropout=dropout,
