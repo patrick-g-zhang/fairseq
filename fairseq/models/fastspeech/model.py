@@ -1132,6 +1132,7 @@ class EncSALayer(nn.Module):
 
         """
         super().__init__()
+        pdb.set_trace()
         self.c = c
         self.dropout = dropout
         self.layer_norm1 = LayerNorm2(c)
