@@ -19,6 +19,7 @@ from fairseq.models import (
     register_model_architecture,
 )
 from fairseq.modules import (
+    LayerNorm,
     TransformerSentenceEncoder,
 )
 from fairseq.modules.transformer_sentence_encoder import init_bert_params
