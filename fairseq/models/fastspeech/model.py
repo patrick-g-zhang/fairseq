@@ -1007,7 +1007,7 @@ class RobertaClassificationHead(nn.Module):
         return x
 
 
-class FastSpeech2Encoder(nn.Module):
+class FastSpeech2Encoder(FairseqDecoder):
     """RoBERTa encoder.
 
     Implements the :class:`~fairseq.models.FairseqDecoder` interface required
@@ -1015,9 +1015,7 @@ class FastSpeech2Encoder(nn.Module):
     """
 
     def __init__(self, args, dictionary):
-        super().__init__()
-        pdb.set_trace()
-        self.dictionary = dictionary
+        super().__init__(dictionary)
         self.padding_idx = dictionary.pad()
         self.enc_layers = args.encoder_layers
         # self.dec_layers = hparams['dec_layers']
