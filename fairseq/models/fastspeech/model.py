@@ -1045,7 +1045,7 @@ class FastSpeech2Encoder(FairseqDecoder):
             weight=self.encoder_embed_tokens.weight,
         )
 
-    def forward(self, src_tokens, features_only=False, masked_tokens=None, **unused):
+    def forward(self, src_tokens, features_only=False, return_all_hiddens=False, masked_tokens=None, **unused):
         """
         Args:
             src_tokens (LongTensor): input tokens of shape `(batch, src_len)`
