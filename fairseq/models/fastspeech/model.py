@@ -871,7 +871,6 @@ class FastSpeech2(FairseqEncoderLanguageModel):
         return cls(args, model)
 
     def forward(self, src_tokens, features_only=False, return_all_hiddens=False, classification_head_name=None, **kwargs):
-        pdb.set_trace()
         if classification_head_name is not None:
             features_only = True
 
@@ -1019,7 +1018,6 @@ class FastSpeech2Encoder(FairseqDecoder):
         super().__init__(dictionary)
         self.args = args
         self.padding_idx = dictionary.pad()
-        pdb.set_trace()
         self.enc_layers = args.encoder_layers
         # self.dec_layers = hparams['dec_layers']
         # self.dec_arch = self.arch[self.enc_layers:self.enc_layers + self.dec_layers]
@@ -1061,7 +1059,6 @@ class FastSpeech2Encoder(FairseqDecoder):
                 - a dictionary of additional data, where 'inner_states'
                   is a list of hidden states.
         """
-        pdb.set_trace()
         x = self.extract_features(
             src_tokens)
         if not features_only:
@@ -1070,7 +1067,6 @@ class FastSpeech2Encoder(FairseqDecoder):
 
     def extract_features(self, src_tokens, **unused):
 
-        pdb.set_trace()
         encoder_outputs = self.encoder(
             src_tokens)
         encoder_outputs = encoder_outputs['encoder_out']  # [T, B, C]
