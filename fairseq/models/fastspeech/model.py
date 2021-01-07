@@ -1194,7 +1194,7 @@ class TransformerEncoderLayer(nn.Module):
                              attention_dropout=0.0, relu_dropout=dropout,
                              kernel_size=enc_ffn_kernel_size,
                              padding=ffn_padding,
-                             use_relative_position=use_relative_position),
+                             use_relative_position=use_relative_position)
 
 
     def forward(self, x, **kwargs):
