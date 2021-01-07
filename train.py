@@ -42,7 +42,6 @@ def main(args, init_distributed=False):
     print(args)
 
     # Setup task, e.g., translation, language modeling, etc.
-    pdb.set_trace()
     task = tasks.setup_task(args)
 
     # Load valid dataset (we load training data below, based on the latest checkpoint)
@@ -51,7 +50,6 @@ def main(args, init_distributed=False):
         task.load_dataset(valid_sub_split, combine=False, epoch=0)
 
     # Build model and criterion
-    pdb.set_trace()
     model = task.build_model(args)
     criterion = task.build_criterion(args)
     print(model)
