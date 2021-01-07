@@ -1005,7 +1005,7 @@ class FastSpeech2Encoder(nn.Module):
 
         pdb.set_trace()
         self.encoder_embed_tokens = nn.Embedding(
-            len(dictionary), self.hidden_size, self.padding_idx)
+            len(dictionary), self.encoder_embed_dim, self.padding_idx)
         self.encoder = TransformerEncoder(
             enc_layers=self.enc_layers,
             encoder_embed_dim=self.encoder_embed_dim,
