@@ -1016,6 +1016,7 @@ class FastSpeech2Encoder(FairseqDecoder):
 
     def __init__(self, args, dictionary):
         super().__init__(dictionary)
+        self.args = args
         self.padding_idx = dictionary.pad()
         self.enc_layers = args.encoder_layers
         # self.dec_layers = hparams['dec_layers']
