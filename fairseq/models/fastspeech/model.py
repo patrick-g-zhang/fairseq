@@ -19,7 +19,6 @@ from fairseq.models import (
     register_model_architecture,
 )
 from fairseq.modules import (
-    LayerNorm,
     TransformerSentenceEncoder,
 )
 from fairseq.modules.transformer_sentence_encoder import init_bert_params
@@ -35,7 +34,7 @@ class LayerNorm2(torch.nn.LayerNorm):
 
     def __init__(self, nout, dim=-1):
         """Construct an LayerNorm object."""
-        super(LayerNorm, self).__init__(nout, eps=1e-12)
+        super(LayerNorm2, self).__init__(nout, eps=1e-12)
         self.dim = dim
 
     def forward(self, x):
@@ -45,8 +44,8 @@ class LayerNorm2(torch.nn.LayerNorm):
         :rtype torch.Tensor
         """
         if self.dim == -1:
-            return super(LayerNorm, self).forward(x)
-        return super(LayerNorm, self).forward(x.transpose(1, -1)).transpose(1, -1)
+            return super(LayerNorm2, self).forward(x)
+        return super(LayerNorm2, self).forward(x.transpose(1, -1)).transpose(1, -1)
 
 
 class SinusoidalPositionalEmbedding(nn.Module):
