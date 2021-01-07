@@ -27,6 +27,28 @@ DEFAULT_MAX_SOURCE_POSITIONS = 2000
 DEFAULT_MAX_TARGET_POSITIONS = 2000
 from torch.nn import Parameter
 
+class LayerNorm2(torch.nn.LayerNorm):
+    """Layer normalization module.
+    :param int nout: output dim size
+    :param int dim: dimension to be normalized
+    """
+
+    def __init__(self, nout, dim=-1):
+        """Construct an LayerNorm object."""
+        super(LayerNorm, self).__init__(nout, eps=1e-12)
+        self.dim = dim
+
+    def forward(self, x):
+        """Apply layer normalization.
+        :param torch.Tensor x: input tensor
+        :return: layer normalized tensor
+        :rtype torch.Tensor
+        """
+        if self.dim == -1:
+            return super(LayerNorm, self).forward(x)
+        return super(LayerNorm, self).forward(x.transpose(1, -1)).transpose(1, -1)
+
+
 class SinusoidalPositionalEmbedding(nn.Module):
     """This module produces sinusoidal positional embeddings of any length.
 
@@ -944,7 +966,7 @@ class RobertaLMHead(nn.Module):
         # pdb.set_trace()
         self.dense = nn.Linear(embed_dim, embed_dim)
         self.activation_fn = utils.get_activation_fn(activation_fn)
-        self.layer_norm = LayerNorm(embed_dim)
+        self.layer_norm = LayerNorm2(embed_dim)
 
         if weight is None:
             weight = nn.Linear(embed_dim, output_dim, bias=False).weight
@@ -1113,7 +1135,7 @@ class EncSALayer(nn.Module):
         super().__init__()
         self.c = c
         self.dropout = dropout
-        self.layer_norm1 = LayerNorm(c)
+        self.layer_norm1 = LayerNorm2(c)
         self.self_attn = (RelativePositionMultiheadAttention if use_relative_position else MultiheadAttention)(
             self.c,
             num_heads,
@@ -1122,7 +1144,7 @@ class EncSALayer(nn.Module):
             bias=False,
         )
 
-        self.layer_norm2 = LayerNorm(c)
+        self.layer_norm2 = LayerNorm2(c)
         self.ffn = NewTransformerFFNLayer(
             c, 4 * c, kernel_size=kernel_size, dropout=relu_dropout, padding=padding)
 
@@ -1236,7 +1258,7 @@ class TransformerEncoder(nn.Module):
         ])
         self.last_ln = last_ln
         if last_ln:
-            self.layer_norm = LayerNorm(embed_dim)
+            self.layer_norm = LayerNorm2(embed_dim)
 
     def compute_position_bias(self, x, num_buckets, max_distance=128):
         bsz, qlen, klen = x.size(1), x.size(0), x.size(0)
