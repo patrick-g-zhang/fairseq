@@ -355,7 +355,7 @@ class FairseqEncoderLanguageModel(BaseFairseqModel):
         decoder (FairseqDecoder): the decoder
     """
 
-    def __init__(self, decoder):
+    def __init__(self, encoder):
         super().__init__()
         self.encoder = encoder
         assert isinstance(self.encoder, FairseqDecoder)
