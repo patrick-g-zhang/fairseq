@@ -1325,7 +1325,6 @@ class TransformerEncoder(nn.Module):
             'attn_w': []
         }
         """
-        pdb.set_trace()
         x, encoder_embedding = self.forward_embedding(src_tokens)
 
         # B x T x C -> T x B x C
