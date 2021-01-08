@@ -1070,7 +1070,7 @@ class FastSpeech2Encoder(FairseqDecoder):
         encoder_outputs = self.encoder(
             src_tokens)
         encoder_outputs = encoder_outputs['encoder_out']  # [T, B, C]
-        src_nonpadding = (src_tokens > 0).float().permute(1, 0)[:, :, None]
+        src_nonpadding = (src_tokens > 0).type(encoder_outputs.dtype).permute(1, 0)[:, :, None]
         encoder_outputs = encoder_outputs * src_nonpadding  # [T, B, C]
         return encoder_outputs.transpose(0, 1)
 
@@ -1162,14 +1162,14 @@ class EncSALayer(nn.Module):
 
         x = F.dropout(x, self.dropout, training=self.training)
         x = residual + x
-        x = x * (1 - encoder_padding_mask.float()).transpose(0, 1)[..., None]
+        x = x * (1 - encoder_padding_mask.type(x.dtype)).transpose(0, 1)[..., None]
 
         residual = x
         x = self.layer_norm2(x)
         x = self.ffn(x)
         x = F.dropout(x, self.dropout, training=self.training)
         x = residual + x
-        x = x * (1 - encoder_padding_mask.float()).transpose(0, 1)[..., None]
+        x = x * (1 - encoder_padding_mask.type(x.dtype)).transpose(0, 1)[..., None]
         return x
 
 
@@ -1346,7 +1346,7 @@ class TransformerEncoder(nn.Module):
 
         if self.last_ln:
             x = self.layer_norm(x)
-            x = x * (1 - encoder_padding_mask.float()
+            x = x * (1 - encoder_padding_mask.type(x.dtype)
                      ).transpose(0, 1)[..., None]
         return {
             'encoder_out': x,  # T x B x C
