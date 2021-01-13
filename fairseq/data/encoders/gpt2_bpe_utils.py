@@ -114,11 +114,11 @@ class Encoder:
             token = ''.join(self.byte_encoder[b]
                             for b in token.encode('utf-8'))
 
-            # for bpe_token in self.bpe(token).split(' '):
-            #     pdb.set_trace()
-            #     bpe_tokens.extend([self.encoder[bpe_token]])
-            bpe_tokens.extend(self.encoder[bpe_token]
-                              for bpe_token in self.bpe(token).split(' '))
+            for bpe_token in self.bpe(token).split(' '):
+                pdb.set_trace()
+                bpe_tokens.extend([self.encoder[bpe_token]])
+            # bpe_tokens.extend(self.encoder[bpe_token]
+                # for bpe_token in self.bpe(token).split(' '))
         return bpe_tokens
 
     def decode(self, tokens):
