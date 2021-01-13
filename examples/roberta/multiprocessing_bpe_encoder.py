@@ -72,15 +72,15 @@ def main():
 
         encoder = MultiprocessingEncoder(args)
         pool = Pool(args.workers, initializer=encoder.initializer)
-        encoded_lines = pool.imap(encoder.encode_lines, zip(*inputs), 100)
-        # encoder.initializer()
-        # encoded_lines = []
-        # for encoded_line in zip(*inputs):
-            # print(encoded_line)
+        # encoded_lines = pool.imap(encoder.encode_lines, zip(*inputs), 100)
+        encoder.initializer()
+        encoded_lines = []
+        for encoded_line in zip(*inputs):
+            print(encoded_line)
             # pdb.set_trace()
-            # pdb.set_trace()
-            # encoded_line = encoder.encode_lines(encoded_line)
-            # encoded_lines.append(encoded_line)
+            pdb.set_trace()
+            encoded_line = encoder.encode_lines(encoded_line)
+            encoded_lines.append(encoded_line)
         stats = Counter()
         for i, (filt, enc_lines) in enumerate(encoded_lines, start=1):
             if filt == "PASS":
