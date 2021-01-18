@@ -26,10 +26,6 @@ def main():
     """
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        "--encoder-json",
-        help='path to encoder.json',
-    )
-    parser.add_argument(
         "--vocab-bpe",
         type=str,
         help='path to vocab.bpe',
@@ -71,19 +67,18 @@ def main():
         ]
 
         encoder = MultiprocessingEncoder(args)
-        pool = Pool(args.workers, initializer=encoder.initializer)
-        encoded_lines = pool.imap(encoder.encode_lines, zip(*inputs), 100)
-        # encoder.initializer()
-        # encoded_lines = []
-        # for encoded_line in zip(*inputs):
-        # print(encoded_line)
-        # pdb.set_trace()
-        # pdb.set_trace()
-        # encoded_line = encoder.encode_lines(encoded_line)
-        # encoded_lines.append(encoded_line)
+        # pool = Pool(args.workers, initializer=encoder.initializer)
+        # encoded_lines = pool.imap(encoder.encode_lines, zip(*inputs), 100)
+        encoder.initializer()
+        encoded_lines = []
+        for encoded_line in zip(*inputs):
+            print(encoded_line)
+            # pdb.set_trace()
+            pdb.set_trace()
+            encoded_line = encoder.encode_lines(encoded_line)
+            encoded_lines.append(encoded_line)
         stats = Counter()
         for i, (filt, enc_lines) in enumerate(encoded_lines, start=1):
-            pdb.set_trace()
             if filt == "PASS":
                 for enc_line, output_h in zip(enc_lines, outputs):
                     print(enc_line, file=output_h)
@@ -106,8 +101,9 @@ class MultiprocessingEncoder(object):
         bpe = get_encoder(self.args.encoder_json, self.args.vocab_bpe)
 
     def encode(self, line):
+        pdb.set_trace()
         global bpe
-        ids = bpe.encode(line)
+        ids = bpe.process_line(line)
         return list(map(str, ids))
 
     def decode(self, tokens):
