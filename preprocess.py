@@ -77,7 +77,10 @@ def main(args):
         tgt_dict = src_dict
     else:
         # for masked ml
+        pdb.set_trace()
         if args.srcdict:
+            if args.two_inputs:
+                pdb.set_trace()
             src_dict = task.load_dictionary(args.srcdict)
         else:
             assert args.trainpref, "--trainpref must be set if --srcdict is not specified"
