@@ -71,7 +71,7 @@ def main():
         ]
 
         encoder = MultiprocessingEncoder(args)
-        pool = Pool(args.workers, initializer=encoder.initializer)
+        # pool = Pool(args.workers, initializer=encoder.initializer)
         # encoded_lines = pool.imap(encoder.encode_lines, zip(*inputs), 100)
         encoder.initializer()
         encoded_lines = []
