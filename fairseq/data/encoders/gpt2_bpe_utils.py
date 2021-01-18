@@ -68,7 +68,6 @@ class Encoder:
             r"""'s|'t|'re|'ve|'m|'ll|'d| ?\p{L}+| ?\p{N}+| ?[^\s\p{L}\p{N}]+|\s+(?!\S)|\s+""")
 
     def bpe(self, token):
-        pdb.set_trace()
         if token in self.cache:
             return self.cache[token]
         word = tuple(token)
