@@ -129,6 +129,7 @@ class Encoder:
 
 
 def get_encoder(encoder_json_path, vocab_bpe_path):
+    pdb.set_trace()
     with open(encoder_json_path, 'r') as f:
         encoder = json.load(f)
     with open(vocab_bpe_path, 'r', encoding="utf-8") as f:
