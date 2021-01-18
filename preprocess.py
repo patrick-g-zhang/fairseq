@@ -230,6 +230,7 @@ def main(args):
             )
             shutil.copyfile(file_name(input_prefix, lang), output_text_file)
         else:
+            pdb.set_trace()
             make_binary_dataset(vocab, input_prefix,
                                 output_prefix, lang, num_workers)
 

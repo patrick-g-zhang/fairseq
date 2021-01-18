@@ -11,7 +11,7 @@ from fairseq.data import (
     data_utils,
     FairseqDataset,
     iterators,
-    Dictionary,
+    Dictionary, PhonemeDictionary
 )
 
 
@@ -41,6 +41,16 @@ class FairseqTask(object):
         return Dictionary.load(filename)
 
     @classmethod
+    def load_two_dictionary(cls, filename1, filename2):
+        """Load the dictionary from the filenames
+            one is phoneme dictionary one is dictionary
+
+        Args:
+            filename (str): the filename
+        """
+        return PhonemeDictionary.load(filename1), Dictionary.load(filename2)
+
+    @classmethod
     def build_dictionary(cls, filenames, workers=1, threshold=-1, nwords=-1, padding_factor=8):
         """Build the dictionary
 
@@ -56,8 +66,10 @@ class FairseqTask(object):
         """
         d = Dictionary()
         for filename in filenames:
-            Dictionary.add_file_to_dictionary(filename, d, tokenizer.tokenize_line, workers)
-        d.finalize(threshold=threshold, nwords=nwords, padding_factor=padding_factor)
+            Dictionary.add_file_to_dictionary(
+                filename, d, tokenizer.tokenize_line, workers)
+        d.finalize(threshold=threshold, nwords=nwords,
+                   padding_factor=padding_factor)
         return d
 
     @classmethod
@@ -91,7 +103,8 @@ class FairseqTask(object):
         if split not in self.datasets:
             raise KeyError('Dataset not loaded: ' + split)
         if not isinstance(self.datasets[split], FairseqDataset):
-            raise TypeError('Datasets are expected to be of type FairseqDataset')
+            raise TypeError(
+                'Datasets are expected to be of type FairseqDataset')
         return self.datasets[split]
 
     def get_batch_iterator(
@@ -147,7 +160,8 @@ class FairseqTask(object):
         # filter examples that are too large
         if max_positions is not None:
             indices = data_utils.filter_by_size(
-                indices, dataset, max_positions, raise_exception=(not ignore_invalid_inputs),
+                indices, dataset, max_positions, raise_exception=(
+                    not ignore_invalid_inputs),
             )
 
         # create mini-batches with given size constraints
@@ -222,7 +236,8 @@ class FairseqTask(object):
                 sampling_topp=getattr(args, 'sampling_topp', -1.0),
                 temperature=getattr(args, 'temperature', 1.),
                 diverse_beam_groups=getattr(args, 'diverse_beam_groups', -1),
-                diverse_beam_strength=getattr(args, 'diverse_beam_strength', 0.5),
+                diverse_beam_strength=getattr(
+                    args, 'diverse_beam_strength', 0.5),
                 match_source_len=getattr(args, 'match_source_len', False),
                 no_repeat_ngram_size=getattr(args, 'no_repeat_ngram_size', 0),
             )
