@@ -5,12 +5,8 @@ Original source: https://github.com/openai/gpt-2/blob/master/src/encoder.py
 Original license: MIT
 """
 
-from functools import lru_cache
 import json
 import pdb
-import codecs
-
-from __future__ import unicode_literals, division
 
 import sys
 import os
