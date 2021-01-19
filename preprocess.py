@@ -107,6 +107,7 @@ def main(args):
         print("| [{}] Dictionary: {} types".format(lang, len(vocab) - 1))
         n_seq_tok = [0, 0]
         replaced = Counter()
+        pdb.set_trace()
 
         def merge_result(worker_result):
             replaced.update(worker_result["replaced"])
@@ -123,7 +124,6 @@ def main(args):
         if num_workers > 1:
             pool = Pool(processes=num_workers - 1)
             for worker_id in range(1, num_workers):
-                pdb.set_trace()
                 prefix = "{}{}".format(output_prefix, worker_id)
                 binarize(args, input_file, vocab, prefix, lang,
                          offsets[worker_id], offsets[worker_id + 1])
