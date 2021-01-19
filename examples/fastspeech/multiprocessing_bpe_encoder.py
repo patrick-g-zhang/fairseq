@@ -73,9 +73,6 @@ def main():
         encoder.initializer()
         encoded_lines = []
         for encoded_line in zip(*inputs):
-            print(encoded_line)
-            # pdb.set_trace()
-            pdb.set_trace()
             encoded_line = encoder.encode_lines(encoded_line)
             encoded_lines.append(encoded_line)
         stats = Counter()
@@ -116,10 +113,10 @@ class MultiprocessingEncoder(object):
         """
         enc_lines = []
         for line in lines:
+            pdb.set_trace()
             line = re.sub('<UNK>', '', line)           # Delete pattern abc
             line = re.sub('<EOS>', '', line)           # Delete pattern abc
             line = line.strip()
-            pdb.set_trace()
             out = bpe.process_line(line)
             enc_lines.append(" ".join(tokens))
         return ["PASS", enc_lines]
