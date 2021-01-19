@@ -113,14 +113,15 @@ class MultiprocessingEncoder(object):
         """
         enc_lines = []
         for rline in lines:
+            rline = rline.strip()
             line = re.sub('<UNK>', '', rline)           # Delete pattern abc
             line = re.sub('<EOS>', '', line)           # Delete pattern abc
             line = line.strip()
-            pdb.set_trace()
             phoneme_bpe_tokens = self.encode(line)
             phoneme_bpe_tokens.insert(0, '<unk>')
             phoneme_bpe_tokens.append('</s>')
             encoded_one_line = " ".join(phoneme_bpe_tokens) + ' $ ' + rline
+            pdb.set_trace()
             enc_lines.append(encoded_one_line)
         return ["PASS", enc_lines]
 
