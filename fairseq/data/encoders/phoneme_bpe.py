@@ -68,7 +68,7 @@ class BPE(object):
         """segment line, dealing with leading and trailing whitespace"""
 
         out = ""
-
+        pdb.set_trace()
         leading_whitespace = len(line) - len(line.lstrip('\r\n '))
         if leading_whitespace:
             out += line[:leading_whitespace]
@@ -80,7 +80,6 @@ class BPE(object):
         """segment single sentence (whitespace-tokenized string) with BPE encoding"""
         tokens = [word.strip() for word in sentence.split('|')]
         segments = self.segment_tokens(tokens, dropout)
-        pdb.set_trace()
         return ' '.join(segments)
 
     def segment_tokens(self, tokens, dropout=0):
