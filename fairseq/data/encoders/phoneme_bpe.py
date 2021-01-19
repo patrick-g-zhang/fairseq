@@ -86,7 +86,6 @@ class BPE(object):
         output = []
         for word in tokens:
             # eliminate double spaces
-            pdb.set_trace()
             if not word:
                 continue
             new_word = [out for out in encode(word,
