@@ -38,7 +38,7 @@ class FairseqTask(object):
         Args:
             filename (str): the filename
         """
-        return Dictionary.load(filename)
+        return PhonemeDictionary.load(filename)
 
     @classmethod
     def load_two_dictionary(cls, filename1, filename2):

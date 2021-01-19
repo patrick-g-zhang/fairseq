@@ -5,7 +5,7 @@
 
 from collections import Counter
 import os
-
+import pdb
 from fairseq.tokenizer import tokenize_line
 
 
@@ -35,6 +35,7 @@ class Binarizer:
             f.seek(offset)
             # next(f) breaks f.tell(), hence readline() must be used
             line = safe_readline(f)
+            pdb.set_trace()
             while line:
                 if end > 0 and f.tell() > end:
                     break
