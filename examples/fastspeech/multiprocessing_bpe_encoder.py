@@ -112,13 +112,16 @@ class MultiprocessingEncoder(object):
         Encode a set of lines. All lines will be encoded together.
         """
         enc_lines = []
-        for line in lines:
-            line = re.sub('<UNK>', '', line)           # Delete pattern abc
+        for rline in lines:
+            line = re.sub('<UNK>', '', rline)           # Delete pattern abc
             line = re.sub('<EOS>', '', line)           # Delete pattern abc
             line = line.strip()
             pdb.set_trace()
             phoneme_bpe_tokens = self.encode(line)
-            enc_lines.append(" ".join(tokens))
+            phoneme_bpe_tokens.insert(0, '<unk>')
+            phoneme_bpe_tokens.append('</s>')
+            encoded_one_line = " ".join(phoneme_bpe_tokens) + ' $ ' + rline
+            enc_lines.append(encoded_one_line)
         return ["PASS", enc_lines]
 
     def decode_lines(self, lines):
