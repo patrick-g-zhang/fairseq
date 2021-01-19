@@ -13,6 +13,7 @@ from collections import Counter
 from multiprocessing import Pool
 
 from fairseq.data.encoders.phoneme_bpe import get_encoder
+import re
 import pdb
 
 
@@ -101,7 +102,6 @@ class MultiprocessingEncoder(object):
         bpe = get_encoder(self.args.vocab_bpe)
 
     def encode(self, line):
-        pdb.set_trace()
         global bpe
         ids = bpe.process_line(line)
         return list(map(str, ids))
@@ -116,10 +116,11 @@ class MultiprocessingEncoder(object):
         """
         enc_lines = []
         for line in lines:
+            line = re.sub('<UNK>', '', line)           # Delete pattern abc
+            line = re.sub('<EOS>', '', line)           # Delete pattern abc
             line = line.strip()
-            if len(line) == 0 and not self.args.keep_empty:
-                return ["EMPTY", None]
-            tokens = self.encode(line)
+            pdb.set_trace()
+            out = bpe.process_line(line)
             enc_lines.append(" ".join(tokens))
         return ["PASS", enc_lines]
 

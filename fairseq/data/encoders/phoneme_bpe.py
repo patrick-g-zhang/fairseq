@@ -23,8 +23,6 @@ from io import open
 
 
 def get_encoder(vocab_bpe_path):
-    pdb.set_trace()
-
     with codecs.open(vocab_bpe_path, encoding='utf-8') as bpefile:
         return BPE(bpefile)
 
