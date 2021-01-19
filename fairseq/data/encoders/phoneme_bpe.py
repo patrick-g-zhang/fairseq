@@ -86,6 +86,7 @@ class BPE(object):
         output = []
         for word in tokens:
             # eliminate double spaces
+            pdb.set_trace()
             if not word:
                 continue
             new_word = [out for segment in word
@@ -104,7 +105,6 @@ class BPE(object):
 def encode(orig, bpe_codes, bpe_codes_reverse, cache, dropout=0):
     """Encode word based on list of BPE merge operations, which are applied consecutively
     """
-    pdb.set_trace()
     if not dropout and orig in cache:
         return cache[orig]
 
