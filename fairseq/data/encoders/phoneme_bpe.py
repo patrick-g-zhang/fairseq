@@ -68,7 +68,6 @@ class BPE(object):
         """segment line, dealing with leading and trailing whitespace"""
 
         out = ""
-        pdb.set_trace()
         leading_whitespace = len(line) - len(line.lstrip('\r\n '))
         if leading_whitespace:
             out += line[:leading_whitespace]
@@ -105,6 +104,7 @@ class BPE(object):
 def encode(orig, bpe_codes, bpe_codes_reverse, cache, dropout=0):
     """Encode word based on list of BPE merge operations, which are applied consecutively
     """
+    pdb.set_trace()
     if not dropout and orig in cache:
         return cache[orig]
 
