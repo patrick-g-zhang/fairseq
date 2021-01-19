@@ -89,12 +89,11 @@ class BPE(object):
             pdb.set_trace()
             if not word:
                 continue
-            new_word = [out for segment in word
-                        for out in encode(segment,
-                                          self.bpe_codes,
-                                          self.bpe_codes_reverse,
-                                          self.cache,
-                                          dropout)]
+            new_word = [out for out in encode(word,
+                                              self.bpe_codes,
+                                              self.bpe_codes_reverse,
+                                              self.cache,
+                                              dropout)]
 
             for item in new_word:
                 output.append(item)
