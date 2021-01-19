@@ -80,8 +80,10 @@ def main(args):
         pdb.set_trace()
         if args.srcdict:
             if args.two_inputs:
-                pdb.set_trace()
-            src_dict = task.load_dictionary(args.srcdict)
+                src_dict_1, src_dict_2 = task.load_two_dictionary(
+                    args.srcdict, args.tgtdict)
+            else:
+                src_dict = task.load_dictionary(args.srcdict)
         else:
             assert args.trainpref, "--trainpref must be set if --srcdict is not specified"
             src_dict = build_dictionary(

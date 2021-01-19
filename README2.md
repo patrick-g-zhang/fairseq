@@ -6,5 +6,10 @@
     - adding new arg ```--two-inputs``` to ```preprocess.py``` file
 
     ### phoneme bpe files
-    1. ./experiment/phoneme_bpe/vocab.bpe 
-    2. ./experiment/phoneme_bpe/dict.txt
+    1. ./experiment/phoneme_bpe/vocab.bpe, this file is for bpe pairs
+    2. ./experiment/phoneme_bpe/dict.txt, this file is for bpe dict creation
+
+    ### new file for prepare phoneme bpe
+
+    ### preprocessing file
+    
