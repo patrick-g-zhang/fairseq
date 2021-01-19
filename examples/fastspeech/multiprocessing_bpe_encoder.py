@@ -98,7 +98,7 @@ class MultiprocessingEncoder(object):
 
     def initializer(self):
         global bpe
-        bpe = get_encoder(self.args.encoder_json, self.args.vocab_bpe)
+        bpe = get_encoder(self.args.vocab_bpe)
 
     def encode(self, line):
         pdb.set_trace()
