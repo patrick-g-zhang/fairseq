@@ -119,8 +119,11 @@ class MultiprocessingEncoder(object):
             phoneme_bpe_tokens = self.encode(line)
             phoneme_bpe_tokens.insert(0, '<unk>')
             phoneme_bpe_tokens.append('</s>')
-            assert sum(map(lambda x: len(x.split("+")),
-                           phoneme_bpe_tokens)) == len(rline.split(" "))
+            if not sum(map(lambda x: len(x.split("+")),
+                           phoneme_bpe_tokens)) == len(rline.split(" ")):
+                print(phoneme_bpe_tokens)
+                print(rline)
+                exit(0)
 
             encoded_one_line = " ".join(phoneme_bpe_tokens) + ' $ ' + rline
             enc_lines.append(encoded_one_line)
