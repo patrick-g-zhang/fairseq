@@ -211,6 +211,7 @@ def main(args):
         )
 
     def make_dataset(vocab, input_prefix, output_prefix, lang, num_workers=1, vocabb=None):
+        pdb.set_trace()
         if args.dataset_impl == "raw":
             # Copy original text file to destination folder
             output_text_file = dest_path(
@@ -226,7 +227,7 @@ def main(args):
 
     def make_all(lang, vocab, vocabb=None):
         if args.trainpref:
-            make_dataset(vocab, vocabb, args.trainpref, "train",
+            make_dataset(vocab, args.trainpref, "train",
                          lang, num_workers=args.workers, vocabb=vocabb)
         if args.validpref:
             for k, validpref in enumerate(args.validpref.split(",")):
@@ -250,7 +251,7 @@ def main(args):
             make_binary_alignment_dataset(
                 args.testpref + "." + args.align_suffix, "test.align", num_workers=args.workers)
 
-    make_all(args.source_lang, src_dict_b, src_dict_p)
+    make_all(args.source_lang, src_dict_p, src_dict_b)
 
     if args.align_suffix:
         make_all_alignments()
