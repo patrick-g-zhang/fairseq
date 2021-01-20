@@ -69,7 +69,6 @@ class Binarizer:
                 line1, line2 = line.split('$')
                 line1 = line1.strip()  # bpe sequence
                 line2 = line2.strip()  # phoneme sequence
-                pdb.set_trace()
                 phoneme_ids = dictp.encode_line(
                     line=line2,
                     line_tokenizer=tokenize,
@@ -85,6 +84,14 @@ class Binarizer:
                     append_eos=append_eos,
                     reverse_order=reverse_order,
                 )
+                phoneme2bpe = []
+                pdb.set_trace()
+
+                for bpe_idx, bpe_seq in line1.split(" "):
+                    phoneme2bpe.extend(
+                        [bpe_idx + 1] * (len(bpe_seq.split("+"))))
+                assert len(phoneme2bpe) == phoneme_ids.size(0)
+                pdb.set_trace()
                 nseq += 1
                 ntok += len(ids)
                 consumer(ids)
