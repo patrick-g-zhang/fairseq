@@ -87,7 +87,8 @@ def main(args):
                 src_dict.save(dict_path(args.lang))
 
     def make_binary_dataset(vocab, input_prefix, output_prefix, lang, num_workers, vocabb=None):
-        print("| [{}] Dictionary: {} types".format(lang, len(vocab) - 1))
+        print("| [{}] Phoneme Dictionary: {} types".format(lang, len(vocab) - 1))
+        print("| [{}] BPE Dictionary: {} types".format(lang, len(vocabb) - 1))
         n_seq_tok = [0, 0]
         replaced = Counter()
 
