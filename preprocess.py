@@ -109,21 +109,21 @@ def main(args):
             pool = Pool(processes=num_workers - 1)
             for worker_id in range(1, num_workers):
                 prefix = "{}{}".format(output_prefix, worker_id)
-                binarize(args, input_file, vocab, prefix, lang,
-                         offsets[worker_id], offsets[worker_id + 1], vocabb=vocabb)
-                # pool.apply_async(
-                #     binarize,
-                #     (
-                #         args,
-                #         input_file,
-                #         vocab,
-                #         prefix,
-                #         lang,
-                #         offsets[worker_id],
-                #         offsets[worker_id + 1]
-                #     ),
-                #     callback=merge_result
-                # )
+                # binarize(args, input_file, vocab, prefix, lang,
+                # offsets[worker_id], offsets[worker_id + 1], vocabb=vocabb)
+                pool.apply_async(
+                    binarize,
+                    (
+                        args,
+                        input_file,
+                        vocab,
+                        prefix,
+                        lang,
+                        offsets[worker_id],
+                        offsets[worker_id + 1]
+                    ),
+                    callback=merge_result
+                )
             pool.close()
 
         ds = indexed_dataset.make_builder(dataset_dest_file(args, output_prefix, lang, "bin"),
@@ -137,7 +137,7 @@ def main(args):
         if num_workers > 1:
             pool.join()
             for worker_id in range(1, num_workers):
-                pdb.set_trace()
+                # pdb.set_trace()
                 prefix = "{}{}".format(output_prefix, worker_id)
                 temp_file_path = dataset_dest_prefix(args, prefix, lang)
                 ds.merge_file_(temp_file_path)
@@ -315,7 +315,6 @@ def binarize(args, filename, vocab, output_prefix, lang, offset, end, vocabb=Non
         ds.add_item(tensor)
 
     # append eos is done here
-    pdb.set_trace()
     if not args.two_inputs:
         res = Binarizer.binarize(filename, vocab, consumer, append_eos=append_eos,
                                  offset=offset, end=end)
