@@ -10,7 +10,7 @@ import struct
 
 import numpy as np
 import torch
-
+import pdb
 from . import FairseqDataset
 
 
@@ -171,7 +171,8 @@ class IndexedDataset(FairseqDataset):
     @staticmethod
     def exists(path):
         return (
-            os.path.exists(index_file_path(path)) and os.path.exists(data_file_path(path))
+            os.path.exists(index_file_path(path)) and os.path.exists(
+                data_file_path(path))
         )
 
     @property
@@ -303,8 +304,10 @@ class IndexedDatasetBuilder(object):
 
     def add_item(self, tensor):
         # +1 for Lua compatibility
-        bytes = self.out_file.write(np.array(tensor.numpy() + 1, dtype=self.dtype))
-        self.data_offsets.append(self.data_offsets[-1] + bytes / self.element_size)
+        bytes = self.out_file.write(
+            np.array(tensor.numpy() + 1, dtype=self.dtype))
+        self.data_offsets.append(
+            self.data_offsets[-1] + bytes / self.element_size)
         for s in tensor.size():
             self.sizes.append(s)
         self.dim_offsets.append(self.dim_offsets[-1] + len(tensor.size()))
@@ -335,7 +338,8 @@ class IndexedDatasetBuilder(object):
         index.write(b'TNTIDX\x00\x00')
         index.write(struct.pack('<Q', 1))
         index.write(struct.pack('<QQ', code(self.dtype), self.element_size))
-        index.write(struct.pack('<QQ', len(self.data_offsets) - 1, len(self.sizes)))
+        index.write(struct.pack('<QQ', len(
+            self.data_offsets) - 1, len(self.sizes)))
         write_longs(index, self.dim_offsets)
         write_longs(index, self.data_offsets)
         write_longs(index, self.sizes)
@@ -415,7 +419,8 @@ class MMapIndexedDataset(torch.utils.data.Dataset):
 
             self._bin_buffer_mmap = np.memmap(path, mode='r', order='C')
             self._bin_buffer = memoryview(self._bin_buffer_mmap)
-            self._sizes = np.frombuffer(self._bin_buffer, dtype=np.int32, count=self._len, offset=offset)
+            self._sizes = np.frombuffer(
+                self._bin_buffer, dtype=np.int32, count=self._len, offset=offset)
             self._pointers = np.frombuffer(self._bin_buffer, dtype=np.int64, count=self._len,
                                            offset=offset + self._sizes.nbytes)
 
@@ -458,7 +463,8 @@ class MMapIndexedDataset(torch.utils.data.Dataset):
         self._index = self.Index(index_file_path(self._path))
 
         _warmup_mmap_file(data_file_path(self._path))
-        self._bin_buffer_mmap = np.memmap(data_file_path(self._path), mode='r', order='C')
+        self._bin_buffer_mmap = np.memmap(
+            data_file_path(self._path), mode='r', order='C')
         self._bin_buffer = memoryview(self._bin_buffer_mmap)
 
     def __del__(self):
@@ -472,7 +478,8 @@ class MMapIndexedDataset(torch.utils.data.Dataset):
     @lru_cache(maxsize=8)
     def __getitem__(self, i):
         ptr, size = self._index[i]
-        np_array = np.frombuffer(self._bin_buffer, dtype=self._index.dtype, count=size, offset=ptr)
+        np_array = np.frombuffer(
+            self._bin_buffer, dtype=self._index.dtype, count=size, offset=ptr)
         if self._index.dtype != np.int64:
             np_array = np_array.astype(np.int64)
 
@@ -489,7 +496,8 @@ class MMapIndexedDataset(torch.utils.data.Dataset):
     @staticmethod
     def exists(path):
         return (
-            os.path.exists(index_file_path(path)) and os.path.exists(data_file_path(path))
+            os.path.exists(index_file_path(path)) and os.path.exists(
+                data_file_path(path))
         )
 
 
@@ -500,6 +508,7 @@ class MMapIndexedDatasetBuilder(object):
         self._sizes = []
 
     def add_item(self, tensor):
+        pdb.set_trace()
         np_array = np.array(tensor.numpy(), dtype=self._dtype)
         self._data_file.write(np_array.tobytes(order='C'))
         self._sizes.append(np_array.size)
