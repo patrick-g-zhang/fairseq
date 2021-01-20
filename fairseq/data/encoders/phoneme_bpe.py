@@ -87,8 +87,8 @@ class BPE(object):
                 output.append(item)
                 if item.endswith('</w>'):
                     output.append('|')
-            if output[-1] == "|":
-                return output[:-1]
+        if output[-1] == "|":
+            return output[:-1]
         return output
 
 
