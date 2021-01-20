@@ -84,10 +84,12 @@ class BPE(object):
                                               dropout)]
 
             for item in new_word:
-                pdb.set_trace()
                 output.append(item)
-                output.append('|')
-        return output[:-1]
+                if item.endswith('</w>'):
+                    output.append('|')
+            if output[-1] == "|":
+                return output[:-1]
+        return output
 
 
 def encode(orig, bpe_codes, bpe_codes_reverse, cache, dropout=0):

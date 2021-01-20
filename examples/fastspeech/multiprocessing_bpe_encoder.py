@@ -117,8 +117,10 @@ class MultiprocessingEncoder(object):
             line = re.sub('<EOS>', '', line)           # Delete pattern abc
             line = line.strip()
             phoneme_bpe_tokens = self.encode(line)
+            pdb.set_trace()
             phoneme_bpe_tokens.insert(0, '<unk>')
             phoneme_bpe_tokens.append('</s>')
+
             encoded_one_line = " ".join(phoneme_bpe_tokens) + ' $ ' + rline
             enc_lines.append(encoded_one_line)
         return ["PASS", enc_lines]
