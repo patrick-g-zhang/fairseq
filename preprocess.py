@@ -316,7 +316,7 @@ def binarize(args, filename, vocab, output_prefix, lang, offset, end, vocabb=Non
 
     # append eos is done here
     pdb.set_trace()
-    if args.two_inputs:
+    if not args.two_inputs:
         res = Binarizer.binarize(filename, vocab, consumer, append_eos=append_eos,
                                  offset=offset, end=end)
     else:
