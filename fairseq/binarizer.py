@@ -95,6 +95,7 @@ class Binarizer:
                     pdb.set_trace()
                     for i in range(152):
                         print(line2.split(' ')[i], newphoneme[i])
+                    pdb.set_trace()
                 item = {
                     'phoneme_ids': phoneme_ids,
                     'bpe_ids': bpe_ids,
