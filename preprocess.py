@@ -76,7 +76,6 @@ def main(args):
         tgt_dict = src_dict
     else:
         # for masked ml
-        pdb.set_trace()
         if args.srcdict:
             if args.two_inputs:
                 src_dict_p, src_dict_b = task.load_two_dictionary(
@@ -91,7 +90,6 @@ def main(args):
         print("| [{}] Dictionary: {} types".format(lang, len(vocab) - 1))
         n_seq_tok = [0, 0]
         replaced = Counter()
-        pdb.set_trace()
 
         def merge_result(worker_result):
             replaced.update(worker_result["replaced"])
@@ -107,6 +105,7 @@ def main(args):
         pool = None
         if num_workers > 1:
             pool = Pool(processes=num_workers - 1)
+            pdb.set_trace()
             for worker_id in range(1, num_workers):
                 prefix = "{}{}".format(output_prefix, worker_id)
                 binarize(args, input_file, vocab, prefix, lang,
