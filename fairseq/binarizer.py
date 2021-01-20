@@ -98,6 +98,10 @@ class Binarizer:
                     'bpe_ids': bpe_ids,
                     'phoneme2bpe': phoneme2bpe
                 }
+
+                for i in range(152):
+                    print(line2.split(' ')[i], newphoneme[i])
+
                 nseq += 1
                 ntok += len(phoneme_ids)
                 consumer(item)
