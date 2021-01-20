@@ -84,6 +84,7 @@ class BPE(object):
                                               dropout)]
 
             for item in new_word:
+                pdb.set_trace()
                 output.append(item)
                 output.append('|')
         return output[:-1]
