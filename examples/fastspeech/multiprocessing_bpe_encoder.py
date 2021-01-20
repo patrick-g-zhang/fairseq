@@ -67,13 +67,13 @@ def main():
         ]
 
         encoder = MultiprocessingEncoder(args)
-        # pool = Pool(args.workers, initializer=encoder.initializer)
-        # encoded_lines = pool.imap(encoder.encode_lines, zip(*inputs), 100)
-        encoder.initializer()
-        encoded_lines = []
-        for encoded_line in zip(*inputs):
-            encoded_line = encoder.encode_lines(encoded_line)
-            encoded_lines.append(encoded_line)
+        pool = Pool(args.workers, initializer=encoder.initializer)
+        encoded_lines = pool.imap(encoder.encode_lines, zip(*inputs), 100)
+        # encoder.initializer()
+        # encoded_lines = []
+        # for encoded_line in zip(*inputs):
+        # encoded_line = encoder.encode_lines(encoded_line)
+        # encoded_lines.append(encoded_line)
         stats = Counter()
         for i, (filt, enc_lines) in enumerate(encoded_lines, start=1):
             if filt == "PASS":
@@ -119,7 +119,6 @@ class MultiprocessingEncoder(object):
             phoneme_bpe_tokens = self.encode(line)
             phoneme_bpe_tokens.insert(0, '<unk>')
             phoneme_bpe_tokens.append('</s>')
-            pdb.set_trace()
             assert sum(map(lambda x: len(x.split("+")),
                            phoneme_bpe_tokens)) == len(rline.split(" "))
 
