@@ -91,11 +91,7 @@ class Binarizer:
                         [bpe_idx + 1] * (len(bpe_seq.split("+"))))
                     newphoneme.extend(
                         bpe_seq.split("+"))
-                if len(phoneme2bpe) != phoneme_ids.size(0):
-                    pdb.set_trace()
-                    for i in range(152):
-                        print(line2.split(' ')[i], newphoneme[i])
-                    pdb.set_trace()
+                assert len(phoneme2bpe) == phoneme_ids.size(0)
                 item = {
                     'phoneme_ids': phoneme_ids,
                     'bpe_ids': bpe_ids,
