@@ -67,11 +67,6 @@ class BPE(object):
     def process_line(self, line, dropout=0):
         """segment line, dealing with leading and trailing whitespace"""
         tokens = [word.strip() for word in line.split('|')]
-        segments = self.segment_tokens(tokens, dropout)
-        return segments
-
-    def segment_tokens(self, tokens, dropout=0):
-        """segment a sequence of tokens with BPE encoding"""
         output = []
         for word in tokens:
             # eliminate double spaces
@@ -85,11 +80,9 @@ class BPE(object):
 
             for item in new_word:
                 output.append(item)
-                if item.endswith('</w>'):
-                    output.append('|')
-        if output[-1] == "|":
-            return output[:-1]
-        return output
+            output.append('|')
+
+        return output[:-1]
 
 
 def encode(orig, bpe_codes, bpe_codes_reverse, cache, dropout=0):
