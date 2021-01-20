@@ -72,11 +72,11 @@ class Binarizer:
                     break
                 line = line.strip()
                 line1, line2 = line.split('$')
-                line1 = line1.strip()
-                line2 = line2.strip()
+                line1 = line1.strip()  # bpe sequence
+                line2 = line2.strip()  # phoneme sequence
                 pdb.set_trace()
-                ids = dictp.encode_line(
-                    line=line1,
+                phoneme_ids = dictp.encode_line(
+                    line=line2,
                     line_tokenizer=tokenize,
                     add_if_not_exist=False,
                     consumer=replaced_consumer,
@@ -84,8 +84,8 @@ class Binarizer:
                     reverse_order=reverse_order,
                 )
 
-                ids = dictb.encode_line(
-                    line=line,
+                bpe_ids = dictb.encode_line(
+                    line=line1,
                     line_tokenizer=tokenize,
                     add_if_not_exist=False,
                     consumer=replaced_consumer,
