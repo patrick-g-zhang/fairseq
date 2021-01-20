@@ -20,7 +20,6 @@ def safe_readline(f):
 
 
 class Binarizer:
-
     @staticmethod
     def binarize(filename, dict, consumer, tokenize=tokenize_line, append_eos=True, reverse_order=False,
                  offset=0, end=-1):
@@ -40,6 +39,52 @@ class Binarizer:
                 if end > 0 and f.tell() > end:
                     break
                 ids = dict.encode_line(
+                    line=line,
+                    line_tokenizer=tokenize,
+                    add_if_not_exist=False,
+                    consumer=replaced_consumer,
+                    append_eos=append_eos,
+                    reverse_order=reverse_order,
+                )
+                nseq += 1
+                ntok += len(ids)
+                consumer(ids)
+                line = f.readline()
+        return {'nseq': nseq, 'nunk': sum(replaced.values()), 'ntok': ntok, 'replaced': replaced}
+
+    @staticmethod
+    def binarize_two(filename, dictp, dictb, consumer, tokenize=tokenize_line, append_eos=True, reverse_order=False,
+                     offset=0, end=-1):
+        nseq, ntok = 0, 0
+        replaced = Counter()
+
+        def replaced_consumer(word, idx):
+            if idx == dict.unk_index and word != dict.unk_word:
+                replaced.update([word])
+
+        with open(filename, 'r', encoding='utf-8') as f:
+            f.seek(offset)
+            # next(f) breaks f.tell(), hence readline() must be used
+            line = safe_readline(f)
+            pdb.set_trace()
+            while line:
+                if end > 0 and f.tell() > end:
+                    break
+                line = line.strip()
+                line1, line2 = line.split('$')
+                line1 = line1.strip()
+                line2 = line2.strip()
+                pdb.set_trace()
+                ids = dictp.encode_line(
+                    line=line1,
+                    line_tokenizer=tokenize,
+                    add_if_not_exist=False,
+                    consumer=replaced_consumer,
+                    append_eos=append_eos,
+                    reverse_order=reverse_order,
+                )
+
+                ids = dictb.encode_line(
                     line=line,
                     line_tokenizer=tokenize,
                     add_if_not_exist=False,

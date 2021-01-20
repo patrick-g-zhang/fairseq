@@ -12,6 +12,7 @@ import numpy as np
 import torch
 import pdb
 from . import FairseqDataset
+import pickle
 
 
 def __best_fitting_dtype(vocab_size=None):
@@ -22,7 +23,7 @@ def __best_fitting_dtype(vocab_size=None):
 
 
 def get_available_dataset_impl():
-    return ['raw', 'lazy', 'cached', 'mmap']
+    return ['raw', 'lazy', 'cached', 'mmap', 'dict']
 
 
 def infer_dataset_impl(path):
@@ -44,6 +45,8 @@ def infer_dataset_impl(path):
 def make_builder(out_file, impl, vocab_size=None):
     if impl == 'mmap':
         return MMapIndexedDatasetBuilder(out_file, dtype=__best_fitting_dtype(vocab_size))
+    elif impl == 'dict':
+        return DictIndexedDatasetBuilder(out_file)
     else:
         return IndexedDatasetBuilder(out_file)
 
@@ -530,3 +533,64 @@ class MMapIndexedDatasetBuilder(object):
 
         with MMapIndexedDataset.Index.writer(index_file, self._dtype) as index:
             index.write(self._sizes)
+
+
+class DictIndexedDatasetBuilder(object):
+    def __init__(self, out_file):
+        self._data_file = open(out_file, 'wb')
+        self.byte_offsets = [0]
+
+    def add_item(self, item):
+        s = pickle.dumps(item)
+        bytes = self._data_file.write(s)
+        self.byte_offsets.append(self.byte_offsets[-1] + bytes)
+
+    def merge_file_(self, another_file):
+        # Concatenate index
+        index = DictIndexedDataset(another_file)
+
+        begin = self.byte_offsets[-1]
+        for offset in index.data_offsets[1:]:
+            self.byte_offsets.append(begin + offset)
+
+        with open(another_file, 'rb') as f:
+            while True:
+                data = f.read(1024)
+                if data:
+                    self._data_file.write(data)
+                else:
+                    break
+
+    def finalize(self, index_file):
+        self._data_file.close()
+        np.save(open(index_file, 'wb'), {'offsets': self.byte_offsets})
+
+
+class DictIndexedDataset:
+    def __init__(self, path):
+        super().__init__()
+        self.path = path
+        self.data_file = None
+        self.data_offsets = np.load(
+            index_file_path(path), allow_pickle=True).item()['offsets']
+        self.data_file = open(data_file_path(path), 'rb', buffering=0)
+
+    def check_index(self, i):
+        if i < 0 or i >= len(self.data_offsets) - 1:
+            raise IndexError('index out of range')
+
+    def __del__(self):
+        if self.data_file:
+            self.data_file.close()
+
+    @lru_cache(maxsize=8)
+    def __getitem__(self, i):
+        self.check_index(i)
+        self.data_file.seek(self.data_offsets[i])
+        b = self.data_file.read(
+            self.data_offsets[i + 1] - self.data_offsets[i])
+        item = pickle.loads(b)
+        return item
+
+    def __len__(self):
+        return len(self.data_offsets) - 1
