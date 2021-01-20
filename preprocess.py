@@ -87,7 +87,8 @@ def main(args):
                 src_dict.save(dict_path(args.lang))
 
     def make_binary_dataset(vocab, input_prefix, output_prefix, lang, num_workers, vocabb=None):
-        print("| [{}] Phoneme Dictionary: {} types".format(lang, len(vocab) - 1))
+        print("| [{}] Phoneme Dictionary: {} types".format(
+            lang, len(vocab) - 1))
         print("| [{}] BPE Dictionary: {} types".format(lang, len(vocabb) - 1))
         n_seq_tok = [0, 0]
         replaced = Counter()
@@ -100,13 +101,13 @@ def main(args):
         input_file = "{}{}".format(
             input_prefix, ("." + lang) if lang is not None else ""
         )
+        pdb.set_trace()
         # the files will be cut for different parts for processing
         # !!!! pay attention for my dataset
         offsets = Binarizer.find_offsets(input_file, num_workers)
         pool = None
         if num_workers > 1:
             pool = Pool(processes=num_workers - 1)
-            pdb.set_trace()
             for worker_id in range(1, num_workers):
                 prefix = "{}{}".format(output_prefix, worker_id)
                 binarize(args, input_file, vocab, prefix, lang,
