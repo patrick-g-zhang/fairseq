@@ -212,7 +212,6 @@ def main(args):
         )
 
     def make_dataset(vocab, input_prefix, output_prefix, lang, num_workers=1, vocabb=None):
-        pdb.set_trace()
         if args.dataset_impl == "raw":
             # Copy original text file to destination folder
             output_text_file = dest_path(
@@ -222,7 +221,6 @@ def main(args):
             )
             shutil.copyfile(file_name(input_prefix, lang), output_text_file)
         else:
-            pdb.set_trace()
             make_binary_dataset(vocab, input_prefix,
                                 output_prefix, lang, num_workers, vocabb=vocabb)
 
@@ -317,6 +315,7 @@ def binarize(args, filename, vocab, output_prefix, lang, offset, end, vocabb=Non
         ds.add_item(tensor)
 
     # append eos is done here
+    pdb.set_trace()
     if args.two_inputs:
         res = Binarizer.binarize(filename, vocab, consumer, append_eos=append_eos,
                                  offset=offset, end=end)
