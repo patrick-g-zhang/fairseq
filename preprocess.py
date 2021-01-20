@@ -21,7 +21,6 @@ import pdb
 
 
 def main(args):
-    pdb.set_trace()
     utils.import_user_module(args)
 
     print(args)
@@ -80,30 +79,15 @@ def main(args):
         pdb.set_trace()
         if args.srcdict:
             if args.two_inputs:
-                src_dict_1, src_dict_2 = task.load_two_dictionary(
+                src_dict_p, src_dict_b = task.load_two_dictionary(
                     args.srcdict, args.tgtdict)
+                src_dict_p.save(dict_path('p'))
+                src_dict_b.save(dict_path('b'))
             else:
                 src_dict = task.load_dictionary(args.srcdict)
-        else:
-            assert args.trainpref, "--trainpref must be set if --srcdict is not specified"
-            src_dict = build_dictionary(
-                [train_path(args.source_lang)], src=True)
+                src_dict.save(dict_path(args.lang))
 
-        if target:
-            if args.tgtdict:
-                tgt_dict = task.load_dictionary(args.tgtdict)
-            else:
-                assert args.trainpref, "--trainpref must be set if --tgtdict is not specified"
-                tgt_dict = build_dictionary(
-                    [train_path(args.target_lang)], tgt=True)
-        else:
-            tgt_dict = None
-
-    src_dict.save(dict_path(args.source_lang))
-    if target and tgt_dict is not None:
-        tgt_dict.save(dict_path(args.target_lang))
-
-    def make_binary_dataset(vocab, input_prefix, output_prefix, lang, num_workers):
+    def make_binary_dataset(vocab, input_prefix, output_prefix, lang, num_workers, vocabb=None):
         print("| [{}] Dictionary: {} types".format(lang, len(vocab) - 1))
         n_seq_tok = [0, 0]
         replaced = Counter()
@@ -126,7 +110,7 @@ def main(args):
             for worker_id in range(1, num_workers):
                 prefix = "{}{}".format(output_prefix, worker_id)
                 binarize(args, input_file, vocab, prefix, lang,
-                         offsets[worker_id], offsets[worker_id + 1])
+                         offsets[worker_id], offsets[worker_id + 1], vocabb=vocabb)
                 # pool.apply_async(
                 #     binarize,
                 #     (
@@ -226,7 +210,7 @@ def main(args):
             )
         )
 
-    def make_dataset(vocab, input_prefix, output_prefix, lang, num_workers=1):
+    def make_dataset(vocab, input_prefix, output_prefix, lang, num_workers=1, vocabb=None):
         if args.dataset_impl == "raw":
             # Copy original text file to destination folder
             output_text_file = dest_path(
@@ -238,22 +222,22 @@ def main(args):
         else:
             pdb.set_trace()
             make_binary_dataset(vocab, input_prefix,
-                                output_prefix, lang, num_workers)
+                                output_prefix, lang, num_workers, vocabb=vocabb)
 
-    def make_all(lang, vocab):
+    def make_all(lang, vocab, vocabb=None):
         if args.trainpref:
-            make_dataset(vocab, args.trainpref, "train",
-                         lang, num_workers=args.workers)
+            make_dataset(vocab, vocabb, args.trainpref, "train",
+                         lang, num_workers=args.workers, vocabb=vocabb)
         if args.validpref:
             for k, validpref in enumerate(args.validpref.split(",")):
                 outprefix = "valid{}".format(k) if k > 0 else "valid"
                 make_dataset(vocab, validpref, outprefix,
-                             lang, num_workers=args.workers)
+                             lang, num_workers=args.workers, vocabb=vocabb)
         if args.testpref:
             for k, testpref in enumerate(args.testpref.split(",")):
                 outprefix = "test{}".format(k) if k > 0 else "test"
                 make_dataset(vocab, testpref, outprefix,
-                             lang, num_workers=args.workers)
+                             lang, num_workers=args.workers, vocabb=vocabb)
 
     def make_all_alignments():
         if args.trainpref and os.path.exists(args.trainpref + "." + args.align_suffix):
@@ -266,9 +250,8 @@ def main(args):
             make_binary_alignment_dataset(
                 args.testpref + "." + args.align_suffix, "test.align", num_workers=args.workers)
 
-    make_all(args.source_lang, src_dict)
-    if target:
-        make_all(args.target_lang, tgt_dict)
+    make_all(args.source_lang, src_dict_b, src_dict_p)
+
     if args.align_suffix:
         make_all_alignments()
 
@@ -322,7 +305,7 @@ def main(args):
                 print("{} {}".format(src_dict[k], tgt_dict[v]), file=f)
 
 
-def binarize(args, filename, vocab, output_prefix, lang, offset, end, append_eos=False):
+def binarize(args, filename, vocab, output_prefix, lang, offset, end, vocabb=None, append_eos=False):
 
     # ds is MMapIndexedDatasetBuilder for indexed Dataset builder
     ds = indexed_dataset.make_builder(dataset_dest_file(args, output_prefix, lang, "bin"),
@@ -332,8 +315,12 @@ def binarize(args, filename, vocab, output_prefix, lang, offset, end, append_eos
         ds.add_item(tensor)
 
     # append eos is done here
-    res = Binarizer.binarize(filename, vocab, consumer, append_eos=append_eos,
-                             offset=offset, end=end)
+    if args.two_inputs:
+        res = Binarizer.binarize(filename, vocab, consumer, append_eos=append_eos,
+                                 offset=offset, end=end)
+    else:
+        res = Binarizer.binarize_two(filename, vocab, vocabb, consumer, append_eos=append_eos,
+                                     offset=offset, end=end)
     ds.finalize(dataset_dest_file(args, output_prefix, lang, "idx"))
     return res
 
