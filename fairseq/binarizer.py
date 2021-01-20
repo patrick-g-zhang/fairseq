@@ -34,7 +34,6 @@ class Binarizer:
             f.seek(offset)
             # next(f) breaks f.tell(), hence readline() must be used
             line = safe_readline(f)
-            pdb.set_trace()
             while line:
                 if end > 0 and f.tell() > end:
                     break
@@ -89,6 +88,7 @@ class Binarizer:
                 for bpe_idx, bpe_seq in enumerate(line1.split(" ")):
                     phoneme2bpe.extend(
                         [bpe_idx + 1] * (len(bpe_seq.split("+"))))
+                pdb.set_trace()
                 assert len(phoneme2bpe) == phoneme_ids.size(0)
                 item = {
                     'phoneme_ids': phoneme_ids,
