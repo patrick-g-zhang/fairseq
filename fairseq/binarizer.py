@@ -93,14 +93,13 @@ class Binarizer:
                         bpe_seq.split("+"))
                 if len(phoneme2bpe) != phoneme_ids.size(0):
                     pdb.set_trace()
+                    for i in range(152):
+                        print(line2.split(' ')[i], newphoneme[i])
                 item = {
                     'phoneme_ids': phoneme_ids,
                     'bpe_ids': bpe_ids,
                     'phoneme2bpe': phoneme2bpe
                 }
-
-                for i in range(152):
-                    print(line2.split(' ')[i], newphoneme[i])
 
                 nseq += 1
                 ntok += len(phoneme_ids)
