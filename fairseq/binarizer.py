@@ -87,7 +87,7 @@ class Binarizer:
                 phoneme2bpe = []
                 pdb.set_trace()
 
-                for bpe_idx, bpe_seq in line1.split(" "):
+                for bpe_idx, bpe_seq in enumerate(line1.split(" ")):
                     phoneme2bpe.extend(
                         [bpe_idx + 1] * (len(bpe_seq.split("+"))))
                 assert len(phoneme2bpe) == phoneme_ids.size(0)
