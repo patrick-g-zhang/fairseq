@@ -121,8 +121,17 @@ class MultiprocessingEncoder(object):
             phoneme_bpe_tokens.append('</s>')
             if not sum(map(lambda x: len(x.split("+")),
                            phoneme_bpe_tokens)) == len(rline.split(" ")):
-                print(phoneme_bpe_tokens)
-                print(rline)
+                new_phonemes = []
+                for phoneme in phoneme_bpe_tokens:
+                    new_phonemes.extend(phoneme.split("+"))
+                old_phonemes = rline.split(" ")
+                for ph_idx in range(min(len(new_phonemes), len(old_phonemes))):
+                    print(new_phonemes[ph_idx], old_phonemes[ph_idx])
+
+                print(old_phonemes)
+                print(new_phonemes)
+                print(len(old_phonemes))
+                print(len(new_phonemes))
                 exit(0)
 
             encoded_one_line = " ".join(phoneme_bpe_tokens) + ' $ ' + rline
