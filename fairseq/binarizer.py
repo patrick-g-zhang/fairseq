@@ -84,10 +84,13 @@ class Binarizer:
                     reverse_order=reverse_order,
                 )
                 phoneme2bpe = []
+                newphoneme = []
 
                 for bpe_idx, bpe_seq in enumerate(line1.split(" ")):
                     phoneme2bpe.extend(
                         [bpe_idx + 1] * (len(bpe_seq.split("+"))))
+                    newphoneme.extend(
+                        bpe_seq.split("+"))
                 if len(phoneme2bpe) != phoneme_ids.size(0):
                     pdb.set_trace()
                 item = {
