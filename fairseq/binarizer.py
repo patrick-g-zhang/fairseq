@@ -85,16 +85,19 @@ class Binarizer:
                     reverse_order=reverse_order,
                 )
                 phoneme2bpe = []
-                pdb.set_trace()
 
                 for bpe_idx, bpe_seq in enumerate(line1.split(" ")):
                     phoneme2bpe.extend(
                         [bpe_idx + 1] * (len(bpe_seq.split("+"))))
                 assert len(phoneme2bpe) == phoneme_ids.size(0)
-                pdb.set_trace()
+                item = {
+                    'phoneme_ids': phoneme_ids,
+                    'bpe_ids': bpe_ids,
+                    'phoneme2bpe': phoneme2bpe
+                }
                 nseq += 1
-                ntok += len(ids)
-                consumer(ids)
+                ntok += len(phoneme_ids)
+                consumer(item)
                 line = f.readline()
         return {'nseq': nseq, 'ntok': ntok, }
 
