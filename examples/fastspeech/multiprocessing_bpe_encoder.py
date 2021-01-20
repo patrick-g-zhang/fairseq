@@ -113,6 +113,8 @@ class MultiprocessingEncoder(object):
         enc_lines = []
         for rline in lines:
             rline = rline.strip()
+            # remove repeat "|"
+            rline = re.sub("(\|\s)+", r"\1", rline)
             line = re.sub('<UNK>', '', rline)           # Delete pattern abc
             line = re.sub('<EOS>', '', line)           # Delete pattern abc
             line = line.strip()
@@ -128,11 +130,11 @@ class MultiprocessingEncoder(object):
                 for ph_idx in range(min(len(new_phonemes), len(old_phonemes))):
                     print(new_phonemes[ph_idx], old_phonemes[ph_idx])
 
-                print(old_phonemes)
-                print(new_phonemes)
-                print(len(old_phonemes))
-                print(len(new_phonemes))
-                exit(0)
+                # print(old_phonemes)
+                # print(new_phonemes)
+                # print(len(old_phonemes))
+                # print(len(new_phonemes))
+                # exit(0)
 
             encoded_one_line = " ".join(phoneme_bpe_tokens) + ' $ ' + rline
             enc_lines.append(encoded_one_line)
