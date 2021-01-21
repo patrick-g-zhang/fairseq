@@ -127,12 +127,20 @@ def main(args):
         pdb.set_trace()
         ds = indexed_dataset.make_builder(dataset_dest_file(args, output_prefix, lang, "bin"),
                                           impl=args.dataset_impl, vocab_size=len(vocab))
-        merge_result(
-            Binarizer.binarize(
-                input_file, vocab, lambda t: ds.add_item(t),
-                offset=0, end=offsets[1], append_eos=False
+        if args.two_inputs:
+            merge_result(
+                Binarizer.binarize(
+                    input_file, vocab, lambda t: ds.add_item(t),
+                    offset=0, end=offsets[1], append_eos=False
+                )
             )
-        )
+        else:
+            merge_result(
+                Binarizer.binarize_two(
+                    input_file, vocab, vocabb, lambda t: ds.add_item(t),
+                    offset=0, end=offsets[1], append_eos=False
+                )
+            )
         if num_workers > 1:
             pool.join()
             for worker_id in range(1, num_workers):
