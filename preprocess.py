@@ -117,7 +117,8 @@ def main(args):
                         prefix,
                         lang,
                         offsets[worker_id],
-                        offsets[worker_id + 1]
+                        offsets[worker_id + 1],
+                        vocabb=vocabb,
                     ),
                     callback=merge_result
                 )
