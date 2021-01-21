@@ -109,8 +109,6 @@ def main(args):
             pool = Pool(processes=num_workers - 1)
             for worker_id in range(1, num_workers):
                 prefix = "{}{}".format(output_prefix, worker_id)
-                # binarize(args, input_file, vocab, prefix, lang,
-                # offsets[worker_id], offsets[worker_id + 1], vocabb=vocabb)
                 pool.apply_async(
                     binarize,
                     (
@@ -126,6 +124,7 @@ def main(args):
                 )
             pool.close()
 
+        pdb.set_trace()
         ds = indexed_dataset.make_builder(dataset_dest_file(args, output_prefix, lang, "bin"),
                                           impl=args.dataset_impl, vocab_size=len(vocab))
         merge_result(
