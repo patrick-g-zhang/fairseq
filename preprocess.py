@@ -141,6 +141,7 @@ def main(args):
                     offset=0, end=offsets[1], append_eos=False
                 )
             )
+
         if num_workers > 1:
             pool.join()
             for worker_id in range(1, num_workers):
@@ -328,6 +329,7 @@ def binarize(args, filename, vocab, output_prefix, lang, offset, end, vocabb=Non
     else:
         res = Binarizer.binarize_two(filename, vocab, vocabb, consumer, append_eos=append_eos,
                                      offset=offset, end=end)
+    print(dataset_dest_file(args, output_prefix, lang, "idx"))
     ds.finalize(dataset_dest_file(args, output_prefix, lang, "idx"))
     return res
 
