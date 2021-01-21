@@ -91,10 +91,8 @@ def main(args):
             lang, len(vocab) - 1))
         print("| [{}] BPE Dictionary: {} types".format(lang, len(vocabb) - 1))
         n_seq_tok = [0, 0]
-        replaced = Counter()
 
         def merge_result(worker_result):
-            replaced.update(worker_result["replaced"])
             n_seq_tok[0] += worker_result["nseq"]
             n_seq_tok[1] += worker_result["ntok"]
 
@@ -156,12 +154,11 @@ def main(args):
         ds.finalize(dataset_dest_file(args, output_prefix, lang, "idx"))
 
         print(
-            "| [{}] {}: {} sents, {} tokens, {:.3}% replaced by {}".format(
+            "| [{}] {}: {} sents, {} tokens".format(
                 lang,
                 input_file,
                 n_seq_tok[0],
                 n_seq_tok[1],
-                100 * sum(replaced.values()) / n_seq_tok[1],
                 vocab.unk_word,
             )
         )
