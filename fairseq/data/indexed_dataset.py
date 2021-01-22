@@ -571,7 +571,6 @@ class DictIndexedDataset:
         super().__init__()
         self.path = path
         self.data_file = None
-        pdb.set_trace()
         self.data_offsets = np.load(
             index_file_path(path), allow_pickle=True).item()['offsets']
         self.data_file = open(data_file_path(path), 'rb', buffering=0)
