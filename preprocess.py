@@ -103,7 +103,7 @@ def main(args):
         # !!!! pay attention for my dataset
         offsets = Binarizer.find_offsets(input_file, num_workers)
         pool = None
-        pdb.set_trace()
+
         if num_workers > 1:
             pool = Pool(processes=num_workers - 1)
             for worker_id in range(1, num_workers):
@@ -124,10 +124,9 @@ def main(args):
                 )
             pool.close()
 
-        pdb.set_trace()
         ds = indexed_dataset.make_builder(dataset_dest_file(args, output_prefix, lang, "bin"),
                                           impl=args.dataset_impl, vocab_size=len(vocab))
-        if args.two_inputs:
+        if not args.two_inputs:
             merge_result(
                 Binarizer.binarize(
                     input_file, vocab, lambda t: ds.add_item(t),
