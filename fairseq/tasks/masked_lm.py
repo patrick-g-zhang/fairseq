@@ -19,7 +19,7 @@ from fairseq.data import (
     PadDataset,
     PrependTokenDataset,
     SortDataset,
-    TokenBlockDataset, DictTokenBlockDataset
+    TokenBlockDataset
 )
 from fairseq.tasks import FairseqTask, register_task
 from fairseq.data.encoders.utils import get_whole_word_mask
@@ -134,11 +134,11 @@ class MaskedLMTask(FairseqTask):
 
         # create continuous blocks of tokens
         dataset = TokenBlockDataset(
-                dataset,
-                dataset.sizes,
-                self.args.tokens_per_sample - 1,  # one less for <s>
-                break_mode=self.args.sample_break_mode,
-            )
+            dataset,
+            dataset.sizes,
+            self.args.tokens_per_sample - 1,  # one less for <s>
+            break_mode=self.args.sample_break_mode,
+        )
         pdb.set_trace()
         dataset.__getitem__(1)
         print('| loaded {} blocks from: {}'.format(len(dataset), split_path))
