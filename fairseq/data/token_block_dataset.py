@@ -54,6 +54,7 @@ class TokenBlockDataset(FairseqDataset):
 
         super().__init__()
         self.dataset = dataset
+        self.two_inputs = two_inputs
 
         assert len(dataset) == len(sizes)
         assert len(dataset) > 0
@@ -98,9 +99,9 @@ class TokenBlockDataset(FairseqDataset):
         return self.dataset.attr(attr, start_ds_idx)
 
     def __getitem__(self, index):
-        pdb.set_trace()
         start_ds_idx, start_offset, end_ds_idx = self.block_to_dataset_index[index]
-        if two_inputs:
+        if self.two_inputs:
+            pdb.set_trace()
             phoneme_buffer = []
             bpe_buffer = []
             phoneme2bpe_buffer = []
@@ -111,6 +112,16 @@ class TokenBlockDataset(FairseqDataset):
                 phoneme2bpe_buffer.append(
                     self.dataset[idx]['phoneme2bpe'] + prev_bpe)
                 prev_bpe += self.dataset[0]['bpe_ids'].size(0)
+
+            phoneme_buffer = torch.cat(phoneme_buffer)
+            bpe_buffer = torch.cat(bpe_buffer)
+            phoneme2bpe_buffer = torch.cat(phoneme2bpe_buffer)
+            slice_s, slice_e = self.slice_indices[index]
+            length = slice_e - slice_s
+            s, e = start_offset, start_offset + length
+            assert s == 0
+            assert e == phoneme_buffer.size(0)
+
         else:
 
             buffer = torch.cat(
