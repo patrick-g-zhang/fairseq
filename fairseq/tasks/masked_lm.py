@@ -168,7 +168,7 @@ class MaskedLMTask(FairseqTask):
                 continuous_mask=self.args.continuous_mask,
             )
         else:
-            src_dataset, tgt_dataset = MaskTokensDataset.apply_mask(
+            src_dataset, tgt_dataset = BPEMaskTokensDataset.apply_mask(
                 dataset,
                 self.phoneme_dictionary,
                 self.bpe_dictionary,
