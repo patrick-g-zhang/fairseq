@@ -55,6 +55,7 @@ class TokenBlockDataset(FairseqDataset):
             )
 
         super().__init__()
+        pdb.set_trace()
         self.dataset = dataset
         self.pad = pad
         self.eos = eos
