@@ -61,6 +61,8 @@ def make_dataset(path, impl, fix_lua_indexing=False, dictionary=None):
         return IndexedCachedDataset(path, fix_lua_indexing=fix_lua_indexing)
     elif impl == 'mmap' and MMapIndexedDataset.exists(path):
         return MMapIndexedDataset(path)
+    elif impl == 'dict':
+        return DictIndexedDataset(path)
     return None
 
 
