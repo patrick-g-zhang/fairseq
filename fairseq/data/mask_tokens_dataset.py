@@ -268,7 +268,7 @@ class BPEMaskTokensDataset(BaseWrapperDataset):
                 weights = np.array(self.vocab.count)
             else:
                 weights = np.ones(len(self.vocab))
-            weights[:self.vocab.nspecial] = 0
+            weights[:self.vocab_b.nspecial] = 0
             self.weights = weights / weights.sum()
 
         self.epoch = 0
@@ -310,13 +310,10 @@ class BPEMaskTokensDataset(BaseWrapperDataset):
                 sz, num_mask, replace=False)] = True
             pad_bpe_mask = F.pad(mask, [1, 0])
 
-
             if self.return_masked_tokens:
                 # exit early if we're just returning the masked tokens
                 # (i.e., the targets for masked LM training)
                 # new_bpe_item = np.f
-
-
 
                 new_item = np.full(len(mask), self.pad_idx)
                 new_item[mask] = item[torch.from_numpy(
