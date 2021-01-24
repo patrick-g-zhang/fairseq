@@ -140,6 +140,8 @@ class MaskedLMTask(FairseqTask):
             eos=self.source_dictionary.eos(),
             break_mode=self.args.sample_break_mode,
         )
+        pdb.set_trace()
+        dataset.__getitem__(1)
         print('| loaded {} blocks from: {}'.format(len(dataset), split_path))
 
         # prepend beginning-of-sentence token (<s>, equiv. to [CLS] in BERT)
