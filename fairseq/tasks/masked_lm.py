@@ -111,13 +111,21 @@ class MaskedLMTask(FairseqTask):
         assert len(paths) > 0
         data_path = paths[epoch % len(paths)]
         split_path = os.path.join(data_path, split)
-
-        dataset = data_utils.load_indexed_dataset(
-            split_path,
-            self.source_dictionary,
-            self.args.dataset_impl,
-            combine=combine,
-        )
+        if self.args.two_inputs:
+            dataset = data_utils.load_indexed_dataset(
+                split_path,
+                self.phoneme_dictionary,
+                self.bpe_dictionary,
+                self.args.dataset_impl,
+                combine=combine,
+            )
+        else:
+            dataset = data_utils.load_indexed_dataset(
+                split_path,
+                self.source_dictionary,
+                self.args.dataset_impl,
+                combine=combine,
+            )
 
         if dataset is None:
             raise FileNotFoundError(
