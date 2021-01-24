@@ -64,7 +64,11 @@ class MaskedLMTask(FairseqTask):
 
     def __init__(self, args, dictionary):
         super().__init__(args)
-        self.dictionary = dictionary
+        pdb.set_trace()
+        if args.two_inputs:
+            self.phoneme_dictionary, self.bpe_dictionary = dictionary
+        else:
+            self.dictionary = dictionary
         self.seed = args.seed
 
         # add mask token
@@ -74,12 +78,25 @@ class MaskedLMTask(FairseqTask):
     def setup_task(cls, args, **kwargs):
         paths = args.data.split(':')
         assert len(paths) > 0
+        pdb.set_trace()
         if args.phoneme_dict:
-            dictionary = PhonemeDictionary.load(
-                os.path.join(paths[0], 'dict.txt'))
+            if args.two_inputs:
+                phoneme_dictionary = PhonemeDictionary.load(
+                    os.path.join(paths[0], 'dict.p.txt'))
+                bpe_dictionary = PhonemeDictionary.load(
+                    os.path.join(paths[0], 'dict.b.txt'))
+                print('| phoneme dictionary: {} types'.format(
+                    len(phoneme_dictionary)))
+                print('| bpe dictionary: {} types'.format(len(bpe_dictionary)))
+                dictionary = (phoneme_dictionary, bpe_dictionary)
+            else:
+                dictionary = PhonemeDictionary.load(
+                    os.path.join(paths[0], 'dict.txt'))
+                print('| dictionary: {} types'.format(len(dictionary)))
         else:
             dictionary = Dictionary.load(os.path.join(paths[0], 'dict.txt'))
-        print('| dictionary: {} types'.format(len(dictionary)))
+            print('| dictionary: {} types'.format(len(dictionary)))
+
         return cls(args, dictionary)
 
     def load_dataset(self, split, epoch=0, combine=False, **kwargs):
