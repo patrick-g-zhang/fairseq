@@ -19,7 +19,8 @@ from fairseq.data import (
     PadDataset,
     PrependTokenDataset,
     SortDataset,
-    TokenBlockDataset
+    TokenBlockDataset,
+    BPEMaskTokensDataset
 )
 from fairseq.tasks import FairseqTask, register_task
 from fairseq.data.encoders.utils import get_whole_word_mask
@@ -111,7 +112,6 @@ class MaskedLMTask(FairseqTask):
         assert len(paths) > 0
         data_path = paths[epoch % len(paths)]
         split_path = os.path.join(data_path, split)
-        pdb.set_trace()
         if self.args.two_inputs:
             dataset = data_utils.load_two_indexed_datasets(
                 split_path,
@@ -140,8 +140,6 @@ class MaskedLMTask(FairseqTask):
             break_mode=self.args.sample_break_mode,
             two_inputs=self.args.two_inputs,
         )
-        pdb.set_trace()
-        dataset.__getitem__(1)
         print('| loaded {} blocks from: {}'.format(len(dataset), split_path))
 
         # prepend beginning-of-sentence token (<s>, equiv. to [CLS] in BERT)
@@ -154,19 +152,20 @@ class MaskedLMTask(FairseqTask):
         mask_whole_words = get_whole_word_mask(self.args, self.source_dictionary) \
             if self.args.mask_whole_words else None
 
-        src_dataset, tgt_dataset = MaskTokensDataset.apply_mask(
-            dataset,
-            self.source_dictionary,
-            pad_idx=self.source_dictionary.pad(),
-            mask_idx=self.mask_idx,
-            seed=self.args.seed,
-            mask_prob=self.args.mask_prob,
-            leave_unmasked_prob=self.args.leave_unmasked_prob,
-            random_token_prob=self.args.random_token_prob,
-            freq_weighted_replacement=self.args.freq_weighted_replacement,
-            mask_whole_words=mask_whole_words,
-            continuous_mask=self.args.continuous_mask,
-        )
+        if self.args.two_inputs:
+            src_dataset, tgt_dataset = MaskTokensDataset.apply_mask(
+                dataset,
+                self.source_dictionary,
+                pad_idx=self.source_dictionary.pad(),
+                mask_idx=self.mask_idx,
+                seed=self.args.seed,
+                mask_prob=self.args.mask_prob,
+                leave_unmasked_prob=self.args.leave_unmasked_prob,
+                random_token_prob=self.args.random_token_prob,
+                freq_weighted_replacement=self.args.freq_weighted_replacement,
+                mask_whole_words=mask_whole_words,
+                continuous_mask=self.args.continuous_mask,
+            )
         # pdb.set_trace()
         # src_dataset.__getitem__(1)
         # tgt_dataset.__getitem__(1)
