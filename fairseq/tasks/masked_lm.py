@@ -138,6 +138,7 @@ class MaskedLMTask(FairseqTask):
             dataset.sizes,
             self.args.tokens_per_sample - 1,  # one less for <s>
             break_mode=self.args.sample_break_mode,
+            two_inputs=self.args.two_inputs,
         )
         pdb.set_trace()
         dataset.__getitem__(1)

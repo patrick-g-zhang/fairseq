@@ -556,6 +556,8 @@ class DictIndexedDatasetBuilder(object):
         begin = self.byte_offsets[-1]
         for offset in index.data_offsets[1:]:
             self.byte_offsets.append(begin + offset)
+        for size in index.sizes:
+            self.sizes.append(size)
 
         with open(data_file_path(another_file), 'rb') as f:
             while True:

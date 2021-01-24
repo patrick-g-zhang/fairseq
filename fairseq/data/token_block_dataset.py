@@ -39,6 +39,7 @@ class TokenBlockDataset(FairseqDataset):
         block_size,
         break_mode=None,
         document_sep_len=1,
+        two_inputs=False,
     ):
         try:
             from fairseq.data.token_block_utils_fast import (
@@ -98,7 +99,7 @@ class TokenBlockDataset(FairseqDataset):
         return self.dataset.attr(attr, start_ds_idx)
 
     def __getitem__(self, index):
-        # pdb.set_trace()
+        pdb.set_trace()
         start_ds_idx, start_offset, end_ds_idx = self.block_to_dataset_index[index]
 
         buffer = torch.cat(
