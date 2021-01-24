@@ -133,15 +133,7 @@ class MaskedLMTask(FairseqTask):
                 'Dataset not found: {} ({})'.format(split, split_path))
 
         # create continuous blocks of tokens
-        if self.args.two_inputs:
-            dataset = DictTokenBlockDataset(
-                dataset,
-                dataset.sizes,
-                self.args.tokens_per_sample - 1,  # one less for <s>
-                break_mode=self.args.sample_break_mode,
-            )
-        else:
-            dataset = TokenBlockDataset(
+        dataset = TokenBlockDataset(
                 dataset,
                 dataset.sizes,
                 self.args.tokens_per_sample - 1,  # one less for <s>
