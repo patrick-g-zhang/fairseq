@@ -112,7 +112,6 @@ class TokenBlockDataset(FairseqDataset):
                     torch.IntTensor(self.dataset[idx]['phoneme2bpe']) + prev_bpe)
                 prev_bpe += self.dataset[idx]['bpe_ids'].size(0)
 
-            pdb.set_trace()
             phoneme_buffer = torch.cat(phoneme_buffer)
             bpe_buffer = torch.cat(bpe_buffer)
             phoneme2bpe_buffer = torch.cat(phoneme2bpe_buffer)
@@ -121,7 +120,12 @@ class TokenBlockDataset(FairseqDataset):
             s, e = start_offset, start_offset + length
             assert s == 0
             assert e == phoneme_buffer.size(0)
+            item = {
+                'phoneme': phoneme_buffer,
+                'bpe': bpe_buffer,
+                'phoneme2bpe': phoneme2bpe_buffer,
 
+            }
         else:
 
             buffer = torch.cat(
