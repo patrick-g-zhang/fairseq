@@ -103,6 +103,7 @@ class MaskTokensDataset(BaseWrapperDataset):
     def __getitem__(self, index: int):
         # pdb.set_trace()
         with data_utils.numpy_seed(self.seed, self.epoch, index):
+            pdb.set_trace()
             item = self.dataset[index]
             sz = len(item)
 
@@ -140,9 +141,6 @@ class MaskTokensDataset(BaseWrapperDataset):
             if self.return_masked_tokens:
                 # exit early if we're just returning the masked tokens
                 # (i.e., the targets for masked LM training)
-                if self.mask_whole_words is not None or self.continuous_mask > 1:
-                    mask = np.repeat(mask, word_lens)
-
                 new_item = np.full(len(mask), self.pad_idx)
                 new_item[mask] = item[torch.from_numpy(
                     mask.astype(np.uint8)) == 1]
@@ -235,8 +233,9 @@ class BPEMaskTokensDataset(BaseWrapperDataset):
         self,
         dataset: torch.utils.data.Dataset,
         vocab_p: PhonemeDictionary,
-        vocab: Dictionary,
-        pad_idx: int,
+        vocab_b: Dictionary,
+        phoneme_pad_idx: int,
+        bpe_pad_idx: int,
         phoneme_mask_idx: int,
         bpe_mask_idx: int,
         return_masked_tokens: bool = False,
@@ -245,8 +244,6 @@ class BPEMaskTokensDataset(BaseWrapperDataset):
         leave_unmasked_prob: float = 0.1,
         random_token_prob: float = 0.1,
         freq_weighted_replacement: bool = False,
-        mask_whole_words: torch.Tensor = None,
-        continuous_mask: int = 1,
     ):
         assert 0.0 < mask_prob < 1.0
         assert 0.0 <= random_token_prob <= 1.0
@@ -254,16 +251,17 @@ class BPEMaskTokensDataset(BaseWrapperDataset):
         assert random_token_prob + leave_unmasked_prob <= 1.0
 
         self.dataset = dataset
-        self.vocab = vocab
-        self.pad_idx = pad_idx
-        self.mask_idx = mask_idx
+        self.vocab_p = vocab_p
+        self.vocab_b = vocab_b
+        self.phoneme_pad_idx = phoneme_pad_idx
+        self.bpe_pad_idx = bpe_pad_idx
+        self.phoneme_mask_idx = phoneme_mask_idx
+        self.bpe_mask_idx = bpe_mask_idx
         self.return_masked_tokens = return_masked_tokens
         self.seed = seed
         self.mask_prob = mask_prob
         self.leave_unmasked_prob = leave_unmasked_prob
         self.random_token_prob = random_token_prob
-        self.mask_whole_words = mask_whole_words
-        self.continuous_mask = continuous_mask
 
         if random_token_prob > 0.0:
             if freq_weighted_replacement:
@@ -282,30 +280,23 @@ class BPEMaskTokensDataset(BaseWrapperDataset):
     def __getitem__(self, index: int):
         # pdb.set_trace()
         with data_utils.numpy_seed(self.seed, self.epoch, index):
+            pdb.set_trace()
             item = self.dataset[index]
-            sz = len(item)
+            phoneme = item['phoneme']
+            bpe = item['bpe']
+            phoneme2bpe = item['phoneme2bpe']
 
-            assert self.mask_idx not in item, \
+            sz = len(bpe)
+
+            assert self.phoneme_mask_idx not in phoneme, \
                 'Dataset contains mask_idx (={}), this is not expected!'.format(
-                    self.mask_idx,
+                    self.phoneme_mask_idx,
                 )
 
-            if self.mask_whole_words is not None:
-                word_begins_mask = self.mask_whole_words.gather(0, item)
-                word_begins_idx = word_begins_mask.nonzero().view(-1)
-                sz = len(word_begins_idx)
-                words = np.split(word_begins_mask, word_begins_idx)[1:]
-                assert len(words) == sz
-                word_lens = list(map(len, words))
-
-            if self.continuous_mask > 1:
-                num_words = sz // self.continuous_mask
-                last_num = sz % self.continuous_mask
-                word_lens = [self.continuous_mask] * num_words
-                sz = num_words
-                if last_num != 0:
-                    word_lens.append(last_num)
-                    sz += 1
+            assert self.bpe_mask_idx not in bpe, \
+                'Dataset contains mask_idx (={}), this is not expected!'.format(
+                    self.bpe_mask_idx,
+                )
 
             # decide elements to mask
             mask = np.full(sz, False)
@@ -313,14 +304,19 @@ class BPEMaskTokensDataset(BaseWrapperDataset):
                 # add a random number for probabilistic rounding
                 self.mask_prob * sz + np.random.rand()
             )
+            # mask for bpe
+            pdb.set_trace()
             mask[np.random.choice(
                 sz, num_mask, replace=False)] = True
+            pad_bpe_mask = F.pad(mask, [1, 0])
+
 
             if self.return_masked_tokens:
                 # exit early if we're just returning the masked tokens
                 # (i.e., the targets for masked LM training)
-                if self.mask_whole_words is not None or self.continuous_mask > 1:
-                    mask = np.repeat(mask, word_lens)
+                # new_bpe_item = np.f
+
+
 
                 new_item = np.full(len(mask), self.pad_idx)
                 new_item[mask] = item[torch.from_numpy(
@@ -349,18 +345,12 @@ class BPEMaskTokensDataset(BaseWrapperDataset):
             if unmask is not None:
                 mask = mask ^ unmask
 
-            if self.mask_whole_words is not None or self.continuous_mask > 1:
-                mask = np.repeat(mask, word_lens)
+            new_item = np.copy(bpe)
+            new_item[mask] = self.bpe_mask_idx
 
-            new_item = np.copy(item)
-            new_item[mask] = self.mask_idx
             if rand_mask is not None:
                 num_rand = rand_mask.sum()
                 if num_rand > 0:
-                    if self.mask_whole_words is not None or self.continuous_mask > 1:
-                        rand_mask = np.repeat(rand_mask, word_lens)
-                        num_rand = rand_mask.sum()
-
                     new_item[rand_mask] = np.random.choice(
                         len(self.vocab),
                         num_rand,

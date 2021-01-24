@@ -152,7 +152,8 @@ class MaskedLMTask(FairseqTask):
         mask_whole_words = get_whole_word_mask(self.args, self.source_dictionary) \
             if self.args.mask_whole_words else None
 
-        if self.args.two_inputs:
+        pdb.set_trace()
+        if not self.args.two_inputs:
             src_dataset, tgt_dataset = MaskTokensDataset.apply_mask(
                 dataset,
                 self.source_dictionary,
@@ -166,9 +167,25 @@ class MaskedLMTask(FairseqTask):
                 mask_whole_words=mask_whole_words,
                 continuous_mask=self.args.continuous_mask,
             )
+        else:
+            src_dataset, tgt_dataset = MaskTokensDataset.apply_mask(
+                dataset,
+                self.phoneme_dictionary,
+                self.bpe_dictionary,
+                phoneme_pad_idx=self.phoneme_dictionary.pad(),
+                bpe_pad_idx=self.bpe_dictionary.pad(),
+                phoneme_mask_idx=self.phoneme_mask_idx,
+                bpe_mask_idx=self.bpe_mask_idx,
+                seed=self.args.seed,
+                mask_prob=self.args.mask_prob,
+                leave_unmasked_prob=self.args.leave_unmasked_prob,
+                random_token_prob=self.args.random_token_prob,
+                freq_weighted_replacement=self.args.freq_weighted_replacement,
+            )
+
         # pdb.set_trace()
-        # src_dataset.__getitem__(1)
-        # tgt_dataset.__getitem__(1)
+        tgt_dataset.__getitem__(1)
+        src_dataset.__getitem__(1)
 
         with data_utils.numpy_seed(self.args.seed + epoch):
             shuffle = np.random.permutation(len(src_dataset))
