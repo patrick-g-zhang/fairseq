@@ -73,8 +73,6 @@ def load_two_indexed_datasets(path, dictionary_p, dictionary_b, dataset_impl=Non
         dataset = indexed_dataset.make_dataset(
             path_k,
             impl=dataset_impl_k or default,
-            fix_lua_indexing=True,
-            dictionary=dictionary,
         )
         if dataset is None:
             break
@@ -106,7 +104,6 @@ def load_indexed_dataset(path, dictionary, dataset_impl=None, combine=False, def
     """
     from fairseq.data.concat_dataset import ConcatDataset
     import fairseq.data.indexed_dataset as indexed_dataset
-    pdb.set_trace()
     datasets = []
     for k in itertools.count():
         path_k = path + (str(k) if k > 0 else '')

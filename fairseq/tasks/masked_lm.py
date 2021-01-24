@@ -112,7 +112,7 @@ class MaskedLMTask(FairseqTask):
         data_path = paths[epoch % len(paths)]
         split_path = os.path.join(data_path, split)
         if self.args.two_inputs:
-            dataset = data_utils.load_indexed_dataset(
+            dataset = data_utils.load_two_indexed_datasets(
                 split_path,
                 self.phoneme_dictionary,
                 self.bpe_dictionary,
