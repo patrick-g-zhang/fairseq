@@ -80,19 +80,20 @@ class MaskedLMTask(FairseqTask):
         assert len(paths) > 0
         pdb.set_trace()
         if args.phoneme_dict:
-            if args.two_inputs:
-                phoneme_dictionary = PhonemeDictionary.load(
-                    os.path.join(paths[0], 'dict.p.txt'))
-                bpe_dictionary = PhonemeDictionary.load(
-                    os.path.join(paths[0], 'dict.b.txt'))
-                print('| phoneme dictionary: {} types'.format(
-                    len(phoneme_dictionary)))
-                print('| bpe dictionary: {} types'.format(len(bpe_dictionary)))
-                dictionary = (phoneme_dictionary, bpe_dictionary)
-            else:
-                dictionary = PhonemeDictionary.load(
-                    os.path.join(paths[0], 'dict.txt'))
-                print('| dictionary: {} types'.format(len(dictionary)))
+            dictionary = PhonemeDictionary.load(
+                os.path.join(paths[0], 'dict.txt'))
+            print('| dictionary: {} types'.format(len(dictionary)))
+
+        elif args.two_inputs:
+            phoneme_dictionary = PhonemeDictionary.load(
+                os.path.join(paths[0], 'dict.p.txt'))
+            bpe_dictionary = PhonemeDictionary.load(
+                os.path.join(paths[0], 'dict.b.txt'))
+            print('| phoneme dictionary: {} types'.format(
+                len(phoneme_dictionary)))
+            print('| bpe dictionary: {} types'.format(len(bpe_dictionary)))
+            dictionary = (phoneme_dictionary, bpe_dictionary)
+
         else:
             dictionary = Dictionary.load(os.path.join(paths[0], 'dict.txt'))
             print('| dictionary: {} types'.format(len(dictionary)))
