@@ -280,7 +280,6 @@ class BPEMaskTokensDataset(BaseWrapperDataset):
     def __getitem__(self, index: int):
         # pdb.set_trace()
         with data_utils.numpy_seed(self.seed, self.epoch, index):
-            pdb.set_trace()
             item = self.dataset[index]
             phoneme = item['phoneme']
             bpe = item['bpe'].numpy()
@@ -306,9 +305,10 @@ class BPEMaskTokensDataset(BaseWrapperDataset):
             )
             # mask for bpe
             pdb.set_trace()
-            non_special_indices = np.argwhere(sz > 4)
-            mask[non_special_indices[np.random.choice(
-                len(non_special_indices), num_mask, replace=False)]] = True
+            non_special_indices = np.argwhere(bpe > 4)
+            selected_indices = non_special_indices[np.random.choice(
+                len(non_special_indices), num_mask, replace=False)]
+            mask[selected_indices] = True
             pad_bpe_mask = F.pad(mask, [1, 0])
 
             if self.return_masked_tokens:
