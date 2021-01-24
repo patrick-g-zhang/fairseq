@@ -265,9 +265,9 @@ class BPEMaskTokensDataset(BaseWrapperDataset):
 
         if random_token_prob > 0.0:
             if freq_weighted_replacement:
-                weights = np.array(self.vocab.count)
+                weights = np.array(self.vocab_b.count)
             else:
-                weights = np.ones(len(self.vocab))
+                weights = np.ones(len(self.vocab_b))
             weights[:self.vocab_b.nspecial] = 0
             self.weights = weights / weights.sum()
 
