@@ -541,9 +541,11 @@ class DictIndexedDatasetBuilder(object):
     def __init__(self, out_file):
         self._data_file = open(out_file, 'wb')
         self.byte_offsets = [0]
+        self.sizes = []
 
     def add_item(self, item):
         s = pickle.dumps(item)
+        self.sizes.append(item['phoneme_ids'].size(0))
         bytes = self._data_file.write(s)
         self.byte_offsets.append(self.byte_offsets[-1] + bytes)
 
@@ -565,7 +567,8 @@ class DictIndexedDatasetBuilder(object):
 
     def finalize(self, index_file):
         self._data_file.close()
-        np.save(open(index_file, 'wb'), {'offsets': self.byte_offsets})
+        np.save(open(index_file, 'wb'), {
+                'offsets': self.byte_offsets, 'sizes': self.sizes})
 
 
 class DictIndexedDataset:
@@ -575,6 +578,8 @@ class DictIndexedDataset:
         self.data_file = None
         self.data_offsets = np.load(
             index_file_path(path), allow_pickle=True).item()['offsets']
+        self._sizes = np.load(index_file_path(
+            path), allow_pickle=True).item()['sizes']
         self.data_file = open(data_file_path(path), 'rb', buffering=0)
 
     def check_index(self, i):
@@ -596,3 +601,7 @@ class DictIndexedDataset:
 
     def __len__(self):
         return len(self.data_offsets) - 1
+
+    @property
+    def sizes(self):
+        return self._sizes

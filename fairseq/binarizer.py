@@ -68,7 +68,7 @@ class Binarizer:
                 line1, line2 = line.split('$')
                 line1 = line1.strip()  # bpe sequence
                 line2 = line2.strip()  # phoneme sequence
-                pdb.set_trace()
+                # pdb.set_trace()
                 phoneme_ids = dictp.encode_line(
                     line=line2,
                     line_tokenizer=tokenize,
