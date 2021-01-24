@@ -279,9 +279,6 @@ def add_dataset_args(parser, train=False, gen=False):
     parser.add_argument('--dataset-impl', metavar='FORMAT',
                         choices=get_available_dataset_impl(),
                         help='output dataset implementation')
-    parser.add_argument('--dataset-impl', metavar='FORMAT',
-                        choices=get_available_dataset_impl(),
-                        help='output dataset implementation')
     group.add_argument("--two-inputs", action="store_true",
                        help="two inputs")
     if train:
