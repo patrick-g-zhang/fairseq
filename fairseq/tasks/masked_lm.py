@@ -64,21 +64,22 @@ class MaskedLMTask(FairseqTask):
 
     def __init__(self, args, dictionary):
         super().__init__(args)
-        pdb.set_trace()
         if args.two_inputs:
             self.phoneme_dictionary, self.bpe_dictionary = dictionary
+            self.phoneme_mask_idx = self.phoneme_dictionary.add_symbol(
+                '<mask>')
+            self.bpe_mask_idx = self.bpe_dictionary.add_symbol('<mask>')
         else:
             self.dictionary = dictionary
+            self.mask_idx = dictionary.add_symbol('<mask>')
         self.seed = args.seed
 
         # add mask token
-        self.mask_idx = dictionary.add_symbol('<mask>')
 
     @classmethod
     def setup_task(cls, args, **kwargs):
         paths = args.data.split(':')
         assert len(paths) > 0
-        pdb.set_trace()
         if args.phoneme_dict:
             dictionary = PhonemeDictionary.load(
                 os.path.join(paths[0], 'dict.txt'))
