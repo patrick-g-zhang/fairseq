@@ -19,7 +19,7 @@ from fairseq.data import (
     PadDataset,
     PrependTokenDataset,
     SortDataset,
-    TokenBlockDataset,
+    TokenBlockDataset, DictTokenBlockDataset
 )
 from fairseq.tasks import FairseqTask, register_task
 from fairseq.data.encoders.utils import get_whole_word_mask
@@ -111,6 +111,7 @@ class MaskedLMTask(FairseqTask):
         assert len(paths) > 0
         data_path = paths[epoch % len(paths)]
         split_path = os.path.join(data_path, split)
+        pdb.set_trace()
         if self.args.two_inputs:
             dataset = data_utils.load_two_indexed_datasets(
                 split_path,
@@ -132,14 +133,20 @@ class MaskedLMTask(FairseqTask):
                 'Dataset not found: {} ({})'.format(split, split_path))
 
         # create continuous blocks of tokens
-        dataset = TokenBlockDataset(
-            dataset,
-            dataset.sizes,
-            self.args.tokens_per_sample - 1,  # one less for <s>
-            pad=self.source_dictionary.pad(),
-            eos=self.source_dictionary.eos(),
-            break_mode=self.args.sample_break_mode,
-        )
+        if self.args.two_inputs:
+            dataset = DictTokenBlockDataset(
+                dataset,
+                dataset.sizes,
+                self.args.tokens_per_sample - 1,  # one less for <s>
+                break_mode=self.args.sample_break_mode,
+            )
+        else:
+            dataset = TokenBlockDataset(
+                dataset,
+                dataset.sizes,
+                self.args.tokens_per_sample - 1,  # one less for <s>
+                break_mode=self.args.sample_break_mode,
+            )
         pdb.set_trace()
         dataset.__getitem__(1)
         print('| loaded {} blocks from: {}'.format(len(dataset), split_path))
