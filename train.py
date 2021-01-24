@@ -45,7 +45,7 @@ def main(args, init_distributed=False):
     task = tasks.setup_task(args)
 
     # Load valid dataset (we load training data below, based on the latest checkpoint)
-    # pdb.set_trace()
+    pdb.set_trace()
     for valid_sub_split in args.valid_subset.split(','):
         task.load_dataset(valid_sub_split, combine=False, epoch=0)
 
