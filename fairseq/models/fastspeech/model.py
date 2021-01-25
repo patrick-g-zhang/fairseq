@@ -1085,7 +1085,6 @@ class FastSpeech2Encoder(FairseqDecoder):
     def extract_features(self, src_tokens, **unused):
 
         if self.args.two_inputs:
-            pdb.set_trace()
             phoneme_input = src_tokens['phoneme']
             bpe_input = src_tokens['bpe']
             phoneme2bpe = src_tokens['phoneme2bpe']
@@ -1094,9 +1093,11 @@ class FastSpeech2Encoder(FairseqDecoder):
                 bpe=bpe_input,
                 phoneme2bpe=phoneme2bpe
                 )
+            src_tokens = src_tokens['phoneme']
         else:
             encoder_outputs = self.encoder(
                     src_tokens)
+        pdb.set_trace()
         encoder_outputs = encoder_outputs['encoder_out']  # [T, B, C]
         src_nonpadding = (src_tokens > 0).type(encoder_outputs.dtype).permute(1, 0)[:, :, None]
         encoder_outputs = encoder_outputs * src_nonpadding  # [T, B, C]
@@ -1342,7 +1343,6 @@ class TransformerEncoder(nn.Module):
     def forward_embedding(self, src_tokens, bpe=None, phoneme2bpe=None):
         # embed tokens and positions
         embed = self.embed_scale * self.embed_tokens(src_tokens)
-        pdb.set_trace()
         if self.two_inputs:
             bpe_embed = self.embed_scale * self.bpe_embed_tokens(bpe) # B T H
             bpe_embed = F.pad(bpe_embed, [0, 0, 1, 0, 0, 0])
@@ -1372,7 +1372,6 @@ class TransformerEncoder(nn.Module):
             'attn_w': []
         }
         """
-        pdb.set_trace()
         src_tokens = src_tokens.long()
         bpe = bpe.long()
         x, encoder_embedding = self.forward_embedding(src_tokens, bpe, phoneme2bpe)
