@@ -1076,6 +1076,7 @@ class FastSpeech2Encoder(FairseqDecoder):
                 - a dictionary of additional data, where 'inner_states'
                   is a list of hidden states.
         """
+        pdb.set_trace()
         x = self.extract_features(
             src_tokens)
         if not features_only:
