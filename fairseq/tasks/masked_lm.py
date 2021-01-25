@@ -114,7 +114,6 @@ class MaskedLMTask(FairseqTask):
         assert len(paths) > 0
         data_path = paths[epoch % len(paths)]
         split_path = os.path.join(data_path, split)
-        pdb.set_trace()
         if self.args.two_inputs:
             dataset = data_utils.load_two_indexed_datasets(
                 split_path,
@@ -185,6 +184,7 @@ class MaskedLMTask(FairseqTask):
                 freq_weighted_replacement=self.args.freq_weighted_replacement,
             )
 
+        pdb.set_trace()
         with data_utils.numpy_seed(self.args.seed + epoch):
             shuffle = np.random.permutation(len(src_dataset))
 
