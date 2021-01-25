@@ -49,7 +49,6 @@ def main(args, init_distributed=False):
     for valid_sub_split in args.valid_subset.split(','):
         task.load_dataset(valid_sub_split, combine=False, epoch=0)
 
-    pdb.set_trace()
     # Build model and criterion
     model = task.build_model(args)
     criterion = task.build_criterion(args)
@@ -71,6 +70,7 @@ def main(args, init_distributed=False):
 
     # Load the latest checkpoint if one is available and restore the
     # corresponding train iterator
+    pdb.set_trace()
     extra_state, epoch_itr = checkpoint_utils.load_checkpoint(args, trainer)
 
     # Train until the learning rate gets too small
