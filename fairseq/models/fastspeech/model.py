@@ -1347,6 +1347,7 @@ class TransformerEncoder(nn.Module):
             bpe_embed = self.embed_scale * self.bpe_embed_tokens(bpe) # B T H
             bpe_embed = F.pad(bpe_embed, [0, 0, 1, 0, 0, 0])
 
+            phoneme2bpe = phoneme2bpe[..., None].repeat([1, 1, self.hidden_size]).contiguous()
             bpe_embed = torch.gather(
             bpe_embed, 1, phoneme2bpe.long())  # [B, T, H]
 
