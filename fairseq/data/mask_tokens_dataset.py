@@ -311,7 +311,7 @@ class BPEMaskTokensDataset(BaseWrapperDataset):
             pad_bpe_mask = torch.nn.functional.pad(torch.Tensor(mask), [1, 0])
             pdb.set_trace()
             phoneme_mask = torch.gather(
-                pad_bpe_mask, 0, phoneme2bpe)
+                pad_bpe_mask, 0, phoneme2bpe.long())
 
             if self.return_masked_tokens:
                 # exit early if we're just returning the masked tokens
