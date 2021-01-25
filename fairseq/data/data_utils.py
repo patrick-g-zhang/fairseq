@@ -59,7 +59,6 @@ def load_two_indexed_datasets(path, dictionary_p, dictionary_b, dataset_impl=Non
             combine 'data-bin/train', 'data-bin/train1', ... and return a
             single ConcatDataset instance.
     """
-    from fairseq.data.concat_dataset import ConcatDataset
     import fairseq.data.indexed_dataset as indexed_dataset
     path_k = path
 
