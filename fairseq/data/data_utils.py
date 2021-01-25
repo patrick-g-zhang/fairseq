@@ -61,31 +61,14 @@ def load_two_indexed_datasets(path, dictionary_p, dictionary_b, dataset_impl=Non
     """
     from fairseq.data.concat_dataset import ConcatDataset
     import fairseq.data.indexed_dataset as indexed_dataset
-    datasets = []
-    for k in itertools.count():
-        pdb.set_trace()
-        path_k = path + (str(k) if k > 0 else '')
+    path_k = path
 
-        dataset_impl_k = dataset_impl
-        if dataset_impl_k is None:
-            dataset_impl_k = indexed_dataset.infer_dataset_impl(path_k)
-
-        dataset = indexed_dataset.make_dataset(
-            path_k,
-            impl=dataset_impl_k or default,
-        )
-        if dataset is None:
-            break
-        print('| loaded {} examples from: {}'.format(len(dataset), path_k))
-        datasets.append(dataset)
-        if not combine:
-            break
-    if len(datasets) == 0:
-        return None
-    elif len(datasets) == 1:
-        return datasets[0]
-    else:
-        return ConcatDataset(datasets)
+    dataset = indexed_dataset.make_dataset(
+        path_k,
+        impl=dataset_impl or default,
+    )
+    print('| loaded {} examples from: {}'.format(len(dataset), path_k))
+    return dataset
 
 
 def load_indexed_dataset(path, dictionary, dataset_impl=None, combine=False, default='cached'):
