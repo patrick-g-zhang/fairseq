@@ -1372,6 +1372,8 @@ class TransformerEncoder(nn.Module):
         }
         """
         pdb.set_trace()
+        src_tokens = src_tokens.long()
+        bpe = bpe.long()
         x, encoder_embedding = self.forward_embedding(src_tokens, bpe, phoneme2bpe)
 
         # B x T x C -> T x B x C
