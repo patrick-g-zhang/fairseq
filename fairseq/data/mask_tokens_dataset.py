@@ -312,7 +312,7 @@ class BPEMaskTokensDataset(BaseWrapperDataset):
                 torch.BoolTensor(mask), [True, False])
             phoneme_mask = torch.gather(
                 pad_bpe_mask, 0, phoneme2bpe.long()).numpy()
-            pdb.set_trace()
+
             if self.return_masked_tokens:
                 # exit early if we're just returning the masked tokens
                 # (i.e., the targets for masked LM training)
@@ -351,16 +351,29 @@ class BPEMaskTokensDataset(BaseWrapperDataset):
             if unmask is not None:
                 mask = mask ^ unmask
 
-            new_item = np.copy(bpe)
-            new_item[mask] = self.bpe_mask_idx
+            pad_bpe_mask = torch.nn.functional.pad(
+                torch.BoolTensor(mask), [True, False])
+            phoneme_mask = torch.gather(
+                pad_bpe_mask, 0, phoneme2bpe.long()).numpy()
 
-            if rand_mask is not None:
-                num_rand = rand_mask.sum()
-                if num_rand > 0:
-                    new_item[rand_mask] = np.random.choice(
-                        len(self.vocab),
-                        num_rand,
-                        p=self.weights,
-                    )
+            bpe = np.copy(bpe)
+            bpe[mask] = self.bpe_mask_idx
+            phoneme[phoneme_mask] = self.phoneme_mask_idx
 
-            return torch.from_numpy(new_item)
+            new_item = {
+
+                'bpe': torch.from_numpy(bpe),
+                'phoneme': torch.from_numpy(phoneme),
+                'phoneme2bpe': phoneme2bpe,
+            }
+
+            # if rand_mask is not None:
+            #     num_rand = rand_mask.sum()
+            #     if num_rand > 0:
+            #         new_item[rand_mask] = np.random.choice(
+            #             len(self.vocab),
+            #             num_rand,
+            #             p=self.weights,
+            #         )
+
+            return new_item
