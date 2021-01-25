@@ -20,10 +20,10 @@ class PadDataset(BaseWrapperDataset):
 
 
 class DictPadDataset(BaseWrapperDataset):
-    def __init__(self, dataset, phoneme_pad_idx, bpe_pad_idx, left_pad):
+    def __init__(self, dataset, pad_idx, left_pad):
         super().__init__(dataset)
-        self.phoneme_pad_idx = phoneme_pad_idx
-        self.bpe_pad_idx = phoneme_pad_idx
+        self.phoneme_pad_idx = pad_idx
+        self.bpe_pad_idx = pad_idx
         self.left_pad = left_pad
 
     def collater(self, samples):
