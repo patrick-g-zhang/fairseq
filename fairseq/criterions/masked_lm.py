@@ -30,6 +30,7 @@ class MaskedLmLoss(FairseqCriterion):
         3) logging outputs to display while training
         """
         # compute MLM loss
+        pdb.set_trace()
         masked_tokens = sample['target'].ne(self.padding_idx)
         sample_size = masked_tokens.int().sum().item()
 

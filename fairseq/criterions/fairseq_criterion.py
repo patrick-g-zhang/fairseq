@@ -12,7 +12,11 @@ class FairseqCriterion(_Loss):
         super().__init__()
         self.args = args
         self.task = task
-        self.padding_idx = task.target_dictionary.pad() if task.target_dictionary is not None else -100
+        if args.two_inputs:
+            self.padding_idx = task.phoneme_dictionary.pad()
+        else:
+            self.padding_idx = task.target_dictionary.pad(
+            ) if task.target_dictionary is not None else -100
 
     @staticmethod
     def add_args(parser):
