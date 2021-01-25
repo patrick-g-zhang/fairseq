@@ -288,8 +288,8 @@ class BPEMaskTokensDataset(BaseWrapperDataset):
             sz = len(bpe)
 
             assert self.phoneme_mask_idx not in phoneme, \
-                'Dataset contains mask_idx (={}), this is not expected!'.format(
-                    self.phoneme_mask_idx,
+                'Dataset contains mask_idx (={}), this is not expected!{}'.format(
+                    self.phoneme_mask_idx, phoneme
                 )
 
             assert self.bpe_mask_idx not in bpe, \
