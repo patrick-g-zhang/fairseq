@@ -63,6 +63,7 @@ def load_two_indexed_datasets(path, dictionary_p, dictionary_b, dataset_impl=Non
     import fairseq.data.indexed_dataset as indexed_dataset
     datasets = []
     for k in itertools.count():
+        pdb.set_trace()
         path_k = path + (str(k) if k > 0 else '')
 
         dataset_impl_k = dataset_impl
