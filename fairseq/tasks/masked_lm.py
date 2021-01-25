@@ -15,8 +15,10 @@ from fairseq.data import (
     MaskTokensDataset,
     NestedDictionaryDataset,
     NumelDataset,
+    DictNumelDataset,
     NumSamplesDataset,
     PadDataset,
+    DictPadDataset,
     PrependTokenDataset,
     SortDataset,
     TokenBlockDataset,
@@ -182,40 +184,65 @@ class MaskedLMTask(FairseqTask):
                 freq_weighted_replacement=self.args.freq_weighted_replacement,
             )
 
-        pdb.set_trace()
-        tgt_dataset.__getitem__(1)
-        src_dataset.__getitem__(1)
-
         with data_utils.numpy_seed(self.args.seed + epoch):
             shuffle = np.random.permutation(len(src_dataset))
 
-        self.datasets[split] = SortDataset(
-            NestedDictionaryDataset(
-                {
-                    'id': IdDataset(),
-                    'net_input': {
-                        'src_tokens': PadDataset(
-                            src_dataset,
+        if not self.args.two_inputs:
+            self.datasets[split] = SortDataset(
+                NestedDictionaryDataset(
+                    {
+                        'id': IdDataset(),
+                        'net_input': {
+                            'src_tokens': PadDataset(
+                                src_dataset,
+                                pad_idx=self.source_dictionary.pad(),
+                                left_pad=False,
+                            ),
+                            'src_lengths': NumelDataset(src_dataset, reduce=False),
+                        },
+                        'target': PadDataset(
+                            tgt_dataset,
                             pad_idx=self.source_dictionary.pad(),
                             left_pad=False,
                         ),
-                        'src_lengths': NumelDataset(src_dataset, reduce=False),
+                        'nsentences': NumSamplesDataset(),
+                        'ntokens': NumelDataset(src_dataset, reduce=True),
                     },
-                    'target': PadDataset(
-                        tgt_dataset,
-                        pad_idx=self.source_dictionary.pad(),
-                        left_pad=False,
-                    ),
-                    'nsentences': NumSamplesDataset(),
-                    'ntokens': NumelDataset(src_dataset, reduce=True),
-                },
-                sizes=[src_dataset.sizes],
-            ),
-            sort_order=[
-                shuffle,
-                src_dataset.sizes,
-            ],
-        )
+                    sizes=[src_dataset.sizes],
+                ),
+                sort_order=[
+                    shuffle,
+                    src_dataset.sizes,
+                ],
+            )
+        else:
+            self.datasets[split] = SortDataset(
+                NestedDictionaryDataset(
+                    {
+                        'id': IdDataset(),
+                        'net_input': {
+                            'src_tokens': DictPadDataset(
+                                src_dataset,
+                                pad_idx=self.phoneme_dictionary.pad(),
+                                left_pad=False,
+                            ),
+                            'src_lengths': DictNumelDataset(src_dataset, reduce=False),
+                        },
+                        'target': DictPadDataset(
+                            tgt_dataset,
+                            pad_idx=self.phoneme_dictionary.pad(),
+                            left_pad=False,
+                        ),
+                        'nsentences': NumSamplesDataset(),
+                        'ntokens': DictNumelDataset(src_dataset, reduce=True),
+                    },
+                    sizes=[src_dataset.sizes],
+                ),
+                sort_order=[
+                    shuffle,
+                    src_dataset.sizes,
+                ],
+            )
 
     def build_dataset_for_inference(self, src_tokens, src_lengths, sort=True):
         src_dataset = PadDataset(

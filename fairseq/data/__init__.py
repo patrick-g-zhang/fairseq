@@ -26,10 +26,10 @@ from .mask_tokens_dataset import MaskTokensDataset, BPEMaskTokensDataset
 from .monolingual_dataset import MonolingualDataset
 from .nested_dictionary_dataset import NestedDictionaryDataset
 from .noising import NoisingDataset
-from .numel_dataset import NumelDataset
+from .numel_dataset import NumelDataset, DictNumelDataset
 from .num_samples_dataset import NumSamplesDataset
 from .offset_tokens_dataset import OffsetTokensDataset
-from .pad_dataset import LeftPadDataset, PadDataset, RightPadDataset
+from .pad_dataset import LeftPadDataset, PadDataset, DictPadDataset, RightPadDataset
 from .prepend_dataset import PrependDataset
 from .prepend_token_dataset import PrependTokenDataset
 from .raw_label_dataset import RawLabelDataset
@@ -83,9 +83,11 @@ __all__ = [
     'NestedDictionaryDataset',
     'NoisingDataset',
     'NumelDataset',
+    'DictNumelDataset',
     'NumSamplesDataset',
     'OffsetTokensDataset',
     'PadDataset',
+    'DictPadDataset',
     'PrependDataset',
     'PrependTokenDataset',
     'ReplaceDataset',

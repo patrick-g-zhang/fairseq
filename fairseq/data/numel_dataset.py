@@ -30,3 +30,23 @@ class NumelDataset(BaseWrapperDataset):
             return sum(samples)
         else:
             return torch.tensor(samples)
+
+
+class DictNumelDataset(BaseWrapperDataset):
+
+    def __init__(self, dataset, reduce=False):
+        super().__init__(dataset)
+        self.reduce = reduce
+
+    def __getitem__(self, index):
+        item = self.dataset[index]
+        return torch.numel(item['phoneme'])
+
+    def __len__(self):
+        return len(self.dataset)
+
+    def collater(self, samples):
+        if self.reduce:
+            return sum(samples)
+        else:
+            return torch.tensor(samples)
