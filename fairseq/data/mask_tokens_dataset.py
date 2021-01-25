@@ -281,7 +281,7 @@ class BPEMaskTokensDataset(BaseWrapperDataset):
         # pdb.set_trace()
         with data_utils.numpy_seed(self.seed, self.epoch, index):
             item = self.dataset[index]
-            phoneme = item['phoneme']
+            phoneme = item['phoneme'].numpy()
             bpe = item['bpe'].numpy()
             phoneme2bpe = item['phoneme2bpe']
 
@@ -311,17 +311,23 @@ class BPEMaskTokensDataset(BaseWrapperDataset):
             pad_bpe_mask = torch.nn.functional.pad(torch.Tensor(mask), [1, 0])
             pdb.set_trace()
             phoneme_mask = torch.gather(
-                pad_bpe_mask, 0, phoneme2bpe.long())
+                pad_bpe_mask, 0, phoneme2bpe.long()).numpy()
 
             if self.return_masked_tokens:
                 # exit early if we're just returning the masked tokens
                 # (i.e., the targets for masked LM training)
                 # new_bpe_item = np.f
 
-                new_item = np.full(len(mask), self.bpe_pad_idx)
-                new_item[mask] = item[torch.from_numpy(
+                bpe_target = np.full(len(mask), self.bpe_pad_idx)
+                bpe_target[mask] = bpe[torch.from_numpy(
                     mask.astype(np.uint8)) == 1]
-                return torch.from_numpy(new_item)
+                phoneme_target = np.full(
+                    len(phoneme_mask), self.phoneme_pad_idx)
+                phoneme_target[phoneme_mask] = phoneme[torch.from_numpy(
+                    phoneme_mask.astype(np.uint8)) == 1]
+                new_item = {'bpe_target': torch.from_numpy(bpe_target),
+                            'phoneme_target': torch.from_numpy(phoneme_target)}
+                return new_item
 
             # decide unmasking and random replacement
             rand_or_unmask_prob = self.random_token_prob + self.leave_unmasked_prob
