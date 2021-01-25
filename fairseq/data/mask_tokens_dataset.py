@@ -308,11 +308,11 @@ class BPEMaskTokensDataset(BaseWrapperDataset):
             selected_indices = non_special_indices[np.random.choice(
                 len(non_special_indices), num_mask, replace=False)]
             mask[selected_indices] = True
-            pad_bpe_mask = torch.nn.functional.pad(torch.Tensor(mask), [1, 0])
-            pdb.set_trace()
+            pad_bpe_mask = torch.nn.functional.pad(
+                torch.BoolTensor(mask), [True, False])
             phoneme_mask = torch.gather(
                 pad_bpe_mask, 0, phoneme2bpe.long()).numpy()
-
+            pdb.set_trace()
             if self.return_masked_tokens:
                 # exit early if we're just returning the masked tokens
                 # (i.e., the targets for masked LM training)
