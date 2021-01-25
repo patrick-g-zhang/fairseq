@@ -1052,7 +1052,15 @@ class FastSpeech2Encoder(FairseqDecoder):
             weight=self.encoder_embed_tokens.weight,
         )
 
-    def forward(self, src_tokens, features_only=False, return_all_hiddens=False, masked_tokens=None, **unused):
+        if self.args.two_inputs:
+            self.bpe_lm_head = RobertaLMHead(
+            embed_dim=args.encoder_embed_dim,
+            output_dim=len(dictionary_b),
+            activation_fn=args.activation_fn,
+            weight=self.encoder_embed_tokens.weight,
+        )
+
+    def forward(self, src_tokens, features_only=False, return_all_hiddens=False, masked_tokens=None, bpe_masked_tokens=None, **unused):
         """
         Args:
             src_tokens (LongTensor): input tokens of shape `(batch, src_len)`
@@ -1071,20 +1079,38 @@ class FastSpeech2Encoder(FairseqDecoder):
         x = self.extract_features(
             src_tokens)
         if not features_only:
-            x = self.output_layer(x, masked_tokens=masked_tokens)
+            x = self.output_layer(x, masked_tokens=masked_tokens, bpe_masked_tokens=bpe_masked_tokens)
         return x, None
 
     def extract_features(self, src_tokens, **unused):
 
-        encoder_outputs = self.encoder(
-            src_tokens)
+        if self.args.two_inputs:
+            pdb.set_trace()
+            phoneme_input = src_tokens['phoneme']
+            bpe_input = src_tokens['bpe']
+            phoneme2bpe = src_tokens['phoneme2bpe']
+            encoder_outputs = self.encoder(
+                src_tokens=phoneme_input,
+                bpe=bpe_input,
+                phoneme2bpe=phoneme2bpe
+                )
+        else:
+            encoder_outputs = self.encoder(
+                    src_tokens)
         encoder_outputs = encoder_outputs['encoder_out']  # [T, B, C]
         src_nonpadding = (src_tokens > 0).type(encoder_outputs.dtype).permute(1, 0)[:, :, None]
         encoder_outputs = encoder_outputs * src_nonpadding  # [T, B, C]
         return encoder_outputs.transpose(0, 1)
 
-    def output_layer(self, features, masked_tokens=None, **unused):
-        return self.lm_head(features, masked_tokens)
+    def output_layer(self, features, masked_tokens=None, bpe_masked_tokens=None, phoneme2bpe=None, **unused):
+        if self.args.two_inputs:
+            pdb.set_trace()
+            # aggerate the features
+            # T, B, C = features.size()
+            # bpe_features = features.new_zeros(
+                # B, T + 1, C).scatter_add_(1, mel2ph[..., None].repeat(1, 1, C), ref_in)
+        else:
+            return self.lm_head(features, masked_tokens)
 
     def max_positions(self):
         """Maximum output length supported by the encoder."""

@@ -31,14 +31,25 @@ class MaskedLmLoss(FairseqCriterion):
         """
         # compute MLM loss
         pdb.set_trace()
-        masked_tokens = sample['target'].ne(self.padding_idx)
-        sample_size = masked_tokens.int().sum().item()
+        if self.args.two_inputs:
+            bpe_masked_tokens = sample['target']['bpe'].ne(self.padding_idx)
+            phoneme_masked_tokens = sample['target']['phoneme'].ne(
+                self.padding_idx)
+            sample_size = phoneme_masked_tokens.int().sum().item()
+              # (Rare case) When all tokens are masked, the model results in empty
+            # tensor and gives CUDA error.
+            if sample_size == 0:
+                masked_tokens = None
+            # pdb.set_trace()
+        else:
+            masked_tokens = sample['target'].ne(self.padding_idx)
+            sample_size = masked_tokens.int().sum().item()
 
-        # (Rare case) When all tokens are masked, the model results in empty
-        # tensor and gives CUDA error.
-        if sample_size == 0:
-            masked_tokens = None
-        # pdb.set_trace()
+            # (Rare case) When all tokens are masked, the model results in empty
+            # tensor and gives CUDA error.
+            if sample_size == 0:
+                masked_tokens = None
+            # pdb.set_trace()
 
         logits = model(**sample['net_input'], masked_tokens=masked_tokens)[0]
         targets = model.get_targets(sample, [logits])
