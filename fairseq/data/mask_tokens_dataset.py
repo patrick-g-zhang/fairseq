@@ -325,9 +325,9 @@ class BPEMaskTokensDataset(BaseWrapperDataset):
                     len(phoneme_mask), self.phoneme_pad_idx)
                 phoneme_target[phoneme_mask] = phoneme[torch.from_numpy(
                     phoneme_mask.astype(np.uint8)) == 1]
-                new_item = {'bpes': torch.from_numpy(bpe_target),
-                            'phonemes': torch.from_numpy(phoneme_target),
-                            'phoneme2bpes': phoneme2bpe, }
+                new_item = {'bpe': torch.from_numpy(bpe_target),
+                            'phoneme': torch.from_numpy(phoneme_target),
+                            'phoneme2bpe': phoneme2bpe, }
                 return new_item
 
             # decide unmasking and random replacement
@@ -357,14 +357,16 @@ class BPEMaskTokensDataset(BaseWrapperDataset):
             phoneme_mask = torch.gather(
                 pad_bpe_mask, 0, phoneme2bpe.long()).numpy()
 
-            bpe = np.copy(bpe)
-            bpe[mask] = self.bpe_mask_idx
-            phoneme[phoneme_mask] = self.phoneme_mask_idx
+            bpe_target = np.copy(bpe)
+            bpe_target[mask] = self.bpe_mask_idx
+
+            phoneme_target = np.copy(phoneme)
+            phoneme_target[phoneme_mask] = self.phoneme_mask_idx
 
             new_item = {
-                'bpes': torch.from_numpy(bpe),
-                'phonemes': torch.from_numpy(phoneme),
-                'phoneme2bpes': phoneme2bpe,
+                'bpe': torch.from_numpy(bpe_target),
+                'phoneme': torch.from_numpy(phoneme_target),
+                'phoneme2bpe': phoneme2bpe,
             }
 
             # if rand_mask is not None:
