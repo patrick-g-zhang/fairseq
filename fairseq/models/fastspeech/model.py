@@ -866,8 +866,11 @@ class FastSpeech2(FairseqEncoderLanguageModel):
 
         if not hasattr(args, 'max_positions'):
             args.max_positions = args.tokens_per_sample
-
-        model = FastSpeech2Encoder(args, task.source_dictionary)
+        pdb.set_trace()
+        if args.two_inputs:
+            model = FastSpeech2Encoder(args, task.phoneme_dictionary, task.bpe_dictionary)
+        else:
+            model = FastSpeech2Encoder(args, task.source_dictionary)
         return cls(args, model)
 
     def forward(self, src_tokens, features_only=False, return_all_hiddens=False, classification_head_name=None, **kwargs):
@@ -1014,7 +1017,7 @@ class FastSpeech2Encoder(FairseqDecoder):
     by :class:`~fairseq.models.FairseqLanguageModel`.
     """
 
-    def __init__(self, args, dictionary):
+    def __init__(self, args, dictionary, dictionary_b=None):
         super().__init__(dictionary)
         self.args = args
         self.padding_idx = dictionary.pad()
@@ -1027,11 +1030,18 @@ class FastSpeech2Encoder(FairseqDecoder):
 
         self.encoder_embed_tokens = nn.Embedding(
             len(dictionary), self.encoder_embed_dim, self.padding_idx)
+        if args.two_inputs:
+            self.bpe_encoder_embed_tokens = nn.Embedding(
+                len(dictionary_b), self.encoder_embed_dim, self.padding_idx
+            )
+        pdb.set_trace()
         self.encoder = TransformerEncoder(
             enc_layers=self.enc_layers,
             encoder_embed_dim=self.encoder_embed_dim,
+            two_inputs=self.args.two_inputs,
             num_attention_heads=self.encoder_attention_heads,
             embed_tokens=self.encoder_embed_tokens,
+            bpe_embeded_tokens=self.bpe_encoder_embed_tokens if args.two_inputs else None,
             has_relative_attention_bias=self.has_relative_attention_bias,
             max_source_positions=args.max_source_positions
         )
@@ -1200,6 +1210,8 @@ class TransformerEncoderLayer(nn.Module):
 class TransformerEncoder(nn.Module):
     def __init__(self,
                  embed_tokens,
+                 bpe_embed_tokens=None,
+                 two_inputs=False,
                  encoder_embed_dim: int=512,
                  enc_layers: int = 8,
                  num_attention_heads: int = 2,
@@ -1209,7 +1221,8 @@ class TransformerEncoder(nn.Module):
                  relative_attention_num_buckets: int = 96,
                  max_distance: int = 200,
                  last_ln: bool = True,
-                 max_source_positions: int = 512):
+                 max_source_positions: int = 512,
+                 ):
         super().__init__()
         self.dropout = dropout
         self.max_distance = max_distance
@@ -1222,6 +1235,8 @@ class TransformerEncoder(nn.Module):
         self.embed_scale = math.sqrt(embed_dim)
         self.max_source_positions = max_source_positions  # 2000
 
+        self.two_inputs = two_inputs
+        self.bpe_embed_tokens = bpe_embed_tokens
         self.use_position_embeddings = use_position_embeddings
         self.has_relative_attention_bias = has_relative_attention_bias
         self.relative_attention_num_buckets = relative_attention_num_buckets
@@ -1299,9 +1314,19 @@ class TransformerEncoder(nn.Module):
         ret += torch.where(is_small, n, val_if_large)
         return ret
 
-    def forward_embedding(self, src_tokens):
+    def forward_embedding(self, src_tokens, bpe=None, phoneme2bpe=None):
         # embed tokens and positions
         embed = self.embed_scale * self.embed_tokens(src_tokens)
+        pdb.set_trace()
+        if self.two_inputs:
+            bpe_embed = self.embed_scale * self.bpe_embeded_tokens(bpe) # B T H
+            bpe_embed = F.pad(bpe_embed, [0, 0, 1, 0, 0, 0])
+
+            bpe_embed = torch.gather(
+            bpe_embed, 1, phoneme2bpe)  # [B, T, H]
+
+            embed += bpe_embed
+
         if self.embed_positions is not None:
             positions = self.embed_positions(src_tokens)
             x = embed + positions
@@ -1310,7 +1335,7 @@ class TransformerEncoder(nn.Module):
         x = F.dropout(x, p=self.dropout, training=self.training)
         return x, embed
 
-    def forward(self, src_tokens):
+    def forward(self, src_tokens, bpe=None, phoneme2bpe=None):
         """
 
         :param src_tokens: [B, T_text]
@@ -1321,7 +1346,7 @@ class TransformerEncoder(nn.Module):
             'attn_w': []
         }
         """
-        x, encoder_embedding = self.forward_embedding(src_tokens)
+        x, encoder_embedding = self.forward_embedding(src_tokens, bpe, phoneme2bpe)
 
         # B x T x C -> T x B x C
         x = x.transpose(0, 1)
