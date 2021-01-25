@@ -1034,7 +1034,6 @@ class FastSpeech2Encoder(FairseqDecoder):
             self.bpe_encoder_embed_tokens = nn.Embedding(
                 len(dictionary_b), self.encoder_embed_dim, self.padding_idx
             )
-        pdb.set_trace()
         self.encoder = TransformerEncoder(
             enc_layers=self.enc_layers,
             encoder_embed_dim=self.encoder_embed_dim,
@@ -1212,16 +1211,16 @@ class TransformerEncoder(nn.Module):
                  embed_tokens,
                  bpe_embed_tokens=None,
                  two_inputs=False,
-                 encoder_embed_dim: int=512,
-                 enc_layers: int = 8,
-                 num_attention_heads: int = 2,
-                 use_position_embeddings: bool = True,
-                 dropout: float = 0.1,
-                 has_relative_attention_bias: bool = False,
-                 relative_attention_num_buckets: int = 96,
-                 max_distance: int = 200,
-                 last_ln: bool = True,
-                 max_source_positions: int = 512,
+                 encoder_embed_dim=512,
+                 enc_layers= 8,
+                 num_attention_heads= 2,
+                 use_position_embeddings = True,
+                 dropout = 0.1,
+                 has_relative_attention_bias = False,
+                 relative_attention_num_buckets = 96,
+                 max_distance = 200,
+                 last_ln = True,
+                 max_source_positions = 512,
                  ):
         super().__init__()
         self.dropout = dropout
