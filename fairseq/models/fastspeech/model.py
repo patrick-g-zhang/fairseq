@@ -1076,20 +1076,27 @@ class FastSpeech2Encoder(FairseqDecoder):
                 - a dictionary of additional data, where 'inner_states'
                   is a list of hidden states.
         """
-        x = self.extract_features(
-            src_tokens)
-        if not features_only:
-            x = self.output_layer(x, masked_tokens=masked_tokens, bpe_masked_tokens=bpe_masked_tokens)
-        return x
-
-    def extract_features(self, src_tokens, **unused):
+        phoneme_input = src_tokens['phoneme']
+        bpe_input = src_tokens['bpe']
+        phoneme2bpe = src_tokens['phoneme2bpe']
 
         if self.args.two_inputs:
-            phoneme_input = src_tokens['phoneme']
-            bpe_input = src_tokens['bpe']
-            phoneme2bpe = src_tokens['phoneme2bpe']
+            x = self.extract_features(
+                phoneme_input, bpe_input=bpe_input, phoneme2bpe=phoneme2bpe)
+            if not features_only:
+                x = self.output_layer(x, masked_tokens=masked_tokens, phoneme2bpe=phoneme2bpe,bpe_masked_tokens=bpe_masked_tokens)
+        else:
+            x = self.extract_features(
+                src_tokens, )
+            if not features_only:
+                x = self.output_layer(x, masked_tokens=masked_tokens)
+        return x
+
+    def extract_features(self, src_tokens, bpe_input=None, phoneme2bpe=None, **unused):
+
+        if self.args.two_inputs:
             encoder_outputs = self.encoder(
-                src_tokens=phoneme_input,
+                src_tokens=src_tokens,
                 bpe=bpe_input,
                 phoneme2bpe=phoneme2bpe
                 )
