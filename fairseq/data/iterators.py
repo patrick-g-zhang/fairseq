@@ -168,6 +168,8 @@ class EpochBatchIterator(EpochBatchIterating):
     ):
         assert isinstance(dataset, torch.utils.data.Dataset)
         self.dataset = dataset
+        print("-------------dsdsds-----------------------")
+        print(dataset)
         self.collate_fn = collate_fn
         self.frozen_batches = tuple(batch_sampler)
         self.seed = seed
