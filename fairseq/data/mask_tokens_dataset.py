@@ -302,6 +302,7 @@ class BPEMaskTokensDataset(BaseWrapperDataset):
             mask = np.full(sz, False)
 
             # mask for bpe
+            pdb.set_trace()
             non_special_indices = np.argwhere(bpe > 3)  # no
             num_mask = int(
                 # add a random number for probabilistic rounding
