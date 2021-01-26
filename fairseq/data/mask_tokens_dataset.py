@@ -241,8 +241,8 @@ class BPEMaskTokensDataset(BaseWrapperDataset):
         return_masked_tokens: bool = False,
         seed: int = 1,
         mask_prob: float = 0.15,
-        leave_unmasked_prob: float = 0.1,
-        random_token_prob: float = 0.1,
+        leave_unmasked_prob: float = 0.08,
+        random_token_prob: float = 0.08,
         freq_weighted_replacement: bool = False,
     ):
         assert 0.0 < mask_prob < 1.0
@@ -255,6 +255,7 @@ class BPEMaskTokensDataset(BaseWrapperDataset):
         self.vocab_b = vocab_b
         self.phoneme_pad_idx = phoneme_pad_idx
         self.bpe_pad_idx = bpe_pad_idx
+        assert self.bpe_pad_idx == self.phoneme_pad_idx == 0
         self.phoneme_mask_idx = phoneme_mask_idx
         self.bpe_mask_idx = bpe_mask_idx
         self.return_masked_tokens = return_masked_tokens
@@ -299,12 +300,14 @@ class BPEMaskTokensDataset(BaseWrapperDataset):
 
             # decide elements to mask
             mask = np.full(sz, False)
+
+            # mask for bpe
+            non_special_indices = np.argwhere(bpe > 3)  # no
             num_mask = int(
                 # add a random number for probabilistic rounding
-                self.mask_prob * sz + np.random.rand()
+                self.mask_prob * len(non_special_indices) + np.random.rand()
             )
-            # mask for bpe
-            non_special_indices = np.argwhere(bpe > 4)
+
             selected_indices = non_special_indices[np.random.choice(
                 len(non_special_indices), num_mask, replace=False)]
             mask[selected_indices] = True
@@ -327,7 +330,7 @@ class BPEMaskTokensDataset(BaseWrapperDataset):
                     phoneme_mask.astype(np.uint8)) == 1]
                 new_item = {'bpe': torch.from_numpy(bpe_target),
                             'phoneme': torch.from_numpy(phoneme_target),
-                            'phoneme2bpe': phoneme2bpe, }
+                            }
                 return new_item
 
             # decide unmasking and random replacement
@@ -352,16 +355,16 @@ class BPEMaskTokensDataset(BaseWrapperDataset):
             if unmask is not None:
                 mask = mask ^ unmask
 
-            pad_bpe_mask = torch.nn.functional.pad(
+            new_pad_bpe_mask = torch.nn.functional.pad(
                 torch.BoolTensor(mask), [True, False])
-            phoneme_mask = torch.gather(
-                pad_bpe_mask, 0, phoneme2bpe.long()).numpy()
+            new_phoneme_mask = torch.gather(
+                new_pad_bpe_mask, 0, phoneme2bpe.long()).numpy()
 
             bpe_target = np.copy(bpe)
             bpe_target[mask] = self.bpe_mask_idx
 
             phoneme_target = np.copy(phoneme)
-            phoneme_target[phoneme_mask] = self.phoneme_mask_idx
+            phoneme_target[new_phoneme_mask] = self.phoneme_mask_idx
 
             new_item = {
                 'bpe': torch.from_numpy(bpe_target),

@@ -20,11 +20,12 @@ class PadDataset(BaseWrapperDataset):
 
 
 class DictPadDataset(BaseWrapperDataset):
-    def __init__(self, dataset, pad_idx, left_pad):
+    def __init__(self, dataset, pad_idx, left_pad, is_target=False):
         super().__init__(dataset)
         self.phoneme_pad_idx = pad_idx
         self.bpe_pad_idx = pad_idx
         self.left_pad = left_pad
+        self.is_target = is_target
 
     def collater(self, samples):
         phonemes = [sample['phoneme'] for sample in samples]
@@ -33,12 +34,17 @@ class DictPadDataset(BaseWrapperDataset):
         bpes = [sample['bpe'] for sample in samples]
         bpes = data_utils.collate_tokens(
             bpes, self.bpe_pad_idx, left_pad=self.left_pad)
+
+        items = {'phoneme': phonemes, 'bpe': bpes}
+
+        if self.is_target:
+            return items
+
         phoneme2bpes = [sample['phoneme2bpe'] for sample in samples]
         phoneme2bpes = data_utils.collate_tokens(
             phoneme2bpes, self.phoneme_pad_idx)
 
-        items = {'phoneme': phonemes, 'bpe': bpes,
-                 'phoneme2bpe': phoneme2bpes}
+        items['phoneme2bpe'] = phoneme2bpes
         return items
 
 

@@ -233,6 +233,7 @@ class MaskedLMTask(FairseqTask):
                             tgt_dataset,
                             pad_idx=self.phoneme_dictionary.pad(),
                             left_pad=False,
+                            is_target=True,
                         ),
                         'nsentences': NumSamplesDataset(),
                         'ntokens': DictNumelDataset(src_dataset, reduce=True),
