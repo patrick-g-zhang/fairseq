@@ -127,6 +127,8 @@ def load_indexed_dataset(path, dictionary, dataset_impl=None, combine=False, def
             dictionary=dictionary,
         )
         if dataset is None:
+            print(f'dataset at {k}')
+            print(dataset)
             break
         print('| loaded {} examples from: {}'.format(len(dataset), path_k))
         datasets.append(dataset)
