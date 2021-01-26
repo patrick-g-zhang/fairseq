@@ -29,8 +29,8 @@ class Dictionary(object):
         self.symbols = []
         self.count = []
         self.indices = {}
-        self.bos_index = self.add_symbol(bos)
         self.pad_index = self.add_symbol(pad)
+        self.bos_index = self.add_symbol(bos)
         self.eos_index = self.add_symbol(eos)
         self.unk_index = self.add_symbol(unk)
         if extra_special_symbols:
