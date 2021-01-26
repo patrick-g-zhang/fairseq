@@ -268,7 +268,6 @@ class Trainer(object):
     ):
         """Return an EpochBatchIterator over the training set for a given epoch."""
         if load_dataset:
-            pdb.set_trace()
             print("| loading train data for epoch {}".format(epoch))
             self.task.load_dataset(
                 self.args.train_subset,

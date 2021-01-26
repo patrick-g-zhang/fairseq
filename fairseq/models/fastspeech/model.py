@@ -1073,6 +1073,7 @@ class FastSpeech2Encoder(FairseqDecoder):
                 - a dictionary of additional data, where 'inner_states'
                   is a list of hidden states.
         """
+        pdb.set_trace()
         phoneme_input = src_tokens['phoneme']
         bpe_input = src_tokens['bpe']
         phoneme2bpe = src_tokens['phoneme2bpe']
