@@ -41,9 +41,12 @@ class MaskedLmLoss(FairseqCriterion):
             if sample_size == 0:
                 masked_tokens = None
             pdb.set_trace()
-            logit1s, logit2s = model(**sample['net_input'], masked_tokens=phoneme_masked_tokens,
+            logitps, logitbs = model(**sample['net_input'], masked_tokens=phoneme_masked_tokens,
                                      bpe_masked_tokens=bpe_masked_tokens)
-            targets = model.get_targets(sample, [logits])
+            targets = model.get_targets(sample, [logitps])
+
+            if sample_size != 0:
+                targets = targets[masked_tokens]
 
         else:
             masked_tokens = sample['target'].ne(self.padding_idx)
@@ -59,8 +62,8 @@ class MaskedLmLoss(FairseqCriterion):
                            masked_tokens=masked_tokens)
             targets = model.get_targets(sample, [logits])
 
-        if sample_size != 0:
-            targets = targets[masked_tokens]
+            if sample_size != 0:
+                targets = targets[masked_tokens]
 
         loss = F.nll_loss(
             F.log_softmax(
