@@ -605,5 +605,9 @@ class DictIndexedDataset:
         return len(self.data_offsets) - 1
 
     @property
+    def supports_prefetch(self):
+        return False
+
+    @property
     def sizes(self):
         return self._sizes
