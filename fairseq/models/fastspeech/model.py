@@ -1379,9 +1379,13 @@ class TransformerEncoder(nn.Module):
             'attn_w': []
         }
         """
-        src_tokens = src_tokens.long()
-        bpe = bpe.long()
-        x, encoder_embedding = self.forward_embedding(src_tokens, bpe, phoneme2bpe)
+        if self.two_inputs:
+            src_tokens = src_tokens.long()
+            bpe = bpe.long()
+            x, encoder_embedding = self.forward_embedding(src_tokens, bpe, phoneme2bpe)
+        else:
+            x, encoder_embedding = self.forward_embedding(src_tokens)
+
 
         # B x T x C -> T x B x C
         x = x.transpose(0, 1)
