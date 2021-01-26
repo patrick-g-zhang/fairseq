@@ -194,7 +194,7 @@ class MaskedLMTask(FairseqTask):
             )
         with data_utils.numpy_seed(self.args.seed + epoch):
             shuffle = np.random.permutation(len(src_dataset))
-
+        print('shuffle = np.random.permutation(len(src_dataset))')
         if not self.args.two_inputs:
             self.datasets[split] = SortDataset(
                 NestedDictionaryDataset(
