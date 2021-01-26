@@ -404,7 +404,6 @@ class MMapIndexedDataset(torch.utils.data.Dataset):
             return _Writer()
 
         def __init__(self, path):
-            pdb.set_trace()
             with open(path, 'rb') as stream:
                 magic_test = stream.read(9)
                 assert self._HDR_MAGIC == magic_test, (
@@ -451,7 +450,6 @@ class MMapIndexedDataset(torch.utils.data.Dataset):
 
     def __init__(self, path):
         super().__init__()
-        pdb.set_trace()
         self._path = None
         self._index = None
         self._bin_buffer = None
