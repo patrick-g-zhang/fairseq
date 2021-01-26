@@ -30,7 +30,6 @@ class MaskedLmLoss(FairseqCriterion):
         3) logging outputs to display while training
         """
         # compute MLM loss
-        pdb.set_trace()
         if self.args.two_inputs:
             bpe_masked_tokens = sample['target']['bpe'].ne(self.padding_idx)
             phoneme_masked_tokens = sample['target']['phoneme'].ne(
@@ -50,7 +49,6 @@ class MaskedLmLoss(FairseqCriterion):
                 targets_p = targets_p[phoneme_masked_tokens]
                 targets_b = targets_b[bpe_masked_tokens]
 
-            pdb.set_trace()
             loss_p = F.nll_loss(
                 F.log_softmax(
                     logitps.view(-1, logitps.size(-1)),
