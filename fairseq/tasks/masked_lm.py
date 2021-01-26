@@ -114,8 +114,6 @@ class MaskedLMTask(FairseqTask):
         assert len(paths) > 0
         data_path = paths[epoch % len(paths)]
         split_path = os.path.join(data_path, split)
-        print("line masked_lm 117 ********************************************")
-        print(split_path)
         if self.args.two_inputs:
             dataset = data_utils.load_two_indexed_datasets(
                 path=split_path,
@@ -187,7 +185,7 @@ class MaskedLMTask(FairseqTask):
             )
         with data_utils.numpy_seed(self.args.seed + epoch):
             shuffle = np.random.permutation(len(src_dataset))
-        print('shuffle np randome ')
+
         if not self.args.two_inputs:
             self.datasets[split] = SortDataset(
                 NestedDictionaryDataset(

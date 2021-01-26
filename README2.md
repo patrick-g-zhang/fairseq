@@ -49,6 +49,7 @@ done
  - adding new argument ```--two-inputs``` to ```preprocess.py``` file. We first test for short input files
  - create a new index dataset named ```DictIndexedDataset```, since we need to store phoneme sequence, sub-word sequence, and phoneme2sub-word. The three vectors are stored in dictionary format.
  - changing argument ```--dataset-impl``` to ```dict```
+ - 
  ```
      python preprocess.py \
     --only-source \
@@ -80,6 +81,8 @@ done
  ```
  ### Training
  
- 
- 
+
+
+
+
  
