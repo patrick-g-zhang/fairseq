@@ -1114,8 +1114,9 @@ class FastSpeech2Encoder(FairseqDecoder):
             # aggerate the features
             # T, B, C = features.size()
             pdb.set_trace()
+            phoneme2bpe = phoneme2bpe.long()
             bpe_features = features.new_zeros(
-                B,  T + 1, self.encoder_embed_dim).scatter_add_(1, phoneme2bpe[:,:, None].repeat(1, 1, self.encoder_embed_dim).long, features)
+                B,  T + 1, self.encoder_embed_dim).scatter_add_(1, phoneme2bpe[:,:, None].repeat(1, 1, self.encoder_embed_dim), features)
             bpe_features = bpe_features[:, 1:, :]
             return self.lm_head(features, masked_tokens), self.lm_head(bpe_features, bpe_masked_tokens)
         else:
