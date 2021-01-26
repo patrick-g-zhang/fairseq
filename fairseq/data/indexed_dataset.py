@@ -299,7 +299,7 @@ class IndexedDatasetBuilder(object):
         np.double: 8
     }
 
-    def __init__(self, out_file, dtype=np.int32):
+    def __init__(self, out_file, dtype=np.uint8):
         self.out_file = open(out_file, 'wb')
         self.dtype = dtype
         self.data_offsets = [0]
@@ -590,7 +590,7 @@ class DictIndexedDataset:
         if self.data_file:
             self.data_file.close()
 
-    @lru_cache(maxsize=8)
+    # @lru_cache(maxsize=8)
     def __getitem__(self, i):
         print("hello")
         self.check_index(i)
