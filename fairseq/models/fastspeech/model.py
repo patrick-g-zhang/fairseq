@@ -977,6 +977,7 @@ class RobertaLMHead(nn.Module):
     def forward(self, features, masked_tokens=None, **kwargs):
         # Only project the unmasked tokens while training,
         # saves both memory and computation
+        pdb.set_trace()
         if masked_tokens is not None:
             features = features[masked_tokens, :]
 
