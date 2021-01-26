@@ -183,9 +183,6 @@ class MaskedLMTask(FairseqTask):
                 random_token_prob=self.args.random_token_prob,
                 freq_weighted_replacement=self.args.freq_weighted_replacement,
             )
-        src_dataset.__getitem__(0)
-        tgt_dataset.__getitem__(0)
-        pdb.set_trace()
         with data_utils.numpy_seed(self.args.seed + epoch):
             shuffle = np.random.permutation(len(src_dataset))
 
