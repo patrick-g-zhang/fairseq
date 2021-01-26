@@ -91,7 +91,7 @@ class MaskedLMTask(FairseqTask):
         elif args.two_inputs:
             phoneme_dictionary = PhonemeDictionary.load(
                 os.path.join(paths[0], 'dict.p.txt'))
-            bpe_dictionary = PhonemeDictionary.load(
+            bpe_dictionary = Dictionary.load(
                 os.path.join(paths[0], 'dict.b.txt'))
             print('| phoneme dictionary: {} types'.format(
                 len(phoneme_dictionary)))
