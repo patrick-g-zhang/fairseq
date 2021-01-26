@@ -40,13 +40,51 @@ class MaskedLmLoss(FairseqCriterion):
             # tensor and gives CUDA error.
             if sample_size == 0:
                 masked_tokens = None
-            pdb.set_trace()
             logitps, logitbs = model(**sample['net_input'], masked_tokens=phoneme_masked_tokens,
                                      bpe_masked_tokens=bpe_masked_tokens)
             targets = model.get_targets(sample, [logitps])
 
+            pdb.set_trace()
             if sample_size != 0:
                 targets = targets[masked_tokens]
+
+            targets_p = targets['phoneme']
+            targets_b = targets['bpe']
+
+            loss_p = F.nll_loss(
+                F.log_softmax(
+                    logitps.view(-1, logitps.size(-1)),
+                    dim=-1,
+                    dtype=torch.float32,
+                ),
+                targets_p.view(-1),
+                reduction='sum',
+                ignore_index=self.padding_idx,
+            )
+
+            loss_b = F.nll_loss(
+                F.log_softmax(
+                    logitbs.view(-1, logitbs.size(-1)),
+                    dim=-1,
+                    dtype=torch.float32,
+                ),
+                targets_b.view(-1),
+                reduction='sum',
+                ignore_index=self.padding_idx,
+            )
+
+            loss = loss_b + loss_p
+            logging_output = {
+                'loss_p': utils.item(loss_p.data) if reduce else loss_p.data,
+                'nll_loss_p': utils.item(loss_p.data) if reduce else loss_p.data,
+                'loss_b': utils.item(loss_b.data) if reduce else loss_b.data,
+                'nll_loss_b': utils.item(loss_b.data) if reduce else loss_b.data,
+                'loss': utils.item(loss.data) if reduce else loss.data,
+                'nll_loss': utils.item(loss.data) if reduce else loss.data,
+                'ntokens': sample['ntokens'],
+                'nsentences': sample['nsentences'],
+                'sample_size': sample_size,
+            }
 
         else:
             masked_tokens = sample['target'].ne(self.padding_idx)
@@ -65,24 +103,24 @@ class MaskedLmLoss(FairseqCriterion):
             if sample_size != 0:
                 targets = targets[masked_tokens]
 
-        loss = F.nll_loss(
-            F.log_softmax(
-                logits.view(-1, logits.size(-1)),
-                dim=-1,
-                dtype=torch.float32,
-            ),
-            targets.view(-1),
-            reduction='sum',
-            ignore_index=self.padding_idx,
-        )
+            loss = F.nll_loss(
+                F.log_softmax(
+                    logits.view(-1, logits.size(-1)),
+                    dim=-1,
+                    dtype=torch.float32,
+                ),
+                targets.view(-1),
+                reduction='sum',
+                ignore_index=self.padding_idx,
+            )
 
-        logging_output = {
-            'loss': utils.item(loss.data) if reduce else loss.data,
-            'nll_loss': utils.item(loss.data) if reduce else loss.data,
-            'ntokens': sample['ntokens'],
-            'nsentences': sample['nsentences'],
-            'sample_size': sample_size,
-        }
+            logging_output = {
+                'loss': utils.item(loss.data) if reduce else loss.data,
+                'nll_loss': utils.item(loss.data) if reduce else loss.data,
+                'ntokens': sample['ntokens'],
+                'nsentences': sample['nsentences'],
+                'sample_size': sample_size,
+            }
         return loss, sample_size, logging_output
 
     @staticmethod
