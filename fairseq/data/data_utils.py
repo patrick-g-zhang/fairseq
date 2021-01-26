@@ -65,8 +65,9 @@ def load_two_indexed_datasets(path, dictionary_p=None, dictionary_b=None, datase
     import fairseq.data.indexed_dataset as indexed_dataset
     datasets = []
     for k in itertools.count():
+        print("data_utils ********************************************")
         path_k = path + (str(k) if k > 0 else '')
-
+        print(f'path_k {path_k}')
         dataset_impl_k = dataset_impl
         if dataset_impl_k is None:
             dataset_impl_k = indexed_dataset.infer_dataset_impl(path_k)
@@ -75,6 +76,7 @@ def load_two_indexed_datasets(path, dictionary_p=None, dictionary_b=None, datase
             path_k,
             impl=dataset_impl_k or default,
         )
+        print(f'dataset_impl_k {dataset_impl_k}')
         if dataset is None:
             break
         print('| loaded {} examples from: {}'.format(len(dataset), path_k))
@@ -82,6 +84,8 @@ def load_two_indexed_datasets(path, dictionary_p=None, dictionary_b=None, datase
         if not combine:
             break
     if len(datasets) == 0:
+        print(f'dataset at {k}')
+        print(dataset)
         return None
     elif len(datasets) == 1:
         return datasets[0]
