@@ -571,7 +571,7 @@ class DictIndexedDatasetBuilder(object):
                 'offsets': self.byte_offsets, 'sizes': self.sizes})
 
 
-class DictIndexedDataset:
+class DictIndexedDataset(FairseqDataset):
     def __init__(self, path):
         super().__init__()
         self.path = path
@@ -590,9 +590,8 @@ class DictIndexedDataset:
         if self.data_file:
             self.data_file.close()
 
-    # @lru_cache(maxsize=8)
+    @lru_cache(maxsize=8)
     def __getitem__(self, i):
-        print("hello")
         self.check_index(i)
         self.data_file.seek(self.data_offsets[i])
         b = self.data_file.read(
