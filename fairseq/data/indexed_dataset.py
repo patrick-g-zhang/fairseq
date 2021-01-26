@@ -609,3 +609,10 @@ class DictIndexedDataset(FairseqDataset):
     @property
     def sizes(self):
         return self._sizes
+
+    @staticmethod
+    def exists(path):
+        return (
+            os.path.exists(index_file_path(path)) and os.path.exists(
+                data_file_path(path))
+        )
