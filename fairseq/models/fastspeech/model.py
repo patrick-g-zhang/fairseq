@@ -866,7 +866,6 @@ class FastSpeech2(FairseqEncoderLanguageModel):
 
         if not hasattr(args, 'max_positions'):
             args.max_positions = args.tokens_per_sample
-        pdb.set_trace()
         if args.two_inputs:
             model = FastSpeech2Encoder(args, task.phoneme_dictionary, task.bpe_dictionary)
         else:
@@ -1076,7 +1075,6 @@ class FastSpeech2Encoder(FairseqDecoder):
                 - a dictionary of additional data, where 'inner_states'
                   is a list of hidden states.
         """
-        pdb.set_trace()
         phoneme_input = src_tokens['phoneme']
         bpe_input = src_tokens['bpe']
         phoneme2bpe = src_tokens['phoneme2bpe']
@@ -1117,7 +1115,7 @@ class FastSpeech2Encoder(FairseqDecoder):
             # T, B, C = features.size()
             pdb.set_trace()
             bpe_features = features.new_zeros(
-                B,  T + 1, self.encoder_embed_dim).scatter_add_(1, phoneme2bpe[:,:, None].repeat(1, 1, self.encoder_embed_dim), features)
+                B,  T + 1, self.encoder_embed_dim).scatter_add_(1, phoneme2bpe[:,:, None].repeat(1, 1, self.encoder_embed_dim).long, features)
             bpe_features = bpe_features[:, 1:, :]
             return self.lm_head(features, masked_tokens), self.lm_head(bpe_features, bpe_masked_tokens)
         else:
