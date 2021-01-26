@@ -314,7 +314,7 @@ class GroupedIterator(object):
         chunk = []
         try:
             print("**********************************")
-            print(chunk)
+            print(f'chunk size {self.chunk_size}')
             for _ in range(self.chunk_size):
                 chunk.append(next(self.itr))
         except StopIteration as e:
