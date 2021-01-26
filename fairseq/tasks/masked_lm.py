@@ -114,7 +114,7 @@ class MaskedLMTask(FairseqTask):
         assert len(paths) > 0
         data_path = paths[epoch % len(paths)]
         split_path = os.path.join(data_path, split)
-        print("********************************************")
+        print("line masked_lm 117 ********************************************")
         print(split_path)
         if self.args.two_inputs:
             dataset = data_utils.load_two_indexed_datasets(
