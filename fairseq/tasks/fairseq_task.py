@@ -13,6 +13,7 @@ from fairseq.data import (
     iterators,
     Dictionary, PhonemeDictionary
 )
+import pdb
 
 
 class FairseqTask(object):
@@ -145,6 +146,7 @@ class FairseqTask(object):
         # For default fairseq task, return same iterator across epochs
         # as datasets are not dynamic, can be overridden in task specific
         # setting.
+        pdb.set_trace()
         if dataset in self.dataset_to_epoch_iter:
             return self.dataset_to_epoch_iter[dataset]
 
