@@ -43,13 +43,13 @@ class MaskedLmLoss(FairseqCriterion):
             logitps, logitbs = model(**sample['net_input'], masked_tokens=phoneme_masked_tokens,
                                      bpe_masked_tokens=bpe_masked_tokens)
             targets = model.get_targets(sample, [logitps])
+            targets_p = targets['phoneme']
+            targets_b = targets['bpe']
 
             pdb.set_trace()
             if sample_size != 0:
-                targets = targets[masked_tokens]
-
-            targets_p = targets['phoneme']
-            targets_b = targets['bpe']
+                targets_p = targets_p[masked_tokens]
+                targets_b = targets_b[bpe_masked_tokens]
 
             loss_p = F.nll_loss(
                 F.log_softmax(
