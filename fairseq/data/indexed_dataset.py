@@ -580,6 +580,9 @@ class DictIndexedDataset(FairseqDataset):
             index_file_path(path), allow_pickle=True).item()['offsets']
         self._sizes = np.load(index_file_path(
             path), allow_pickle=True).item()['sizes']
+        self.data_file = None
+
+    def read_data(self, path):
         self.data_file = open(data_file_path(path), 'rb', buffering=0)
 
     def check_index(self, i):
@@ -592,6 +595,8 @@ class DictIndexedDataset(FairseqDataset):
 
     @lru_cache(maxsize=8)
     def __getitem__(self, i):
+        if not self.data_file:
+            self.read_data(self.path)
         self.check_index(i)
         self.data_file.seek(self.data_offsets[i])
         b = self.data_file.read(
