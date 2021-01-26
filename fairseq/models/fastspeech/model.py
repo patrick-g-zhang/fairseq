@@ -964,7 +964,6 @@ class RobertaLMHead(nn.Module):
 
     def __init__(self, embed_dim, output_dim, activation_fn, weight=None):
         super().__init__()
-        pdb.set_trace()
         self.dense = nn.Linear(embed_dim, embed_dim)
         self.activation_fn = utils.get_activation_fn(activation_fn)
         self.layer_norm = LayerNorm2(embed_dim)
@@ -977,7 +976,6 @@ class RobertaLMHead(nn.Module):
     def forward(self, features, masked_tokens=None, **kwargs):
         # Only project the unmasked tokens while training,
         # saves both memory and computation
-        pdb.set_trace()
         if masked_tokens is not None:
             features = features[masked_tokens, :]
 
@@ -1056,7 +1054,7 @@ class FastSpeech2Encoder(FairseqDecoder):
             embed_dim=args.encoder_embed_dim,
             output_dim=len(dictionary_b),
             activation_fn=args.activation_fn,
-            weight=self.encoder_embed_tokens.weight,
+            weight=self.bpe_encoder_embed_tokens.weight,
         )
 
     def forward(self, src_tokens, features_only=False, return_all_hiddens=False, masked_tokens=None, bpe_masked_tokens=None, **unused):
