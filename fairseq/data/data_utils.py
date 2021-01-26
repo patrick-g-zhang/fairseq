@@ -72,7 +72,6 @@ def load_two_indexed_datasets(path, dictionary_p=None, dictionary_b=None, datase
             path_k,
             impl=dataset_impl_k or default,
         )
-        print(f'dataset_impl_k {dataset_impl_k}')
         if dataset is None:
             break
         print('| loaded {} examples from: {}'.format(len(dataset), path_k))
@@ -101,23 +100,16 @@ def load_indexed_dataset(path, dictionary, dataset_impl=None, combine=False, def
             combine 'data-bin/train', 'data-bin/train1', ... and return a
             single ConcatDataset instance.
     """
-    print("********************************************")
-    print(combine)
     from fairseq.data.concat_dataset import ConcatDataset
     import fairseq.data.indexed_dataset as indexed_dataset
     datasets = []
     for k in itertools.count():
-        print("line 112 data_utils ********************************************")
-        print(k)
 
         path_k = path + (str(k) if k > 0 else '')
-        print("line 117 data_utils ********************************************")
-        print(f'path_k {path_k}')
         dataset_impl_k = dataset_impl
         if dataset_impl_k is None:
             dataset_impl_k = indexed_dataset.infer_dataset_impl(path_k)
 
-        print(f'dataset_impl_k {dataset_impl_k}')
         dataset = indexed_dataset.make_dataset(
             path_k,
             impl=dataset_impl_k or default,
@@ -125,8 +117,6 @@ def load_indexed_dataset(path, dictionary, dataset_impl=None, combine=False, def
             dictionary=dictionary,
         )
         if dataset is None:
-            print(f'dataset at {k}')
-            print(dataset)
             break
         print('| loaded {} examples from: {}'.format(len(dataset), path_k))
         datasets.append(dataset)
