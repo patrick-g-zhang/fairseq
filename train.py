@@ -69,6 +69,7 @@ def main(args, init_distributed=False):
 
     # Load the latest checkpoint if one is available and restore the
     # corresponding train iterator
+    pdb.set_trace()
     extra_state, epoch_itr = checkpoint_utils.load_checkpoint(args, trainer)
 
     # Train until the learning rate gets too small
@@ -304,7 +305,6 @@ def distributed_main(i, args, start_rank=0):
 
 
 def cli_main():
-    pdb.set_trace()
     parser = options.get_training_parser()
     args = options.parse_args_and_arch(parser)
 
