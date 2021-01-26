@@ -131,14 +131,7 @@ class MaskedLMTask(FairseqTask):
                 self.args.dataset_impl,
                 combine=combine,
             )
-        # dataset = data_utils.load_indexed_dataset(
-        #     split_path,
-        #     (self.phoneme_dictionary, self.bpe_dictionary),
-        #     # self.source_dictionary,
-        #     self.args.dataset_impl,
-        #     combine=combine,
-        # )
-        # pdb.set_trace()
+
         if dataset is None:
             raise FileNotFoundError(
                 'Dataset not found: {} ({})'.format(split, split_path))

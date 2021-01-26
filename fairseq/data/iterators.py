@@ -260,10 +260,12 @@ class EpochBatchIterator(EpochBatchIterating):
             self.dataset.prefetch([i for s in batches for i in s])
 
             if shuffle and fix_batches_to_gpus:
-                batches = shuffle_batches(batches, self.seed + epoch + self.shard_id)
+                batches = shuffle_batches(
+                    batches, self.seed + epoch + self.shard_id)
         else:
             if shuffle:
-                batches = shuffle_batches(list(self.frozen_batches), self.seed + epoch)
+                batches = shuffle_batches(
+                    list(self.frozen_batches), self.seed + epoch)
             else:
                 batches = self.frozen_batches
             batches = list(ShardedIterator(
@@ -297,7 +299,8 @@ class GroupedIterator(object):
 
     def __init__(self, iterable, chunk_size):
         self._len = int(math.ceil(len(iterable) / float(chunk_size)))
-        self.offset = int(math.ceil(getattr(iterable, 'count', 0) / float(chunk_size)))
+        self.offset = int(
+            math.ceil(getattr(iterable, 'count', 0) / float(chunk_size)))
         self.itr = iterable
         self.chunk_size = chunk_size
 
@@ -310,6 +313,8 @@ class GroupedIterator(object):
     def __next__(self):
         chunk = []
         try:
+            print("**********************************")
+            print(chunk)
             for _ in range(self.chunk_size):
                 chunk.append(next(self.itr))
         except StopIteration as e:
