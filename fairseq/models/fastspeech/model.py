@@ -875,13 +875,12 @@ class FastSpeech2(FairseqEncoderLanguageModel):
     def forward(self, src_tokens, features_only=False, return_all_hiddens=False, classification_head_name=None, **kwargs):
         if classification_head_name is not None:
             features_only = True
-
-        x, extra = self.encoder(src_tokens, features_only,
+        x = self.encoder(src_tokens, features_only,
                                 return_all_hiddens, **kwargs)
 
         if classification_head_name is not None:
             x = self.classification_heads[classification_head_name](x)
-        return x, extra
+        return x
 
     def register_classification_head(self, name, num_classes=None, inner_dim=None, **kwargs):
         """Register a classification head."""
@@ -1113,7 +1112,6 @@ class FastSpeech2Encoder(FairseqDecoder):
 
             # aggerate the features
             # T, B, C = features.size()
-            pdb.set_trace()
             phoneme2bpe = phoneme2bpe.long()
             bpe_features = features.new_zeros(
                 B,  T + 1, self.encoder_embed_dim).scatter_add_(1, phoneme2bpe[:,:, None].repeat(1, 1, self.encoder_embed_dim), features)
