@@ -104,12 +104,16 @@ def load_indexed_dataset(path, dictionary, dataset_impl=None, combine=False, def
             single ConcatDataset instance.
     """
     print("********************************************")
-
+    print(combine)
     from fairseq.data.concat_dataset import ConcatDataset
     import fairseq.data.indexed_dataset as indexed_dataset
     datasets = []
     for k in itertools.count():
+        print("line 112 data_utils ********************************************")
+        print(k)
+
         path_k = path + (str(k) if k > 0 else '')
+        print("line 117 data_utils ********************************************")
         print(path_k)
         dataset_impl_k = dataset_impl
         if dataset_impl_k is None:
