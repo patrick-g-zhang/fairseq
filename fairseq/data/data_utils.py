@@ -77,8 +77,7 @@ def load_two_indexed_datasets(path, dictionary_p, dictionary_b, dataset_impl=Non
             break
         print('| loaded {} examples from: {}'.format(len(dataset), path_k))
         datasets.append(dataset)
-        if not combine:
-            break
+        break
     if len(datasets) == 0:
         return None
     elif len(datasets) == 1:
