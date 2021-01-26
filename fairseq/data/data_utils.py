@@ -114,11 +114,12 @@ def load_indexed_dataset(path, dictionary, dataset_impl=None, combine=False, def
 
         path_k = path + (str(k) if k > 0 else '')
         print("line 117 data_utils ********************************************")
-        print(path_k)
+        print(f'path_k {path_k}')
         dataset_impl_k = dataset_impl
         if dataset_impl_k is None:
             dataset_impl_k = indexed_dataset.infer_dataset_impl(path_k)
 
+        print(f'dataset_impl_k {dataset_impl_k}')
         dataset = indexed_dataset.make_dataset(
             path_k,
             impl=dataset_impl_k or default,
