@@ -1073,11 +1073,12 @@ class FastSpeech2Encoder(FairseqDecoder):
                 - a dictionary of additional data, where 'inner_states'
                   is a list of hidden states.
         """
-        phoneme_input = src_tokens['phoneme']
-        bpe_input = src_tokens['bpe']
-        phoneme2bpe = src_tokens['phoneme2bpe']
 
         if self.args.two_inputs:
+            phoneme_input = src_tokens['phoneme']
+            bpe_input = src_tokens['bpe']
+            phoneme2bpe = src_tokens['phoneme2bpe']
+
             x = self.extract_features(
                 phoneme_input, bpe_input=bpe_input, phoneme2bpe=phoneme2bpe)
             if not features_only:
