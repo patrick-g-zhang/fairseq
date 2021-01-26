@@ -62,6 +62,22 @@ done
     --two-inputs \
     --workers 2
  ```
+ 
+ ```
+     python preprocess.py \
+    --only-source \
+    --srcdict experiments/phoneme/dict.txt \
+    --tgtdict experiments/phoneme_bpe/dict.txt \
+    --trainpref experiments/news-2017-19.en/news.train.bpe \
+    --validpref experiments/news-2017-19.en/news.valid.bpe \
+    --testpref experiments/news-2017-19.en/news.test.bpe \
+    --destdir experiments/data-bin/news-2017-19.en.bpe.full \
+    --dataset-impl dict \
+    --two-inputs \
+    --workers 64
+ ```
+
+ ```
  ### Training
  
  

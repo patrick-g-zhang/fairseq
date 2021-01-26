@@ -1080,7 +1080,7 @@ class FastSpeech2Encoder(FairseqDecoder):
             src_tokens)
         if not features_only:
             x = self.output_layer(x, masked_tokens=masked_tokens, bpe_masked_tokens=bpe_masked_tokens)
-        return x, None
+        return x
 
     def extract_features(self, src_tokens, **unused):
 
@@ -1097,7 +1097,6 @@ class FastSpeech2Encoder(FairseqDecoder):
         else:
             encoder_outputs = self.encoder(
                     src_tokens)
-        pdb.set_trace()
         encoder_outputs = encoder_outputs['encoder_out']  # [T, B, C]
         src_nonpadding = (src_tokens > 0).type(encoder_outputs.dtype).permute(1, 0)[:, :, None]
         encoder_outputs = encoder_outputs * src_nonpadding  # [T, B, C]
@@ -1106,10 +1105,14 @@ class FastSpeech2Encoder(FairseqDecoder):
     def output_layer(self, features, masked_tokens=None, bpe_masked_tokens=None, phoneme2bpe=None, **unused):
         if self.args.two_inputs:
             pdb.set_trace()
+            B, T = bpe_masked_tokens.size()
+
             # aggerate the features
             # T, B, C = features.size()
-            # bpe_features = features.new_zeros(
-                # B, T + 1, C).scatter_add_(1, mel2ph[..., None].repeat(1, 1, C), ref_in)
+            bpe_features = features.new_zeros(
+                B,  T + 1, self.encoder_embed_dim).scatter_add_(1, phoneme2bpe[..., None].repeat(1, 1, self.encoder_embed_dim), features)
+            bpe_features = bpe_features[:, 1:, :]
+            return self.lm_head(features, masked_tokens), self.lm_head(bpe_features, bpe_masked_tokens)
         else:
             return self.lm_head(features, masked_tokens)
 
