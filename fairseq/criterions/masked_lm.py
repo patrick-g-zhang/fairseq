@@ -46,11 +46,11 @@ class MaskedLmLoss(FairseqCriterion):
             targets_p = targets['phoneme']
             targets_b = targets['bpe']
 
-            pdb.set_trace()
             if sample_size != 0:
                 targets_p = targets_p[phoneme_masked_tokens]
                 targets_b = targets_b[bpe_masked_tokens]
 
+            pdb.set_trace()
             loss_p = F.nll_loss(
                 F.log_softmax(
                     logitps.view(-1, logitps.size(-1)),
