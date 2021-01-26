@@ -592,6 +592,7 @@ class DictIndexedDataset:
 
     @lru_cache(maxsize=8)
     def __getitem__(self, i):
+        print("hello")
         self.check_index(i)
         self.data_file.seek(self.data_offsets[i])
         b = self.data_file.read(

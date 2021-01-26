@@ -170,9 +170,9 @@ class MaskedLMTask(FairseqTask):
             )
         else:
             src_dataset, tgt_dataset = BPEMaskTokensDataset.apply_mask(
-                dataset,
-                self.phoneme_dictionary,
-                self.bpe_dictionary,
+                dataset=dataset,
+                vocab_p=self.phoneme_dictionary,
+                vocab_b=self.bpe_dictionary,
                 phoneme_pad_idx=self.phoneme_dictionary.pad(),
                 bpe_pad_idx=self.bpe_dictionary.pad(),
                 phoneme_mask_idx=self.phoneme_mask_idx,
