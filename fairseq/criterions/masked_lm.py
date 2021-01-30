@@ -125,13 +125,19 @@ class MaskedLmLoss(FairseqCriterion):
     def aggregate_logging_outputs(logging_outputs):
         """Aggregate logging outputs from data parallel training."""
         loss = sum(log.get('loss', 0) for log in logging_outputs)
+        loss_p = sum(log.get('loss_p', 0) for log in logging_outputs)
+        loss_b = sum(log.get('loss_b', 0) for log in logging_outputs)
         ntokens = sum(log.get('ntokens', 0) for log in logging_outputs)
         nsentences = sum(log.get('nsentences', 0) for log in logging_outputs)
         sample_size = sum(log.get('sample_size', 0) for log in logging_outputs)
 
         agg_output = {
             'loss': loss / sample_size / math.log(2),
+            'loss_p': loss_p / sample_size / math.log(2),
+            'loss_b': loss_b / sample_size / math.log(2),
             'nll_loss': sum(log.get('nll_loss', 0) for log in logging_outputs) / sample_size / math.log(2) if ntokens > 0 else 0.,
+            'nll_loss_p': sum(log.get('nll_loss_p', 0) for log in logging_outputs) / sample_size / math.log(2) if ntokens > 0 else 0.,
+            'nll_loss_b': sum(log.get('nll_loss_b', 0) for log in logging_outputs) / sample_size / math.log(2) if ntokens > 0 else 0.,
             'ntokens': ntokens,
             'nsentences': nsentences,
             'sample_size': sample_size,
