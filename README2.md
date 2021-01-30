@@ -44,12 +44,15 @@ done
 - ```experiments/news-2017-19.en/news.train.bpe```, this file is for saving raw data, ```{bpe-sequence} $ {phoneme sequence}```
     
 ### new file for prepare phoneme bpe
-    
-### Preprocessing
- - adding new argument ```--two-inputs``` to ```preprocess.py``` file. We first test for short input files
+
+### Class ```BPEMaskTokensDataset```
+This dataset implementation is for dictionary masked input.
+
+### Preprocessing Command
+ - adding new argument ```--two-inputs``` to ```preprocess.py``` file. 
  - create a new index dataset named ```DictIndexedDataset```, since we need to store phoneme sequence, sub-word sequence, and phoneme2sub-word. The three vectors are stored in dictionary format.
  - changing argument ```--dataset-impl``` to ```dict```
- - 
+ - preprocess short and test files
  ```
      python preprocess.py \
     --only-source \
@@ -63,7 +66,7 @@ done
     --two-inputs \
     --workers 2
  ```
- 
+ - preprocessing full dataset
  ```
      python preprocess.py \
     --only-source \
@@ -78,11 +81,36 @@ done
     --workers 64
  ```
 
+
+### Training Command
+ - adding new argument ```--two-inputs``` to ```train.py``` file. The input needs both bpe and phoneme
+ - adding ```tensorboard-logdir```
+
+#### Test with small data, 
+```
+SAVE_DIR=/blob/xuta/speech/tts/t-guzhang/fairseq/checkpoints/${ARCH}-Test
+DATA_DIR=/blob/xuta/speech/tts/t-guzhang/fairseq/experiments/data-bin/news-2017-19.en.bpe
+LOG_DIR="logs/fastspeech-Test"
+```
+
+#### Test with full data, 
+```
+SAVE_DIR=/blob/xuta/speech/tts/t-guzhang/fairseq/checkpoints/${ARCH}-BPE-12W-Steps-FP16-wu3
+DATA_DIR=/blob/xuta/speech/tts/t-guzhang/fairseq/experiments/data-bin/news-2017-19.en.bpe.full
+LOG_DIR=/blob/xuta/speech/tts/t-guzhang/fairseq/logs/${ARCH}-BPE-12W-Steps-FP16-wu3
+```
+
  ```
- ### Training
+ python $dist_config /blob/xuta/speech/tts/t-guzhang/fairseq/train.py --fp16  $DATA_DIR \
+    --task masked_lm --criterion masked_lm --save-dir $SAVE_DIR\
+    --arch $ARCH --sample-break-mode complete --tokens-per-sample $TOKENS_PER_SAMPLE \
+    --optimizer adam --adam-betas '(0.9,0.98)' --adam-eps 1e-6 --clip-norm 0.0 \
+    --lr-scheduler polynomial_decay --lr $PEAK_LR --warmup-updates $WARMUP_UPDATES --total-num-update $TOTAL_UPDATES \
+    --dropout 0.1 --weight-decay 0.01 \
+    --batch-size $MAX_SENTENCES --update-freq $UPDATE_FREQ  \
+    --max-update $TOTAL_UPDATES --log-format simple --log-interval 1 --dataset-impl dict --two-inputs --no-pad-prepend-token --tensorboard-logdir=$
+ ```
  
-
-
-
-
+ 
+ 
  

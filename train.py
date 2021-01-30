@@ -132,7 +132,7 @@ def train(args, trainer, task, epoch_itr):
         log_output = trainer.train_step(samples)
         if log_output is None:
             continue
-
+        pdb.set_trace()
         # log mid-epoch stats
         stats = get_training_stats(trainer)
         for k, v in log_output.items():
