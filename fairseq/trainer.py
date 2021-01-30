@@ -293,7 +293,6 @@ class Trainer(object):
 
     def train_step(self, samples, dummy_batch=False, raise_oom=False):
         """Do forward, backward and parameter update."""
-        pdb.set_trace()
         if self._dummy_batch is None:
             self._dummy_batch = samples[0]
 
