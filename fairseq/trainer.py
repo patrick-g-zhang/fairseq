@@ -423,6 +423,7 @@ class Trainer(object):
 
         if not self.fast_stat_sync:
             # aggregate logging outputs and sample sizes
+            pdb.set_trace()
             logging_output = self.task.aggregate_logging_outputs(
                 logging_outputs, self.get_criterion()
             )
