@@ -25,6 +25,8 @@ python $dist_config /blob/xuta/speech/tts/t-guzhang/fairseq/train.py --fp16 $DAT
 
 
 ### Add new example ```fastspeech```
+- The new example convert phoneme string to bpe code.
+- the ```vocab.bpe``` is bpe dictionary
 ```
 for SPLIT in train valid test; do \
         python -m examples.fastspeech.multiprocessing_bpe_encoder \
@@ -35,6 +37,7 @@ for SPLIT in train valid test; do \
         --workers 60; \
 done
 ```
+
 ### Add joint training with subword phoneme
 - adding ```load_two_dictionary``` method to ```fairseq_task.py```
     
