@@ -26,7 +26,8 @@ python $dist_config /blob/xuta/speech/tts/t-guzhang/fairseq/train.py --fp16 $DAT
 
 ### Add new example ```fastspeech```
 - The new example convert phoneme string to bpe code.
-- the ```vocab.bpe``` is bpe dictionary
+- the ```vocab.bpe``` is bpe pair for bpe creation
+- convert phoneme sequence to bpe sequence
 ```
 for SPLIT in train valid test; do \
         python -m examples.fastspeech.multiprocessing_bpe_encoder \
@@ -43,10 +44,11 @@ done
     
 ### Phoneme bpe files and Data
 - ```./experiment/phoneme_bpe/vocab.bpe```, this file is for bpe pairs creation
--  ```./experiment/phoneme_bpe/dict.txt```, this file is for bpe dictionary creation
+-  ```./experiment/phoneme_bpe/dict.txt```, this file is for bpe dictionary
+-  ```./experiment/phoneme_bpe/dict.wp.txt```, this file is for bpe dictionary with single word included, avoid unk problem !!!!
+-   creation
 - ```experiments/news-2017-19.en/news.train.bpe```, this file is for saving raw data, ```{bpe-sequence} $ {phoneme sequence}```
     
-### new file for prepare phoneme bpe
 
 ### Class ```BPEMaskTokensDataset```
 This dataset implementation is for dictionary masked input.
@@ -60,7 +62,7 @@ This dataset implementation is for dictionary masked input.
      python preprocess.py \
     --only-source \
     --srcdict experiments/phoneme/dict.txt \
-    --tgtdict experiments/phoneme_bpe/dict.txt \
+    --tgtdict experiments/phoneme_bpe/dict.wp.txt \
     --trainpref experiments/news-2017-19.en/news.train.test.bpe \
     --validpref experiments/news-2017-19.en/news.valid.test.bpe \
     --testpref experiments/news-2017-19.en/news.test.test.bpe \

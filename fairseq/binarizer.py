@@ -77,6 +77,7 @@ class Binarizer:
                     reverse_order=reverse_order,
                 )
 
+                pdb.set_trace()
                 bpe_ids = dictb.encode_line(
                     line=line1,
                     line_tokenizer=tokenize,
