@@ -58,11 +58,13 @@ This dataset implementation is for dictionary masked input.
  - create a new index dataset named ```DictIndexedDataset```, since we need to store phoneme sequence, sub-word sequence, and phoneme2sub-word. The three vectors are stored in dictionary format.
  - changing argument ```--dataset-impl``` to ```dict```
  - preprocess short and test files
+
+
  ```
      python preprocess.py \
     --only-source \
     --srcdict experiments/phoneme/dict.txt \
-    --tgtdict experiments/phoneme_bpe/dict.wp.txt \
+    --tgtdict experiments/phoneme_bpe/bpe.wp.dict.txt \
     --trainpref experiments/news-2017-19.en/news.train.test.bpe \
     --validpref experiments/news-2017-19.en/news.valid.test.bpe \
     --testpref experiments/news-2017-19.en/news.test.test.bpe \
@@ -76,11 +78,11 @@ This dataset implementation is for dictionary masked input.
      python preprocess.py \
     --only-source \
     --srcdict experiments/phoneme/dict.txt \
-    --tgtdict experiments/phoneme_bpe/dict.txt \
+    --tgtdict experiments/phoneme_bpe/bpe.wp.dict.txt \
     --trainpref experiments/news-2017-19.en/news.train.bpe \
     --validpref experiments/news-2017-19.en/news.valid.bpe \
     --testpref experiments/news-2017-19.en/news.test.bpe \
-    --destdir experiments/data-bin/news-2017-19.en.bpe.full \
+    --destdir experiments/data-bin/news-2017-19.en.bpe.wp.full \
     --dataset-impl dict \
     --two-inputs \
     --workers 64

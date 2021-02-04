@@ -48,7 +48,6 @@ def get_pairs(word):
 class Encoder:
 
     def __init__(self, encoder, bpe_merges, errors='replace'):
-        pdb.set_trace()
         self.encoder = encoder
         self.decoder = {v: k for k, v in self.encoder.items()}
         self.errors = errors  # how to handle errors in decoding
@@ -116,10 +115,8 @@ class Encoder:
                             for b in token.encode('utf-8'))
 
             for bpe_token in self.bpe(token).split(' '):
-                pdb.set_trace()
                 bpe_tokens.extend([self.encoder[bpe_token]])
-            # bpe_tokens.extend(self.encoder[bpe_token]
-                # for bpe_token in self.bpe(token).split(' '))
+
         return bpe_tokens
 
     def decode(self, tokens):
@@ -130,7 +127,6 @@ class Encoder:
 
 
 def get_encoder(encoder_json_path, vocab_bpe_path):
-    pdb.set_trace()
     # encoder_json_path： gpt2_bpe/encoder.json
     # vocab_bpe_path：gpt2_bpe/vocab.bpe
     with open(encoder_json_path, 'r') as f:
