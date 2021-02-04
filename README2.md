@@ -100,10 +100,10 @@ DATA_DIR=/blob/xuta/speech/tts/t-guzhang/fairseq/experiments/data-bin/news-2017-
 LOG_DIR="logs/fastspeech-Test"
 ```
 
-#### Test with full data, 
+#### generate with full data, 
 ```
 SAVE_DIR=/blob/xuta/speech/tts/t-guzhang/fairseq/checkpoints/${ARCH}-BPE-12W-Steps-FP16-wu3
-DATA_DIR=/blob/xuta/speech/tts/t-guzhang/fairseq/experiments/data-bin/news-2017-19.en.bpe.full
+DATA_DIR=/blob/xuta/speech/tts/t-guzhang/fairseq/experiments/data-bin/news-2017-19.en.bpe.wp.full
 LOG_DIR=/blob/xuta/speech/tts/t-guzhang/fairseq/logs/${ARCH}-BPE-12W-Steps-FP16-wu3
 ```
 
