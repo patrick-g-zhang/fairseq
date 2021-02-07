@@ -19,8 +19,11 @@ import random
 import tempfile
 from multiprocessing import Pool, cpu_count
 import pdb
-# hack for python2/3 compatibility
-from io import open
+
+
+def get_encoder(vocab_bpe_path):
+    with codecs.open(vocab_bpe_path, encoding='utf-8') as bpefile:
+        return BPE(bpefile)
 
 
 class BPE(object):
