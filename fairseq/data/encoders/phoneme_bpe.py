@@ -5,31 +5,27 @@ Original source: https://github.com/openai/gpt-2/blob/master/src/encoder.py
 Original license: MIT
 """
 
-import json
-import pdb
+from __future__ import unicode_literals, division
 
 import sys
 import os
 import inspect
 import codecs
 import io
-import argparse
+
 import re
 import warnings
 import random
+import tempfile
 from multiprocessing import Pool, cpu_count
+import pdb
 # hack for python2/3 compatibility
 from io import open
 
 
-def get_encoder(vocab_bpe_path):
-    with codecs.open(vocab_bpe_path, encoding='utf-8') as bpefile:
-        return BPE(bpefile)
-
-
 class BPE(object):
 
-    def __init__(self, codes, merges=-1, vocab=None, glossaries=None):
+    def __init__(self, codes, merges=-1, separator='@@', vocab=None, glossaries=None):
 
         codes.seek(0)
         offset = 1
@@ -62,34 +58,69 @@ class BPE(object):
         self.bpe_codes_reverse = dict(
             [(pair[0] + pair[1], pair) for pair, i in self.bpe_codes.items()])
 
+        self.separator = separator
+
+        self.vocab = vocab
+
+        self.glossaries = glossaries if glossaries else []
+
+        self.glossaries_regex = re.compile('^({})$'.format(
+            '|'.join(glossaries))) if glossaries else None
+
         self.cache = {}
 
     def process_line(self, line, dropout=0):
         """segment line, dealing with leading and trailing whitespace"""
-        tokens = [word.strip() for word in line.split('|')]
+
+        return self.segment(line, dropout)
+
+    def segment(self, sentence, dropout=0):
+        """segment single sentence (whitespace-tokenized string) with BPE encoding"""
+        tokens = [word.strip() for word in sentence.split('|')]
+        segments = self.segment_tokens(tokens, dropout)
+        return segments
+
+    def segment_tokens(self, tokens, dropout=0):
+        """segment a sequence of tokens with BPE encoding"""
         output = []
         for word in tokens:
             # eliminate double spaces
             if not word:
                 continue
-            new_word = [out for out in encode(word,
-                                              self.bpe_codes,
-                                              self.bpe_codes_reverse,
-                                              self.cache,
-                                              dropout)]
+            new_word = [out for segment in self._isolate_glossaries(word)
+                        for out in encode(segment,
+                                          self.bpe_codes,
+                                          self.bpe_codes_reverse,
+                                          self.vocab,
+                                          self.separator,
+                                          self.version,
+                                          self.cache,
+                                          self.glossaries_regex,
+                                          dropout)]
 
-            for item in new_word:
-                output.append(item)
+            for item in new_word[:-1]:
+                output.append(item + self.separator)
+            output.append(new_word[-1])
             output.append('|')
-
         return output[:-1]
 
+    def _isolate_glossaries(self, word):
+        word_segments = [word]
+        for gloss in self.glossaries:
+            word_segments = [out_segments for segment in word_segments
+                             for out_segments in isolate_glossary(segment, gloss)]
+        return word_segments
 
-def encode(orig, bpe_codes, bpe_codes_reverse, cache, dropout=0):
+
+def encode(orig, bpe_codes, bpe_codes_reverse, vocab, separator, version, cache, glossaries_regex=None, dropout=0):
     """Encode word based on list of BPE merge operations, which are applied consecutively
     """
     if not dropout and orig in cache:
         return cache[orig]
+
+    if glossaries_regex and glossaries_regex.match(orig):
+        cache[orig] = (orig,)
+        return (orig,)
 
     if len(orig) == 1:
         return orig
@@ -125,6 +156,13 @@ def encode(orig, bpe_codes, bpe_codes_reverse, cache, dropout=0):
         new_word.extend(word[i:])  # add all symbols until end of word
         word = new_word
 
+    # don't print end-of-word symbols
+
+    if word[-1] == '</w>':
+        word = word[:-1]
+    elif word[-1].endswith('</w>'):
+        word[-1] = word[-1][:-4]
+
     word = tuple(word)
 
     cache[orig] = word
@@ -157,3 +195,63 @@ def recursive_split(segment, bpe_codes, vocab, separator, final=False):
     else:
         for item in recursive_split(right, bpe_codes, vocab, separator, final):
             yield item
+
+
+def check_vocab_and_split(orig, bpe_codes, vocab, separator):
+    """Check for each segment in word if it is in-vocabulary,
+    and segment OOV segments into smaller units by reversing the BPE merge operations"""
+
+    out = []
+
+    for segment in orig[:-1]:
+        if segment + separator in vocab:
+            out.append(segment)
+        else:
+            #sys.stderr.write('OOV: {0}\n'.format(segment))
+            for item in recursive_split(segment, bpe_codes, vocab, separator, False):
+                out.append(item)
+
+    segment = orig[-1]
+    if segment in vocab:
+        out.append(segment)
+    else:
+        #sys.stderr.write('OOV: {0}\n'.format(segment))
+        for item in recursive_split(segment, bpe_codes, vocab, separator, True):
+            out.append(item)
+
+    return out
+
+
+def read_vocabulary(vocab_file, threshold):
+    """read vocabulary file produced by get_vocab.py, and filter according to frequency threshold.
+    """
+
+    vocabulary = set()
+
+    for line in vocab_file:
+        word, freq = line.strip('\r\n ').split(' ')
+        freq = int(freq)
+        if threshold == None or freq >= threshold:
+            vocabulary.add(word)
+
+    return vocabulary
+
+
+def isolate_glossary(word, glossary):
+    """
+    Isolate a glossary present inside a word.
+
+    Returns a list of subwords. In which all 'glossary' glossaries are isolated
+
+    For example, if 'USA' is the glossary and '1934USABUSA' the word, the return value is:
+        ['1934', 'USA', 'B', 'USA']
+    """
+    # regex equivalent of (if word == glossary or glossary not in word)
+    if re.match('^' + glossary + '$', word) or not re.search(glossary, word):
+        return [word]
+    else:
+        segments = re.split(r'({})'.format(glossary), word)
+        segments, ending = segments[:-1], segments[-1]
+        # Remove empty strings in regex group.
+        segments = list(filter(None, segments))
+        return segments + [ending.strip('\r\n ')] if ending != '' else segments

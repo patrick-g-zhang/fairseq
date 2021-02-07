@@ -57,7 +57,7 @@ def main():
     assert len(args.inputs) == len(args.outputs), \
         "number of input and output paths should match"
 
-    pdb.set_trace()
+
     with contextlib.ExitStack() as stack:
         inputs = [
             stack.enter_context(open(input, "r", encoding="utf-8"))
@@ -83,7 +83,6 @@ def main():
         # encoded_lines.append(encoded_line)
         stats = Counter()
         for i, (filt, enc_lines) in enumerate(encoded_lines, start=1):
-            pdb.set_trace()
             if filt == "PASS":
                 for enc_line, output_h in zip(enc_lines, outputs):
                     print(enc_line, file=output_h)
