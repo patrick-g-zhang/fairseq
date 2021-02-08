@@ -303,9 +303,17 @@ class BPEMaskTokensDataset(BaseWrapperDataset):
             test_word_mask = True
             pdb.set_trace()
             if test_word_mask:
-                special_indices = np.argwhere(bpe <= 4)
+                special_indices = list(np.squeeze(np.argwhere(bpe <= 4)))
+                num_mask = int(
+                    self.mask_prob * (len(special_indices) - 1) + np.random.rand())
+                selected_indices = []
+                selected_word_indices = np.random.choice(
+                    len(special_indices) - 1, num_mask, replace=False)
+                for index, (swid, ewid) in enumerate(zip(special_indices[:-1], special_indices[1:])):
+                    if index in selected_word_indices:
+                        selected_indices.extend(*range(swid + 1, ewid))
 
-            # mask for bpe
+                    # mask for bpe
             non_special_indices = np.argwhere(bpe > 4)  # no
             num_mask = int(
                 # add a random number for probabilistic rounding
