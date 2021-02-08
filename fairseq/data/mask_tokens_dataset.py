@@ -311,7 +311,7 @@ class BPEMaskTokensDataset(BaseWrapperDataset):
                     len(special_indices) - 1, num_mask, replace=False)
                 for index, (swid, ewid) in enumerate(zip(special_indices[:-1], special_indices[1:])):
                     if index in selected_word_indices:
-                        selected_indices.extend(*range(swid + 1, ewid))
+                        selected_indices.extend([*range(swid + 1, ewid)])
 
                     # mask for bpe
             non_special_indices = np.argwhere(bpe > 4)  # no
