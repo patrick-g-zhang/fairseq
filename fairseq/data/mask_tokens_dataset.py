@@ -300,6 +300,11 @@ class BPEMaskTokensDataset(BaseWrapperDataset):
             # decide elements to mask
             mask = np.full(sz, False)
 
+            test_word_mask = True
+            pdb.set_trace()
+            if test_word_mask:
+                special_indices = np.argwhere(bpe <= 4)
+
             # mask for bpe
             non_special_indices = np.argwhere(bpe > 4)  # no
             num_mask = int(
