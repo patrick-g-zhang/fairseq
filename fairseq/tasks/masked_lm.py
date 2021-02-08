@@ -151,8 +151,8 @@ class MaskedLMTask(FairseqTask):
 
         # create masked input and targets
         # pdb.set_trace()
-        mask_whole_words = get_whole_word_mask(self.args, self.source_dictionary) \
-            if self.args.mask_whole_words else None
+        # mask_whole_words = get_whole_word_mask(self.args, self.source_dictionary) \
+        #     if self.args.mask_whole_words else None
 
         if not self.args.two_inputs:
             src_dataset, tgt_dataset = MaskTokensDataset.apply_mask(
@@ -165,7 +165,7 @@ class MaskedLMTask(FairseqTask):
                 leave_unmasked_prob=self.args.leave_unmasked_prob,
                 random_token_prob=self.args.random_token_prob,
                 freq_weighted_replacement=self.args.freq_weighted_replacement,
-                mask_whole_words=mask_whole_words,
+                mask_whole_words=self.args.mask_whole_words,
                 continuous_mask=self.args.continuous_mask,
             )
         else:
@@ -182,6 +182,7 @@ class MaskedLMTask(FairseqTask):
                 leave_unmasked_prob=self.args.leave_unmasked_prob,
                 random_token_prob=self.args.random_token_prob,
                 freq_weighted_replacement=self.args.freq_weighted_replacement,
+                mask_whole_words=self.args.mask_whole_words,
             )
             pdb.set_trace()
             src_dataset.__getitem__(1)
