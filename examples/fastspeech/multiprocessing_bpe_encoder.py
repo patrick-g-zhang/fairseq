@@ -119,7 +119,7 @@ class MultiprocessingEncoder(object):
             line = re.sub('<EOS>', '', line)           # Delete pattern abc
             line = line.strip()
             phoneme_bpe_tokens = self.encode(line)
-            phoneme_bpe_tokens.insert(0, '<unk>')
+            phoneme_bpe_tokens.insert(0, '<s>')
             phoneme_bpe_tokens.append('</s>')
             if not sum(map(lambda x: len(x.split("+")),
                            phoneme_bpe_tokens)) == len(rline.split(" ")):
