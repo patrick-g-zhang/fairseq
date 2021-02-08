@@ -243,6 +243,7 @@ class BPEMaskTokensDataset(BaseWrapperDataset):
         leave_unmasked_prob: float = 0.08,
         random_token_prob: float = 0.08,
         freq_weighted_replacement: bool = False,
+        mask_whole_words: bool = False,
     ):
         assert 0.0 < mask_prob < 1.0
         assert 0.0 <= random_token_prob <= 1.0
@@ -263,6 +264,7 @@ class BPEMaskTokensDataset(BaseWrapperDataset):
         self.leave_unmasked_prob = leave_unmasked_prob
         self.random_token_prob = random_token_prob
 
+        self.mask_whole_words = mask_whole_words
         if random_token_prob > 0.0:
             if freq_weighted_replacement:
                 weights = np.array(self.vocab_b.count)
@@ -300,9 +302,7 @@ class BPEMaskTokensDataset(BaseWrapperDataset):
             # decide elements to mask
             mask = np.full(sz, False)
 
-            test_word_mask = True
-            pdb.set_trace()
-            if test_word_mask:
+            if self.mask_whole_words:
                 special_indices = list(np.squeeze(np.argwhere(bpe <= 4)))
                 num_mask = int(
                     self.mask_prob * (len(special_indices) - 1) + np.random.rand())
@@ -312,16 +312,19 @@ class BPEMaskTokensDataset(BaseWrapperDataset):
                 for index, (swid, ewid) in enumerate(zip(special_indices[:-1], special_indices[1:])):
                     if index in selected_word_indices:
                         selected_indices.extend([*range(swid + 1, ewid)])
+            else:
 
                     # mask for bpe
-            non_special_indices = np.argwhere(bpe > 4)  # no
-            num_mask = int(
-                # add a random number for probabilistic rounding
-                self.mask_prob * len(non_special_indices) + np.random.rand()
-            )
+                non_special_indices = np.argwhere(bpe > 4)  # no
+                num_mask = int(
+                    # add a random number for probabilistic rounding
+                    self.mask_prob * \
+                    len(non_special_indices) + np.random.rand()
+                )
 
-            selected_indices = non_special_indices[np.random.choice(
-                len(non_special_indices), num_mask, replace=False)]
+                selected_indices = non_special_indices[np.random.choice(
+                    len(non_special_indices), num_mask, replace=False)]
+
             mask[selected_indices] = True
             pad_bpe_mask = torch.nn.functional.pad(
                 torch.BoolTensor(mask), [True, False])
