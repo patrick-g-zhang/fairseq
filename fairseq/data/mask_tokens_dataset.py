@@ -305,7 +305,7 @@ class BPEMaskTokensDataset(BaseWrapperDataset):
                 # only end and SEP
                 pdb.set_trace()
                 special_indices = list(np.squeeze(
-                    np.argwhere(1 < bpe <= 4)))  # the number of word
+                    np.argwhere((bpe == 4) | (bpe == 2))))  # the number of word
                 # insert first SOS
                 special_indices.insert(0, 0)
                 num_mask = int(
