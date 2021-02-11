@@ -316,10 +316,10 @@ class BPEMaskTokensDataset(BaseWrapperDataset):
                 for index, (swid, ewid) in enumerate(zip(special_indices[:-1], special_indices[1:])):
                     if index in selected_word_indices:
                         if bpe[swid] == 2:
-                            swid = swid + 2
+                            nswid = swid + 2
                         else:
-                            swid = swid + 1
-                        selected_indices.extend([*range(swid + 1, ewid)])
+                            nswid = swid + 1
+                        selected_indices.extend([*range(nswid, ewid)])
             else:
 
                     # mask for bpe
