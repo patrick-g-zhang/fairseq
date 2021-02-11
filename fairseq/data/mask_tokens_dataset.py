@@ -302,15 +302,22 @@ class BPEMaskTokensDataset(BaseWrapperDataset):
             # decide elements to mask
             mask = np.full(sz, False)
             if self.mask_whole_words:
+                # only end and SEP
                 special_indices = list(np.squeeze(
-                    np.argwhere(bpe <= 4)))  # the number of word
+                    np.argwhere(1 < bpe <= 4)))  # the number of word
+                # insert first SOS
+                special_indices.insert(0, 0)
                 num_mask = int(
-                    self.mask_prob * (len(special_indices) - 1) + np.random.rand()) + 1
+                    self.mask_prob * (len(special_indices) - 1) + np.random.rand())
                 selected_indices = []
                 selected_word_indices = np.random.choice(
                     len(special_indices) - 1, num_mask, replace=False)
                 for index, (swid, ewid) in enumerate(zip(special_indices[:-1], special_indices[1:])):
                     if index in selected_word_indices:
+                        if bpe[swid] == 2:
+                            swid = swid + 2
+                        else:
+                            swid = swid + 1
                         selected_indices.extend([*range(swid + 1, ewid)])
             else:
 
