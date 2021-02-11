@@ -301,10 +301,11 @@ class BPEMaskTokensDataset(BaseWrapperDataset):
 
             # decide elements to mask
             mask = np.full(sz, False)
-
+            pdb.set_trace()
             if self.mask_whole_words:
                 pdb.set_trace()
-                special_indices = list(np.squeeze(np.argwhere(bpe <= 4)))
+                special_indices = list(np.squeeze(
+                    np.argwhere(bpe <= 4)))  # the number of word
                 num_mask = int(
                     self.mask_prob * (len(special_indices) - 1) + np.random.rand()) + 1
                 selected_indices = []
