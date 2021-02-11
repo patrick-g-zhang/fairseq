@@ -186,6 +186,7 @@ class MaskedLMTask(FairseqTask):
             )
 
             pdb.set_trace()
+            src_dataset.__getitem__(0)
         with data_utils.numpy_seed(self.args.seed + epoch):
             shuffle = np.random.permutation(len(src_dataset))
 
