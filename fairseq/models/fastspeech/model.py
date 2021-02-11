@@ -978,7 +978,7 @@ class RobertaLMHead(nn.Module):
         # saves both memory and computation
         if masked_tokens is not None:
             features = features[masked_tokens, :]
-
+        pdb.set_trace()
         x = self.dense(features)
         x = self.activation_fn(x)
         x = self.layer_norm(x)
