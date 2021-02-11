@@ -142,7 +142,6 @@ class MaskedLMTask(FairseqTask):
             break_mode=self.args.sample_break_mode,
             two_inputs=self.args.two_inputs,
         )
-        pdb.set_trace()
         print('| loaded {} blocks from: {}'.format(len(dataset), split_path))
 
         # prepend beginning-of-sentence token (<s>, equiv. to [CLS] in BERT)
@@ -186,6 +185,7 @@ class MaskedLMTask(FairseqTask):
                 mask_whole_words=self.args.mask_whole_words,
             )
 
+        pdb.set_trace()
         with data_utils.numpy_seed(self.args.seed + epoch):
             shuffle = np.random.permutation(len(src_dataset))
 

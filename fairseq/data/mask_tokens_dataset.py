@@ -305,10 +305,13 @@ class BPEMaskTokensDataset(BaseWrapperDataset):
                 # only end and SEP
                 special_indices = np.squeeze(np.argwhere(
                     (bpe == 4) | (bpe == 2))).tolist()  # the number of word
+                if not isinstance(special_indices, list):
+                    special_indices = [special_indices]
                 # insert first SOS
                 special_indices.insert(0, 0)
                 num_mask = int(
                     self.mask_prob * (len(special_indices) - 1) + np.random.rand())
+
                 selected_indices = []
                 selected_word_indices = np.random.choice(
                     len(special_indices) - 1, num_mask, replace=False)
