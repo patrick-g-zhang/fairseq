@@ -303,6 +303,7 @@ class BPEMaskTokensDataset(BaseWrapperDataset):
             mask = np.full(sz, False)
 
             if self.mask_whole_words:
+                pdb.set_trace()
                 special_indices = list(np.squeeze(np.argwhere(bpe <= 4)))
                 num_mask = int(
                     self.mask_prob * (len(special_indices) - 1) + np.random.rand()) + 1
@@ -320,7 +321,7 @@ class BPEMaskTokensDataset(BaseWrapperDataset):
                     # add a random number for probabilistic rounding
                     self.mask_prob * \
                     len(non_special_indices) + np.random.rand()
-                ) + 1
+                )
 
                 selected_indices = non_special_indices[np.random.choice(
                     len(non_special_indices), num_mask, replace=False)]
