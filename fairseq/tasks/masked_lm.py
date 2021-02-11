@@ -185,7 +185,10 @@ class MaskedLMTask(FairseqTask):
                 mask_whole_words=self.args.mask_whole_words,
             )
         pdb.set_trace()
-        src_dataset.__getitem__(1)
+        for src_data in src_dataset:
+            src_data['bpe']
+            pass
+        pdb.set_trace()
         with data_utils.numpy_seed(self.args.seed + epoch):
             shuffle = np.random.permutation(len(src_dataset))
 
