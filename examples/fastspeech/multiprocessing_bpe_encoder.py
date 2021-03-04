@@ -116,7 +116,7 @@ class MultiprocessingEncoder(object):
             rline = rline.strip()
             # remove repeat "|"
             rline = re.sub("(\|\s)+", r"\1", rline)
-            rline = re.sub('<UNK> |', '<UNK> |', rline)           # Delete pattern abc
+            rline = re.sub('<UNK> |', '<UNK>', rline)           # Delete pattern abc
             rline = re.sub('| <EOS>', '<EOS>', rline)           # Delete pattern abc
             line = re.sub('<UNK>', '', rline)           # Delete pattern abc
             line = re.sub('<EOS>', '', line)           # Delete pattern abc
