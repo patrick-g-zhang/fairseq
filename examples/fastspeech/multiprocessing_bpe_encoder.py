@@ -74,6 +74,7 @@ def main():
         # for encoded_line in zip(*inputs):
         # encoded_line = encoder.encode_lines(encoded_line)
         # encoded_lines.append(encoded_line)
+
         stats = Counter()
         for i, (filt, enc_lines) in enumerate(encoded_lines, start=1):
             if filt == "PASS":
@@ -115,6 +116,8 @@ class MultiprocessingEncoder(object):
             rline = rline.strip()
             # remove repeat "|"
             rline = re.sub("(\|\s)+", r"\1", rline)
+            line = re.sub('<UNK> |', '', rline)           # Delete pattern abc
+            line = re.sub('| <EOS>', '', rline)           # Delete pattern abc
             line = re.sub('<UNK>', '', rline)           # Delete pattern abc
             line = re.sub('<EOS>', '', line)           # Delete pattern abc
             line = line.strip()
