@@ -856,6 +856,7 @@ class FastSpeech2(FairseqEncoderLanguageModel):
         parser.add_argument('--encoder-layerdrop', type=float, metavar='D', default=0,
                             help='LayerDrop probability for encoder')
         parser.add_argument('--max-source-positions', type=int, help='max source positions')
+        parser.add_argument('--not-use-position-embeddings', action='store_false')
 
     @classmethod
     def build_model(cls, args, task):
@@ -1137,6 +1138,10 @@ def base_architecture(args):
     args.pooler_dropout = getattr(args, 'pooler_dropout', 0.0)
     args.encoder_layerdrop = getattr(args, 'encoder_layerdrop', 0.0)
     args.has_relative_attention_bias = getattr(args, 'has_relative_attention_bias', False)
+    pdb.set_trace()
+    args.not_use_position_embeddings = getattr(args, 'not_use_position_embeddings', False)
+    args.use_position_embeddings = not args.not_use_position_embeddings
+
     args.max_source_positions = getattr(args, 'max_source_positions', 512)
 
 
@@ -1250,8 +1255,8 @@ class TransformerEncoder(nn.Module):
                  use_position_embeddings = True,
                  dropout = 0.1,
                  has_relative_attention_bias = False,
-                 relative_attention_num_buckets = 96,
-                 max_distance = 200,
+                 relative_attention_num_buckets = 120,
+                 max_distance = 240,
                  last_ln = True,
                  max_source_positions = 512,
                  ):
@@ -1379,6 +1384,7 @@ class TransformerEncoder(nn.Module):
         }
         """
         if self.two_inputs:
+            pdb.set_trace()
             src_tokens = src_tokens.long()
             bpe = bpe.long()
             x, encoder_embedding = self.forward_embedding(src_tokens, bpe, phoneme2bpe)
