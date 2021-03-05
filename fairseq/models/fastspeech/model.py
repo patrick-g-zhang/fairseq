@@ -524,6 +524,7 @@ class RelativePositionMultiheadAttention(nn.Module):
                  add_bias_kv=False, add_zero_attn=False, self_attention=False,
                  encoder_decoder_attention=False, max_relative_positions=128):
         super().__init__()
+        pdb.set_trace()
         self.embed_dim = embed_dim
         self.kdim = kdim if kdim is not None else embed_dim
         self.vdim = vdim if vdim is not None else embed_dim
