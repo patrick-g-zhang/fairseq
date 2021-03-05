@@ -845,6 +845,7 @@ class FastSpeech2(FairseqEncoderLanguageModel):
         parser.add_argument('--dropout', type=float, metavar='D',
                             help='dropout probability')
         parser.add_argument('--has-relative-attention-bias', action='store_true')
+        parser.add_argument('--use-relative-position',action='store_true')
 
         parser.add_argument('--pooler-dropout', type=float, metavar='D',
                             help='dropout probability in the masked_lm pooler layers')
@@ -857,6 +858,7 @@ class FastSpeech2(FairseqEncoderLanguageModel):
                             help='LayerDrop probability for encoder')
         parser.add_argument('--max-source-positions', type=int, help='max source positions')
         parser.add_argument('--not-use-position-embeddings', action='store_true')
+
 
 
     @classmethod
@@ -1018,13 +1020,13 @@ class FastSpeech2Encoder(FairseqDecoder):
     def __init__(self, args, dictionary, dictionary_b=None):
         super().__init__(dictionary)
         self.args = args
+        pdb.set_trace()
         self.padding_idx = dictionary.pad()
         self.enc_layers = args.encoder_layers
-        # self.dec_layers = hparams['dec_layers']
-        # self.dec_arch = self.arch[self.enc_layers:self.enc_layers + self.dec_layers]
         self.encoder_embed_dim = args.encoder_embed_dim
         self.encoder_attention_heads = args.encoder_attention_heads
         self.has_relative_attention_bias = args.has_relative_attention_bias
+        self.use_relative_position = args.use_relative_position
 
         self.encoder_embed_tokens = nn.Embedding(
             len(dictionary), self.encoder_embed_dim, self.padding_idx)
@@ -1039,6 +1041,7 @@ class FastSpeech2Encoder(FairseqDecoder):
             num_attention_heads=self.encoder_attention_heads,
             embed_tokens=self.encoder_embed_tokens,
             bpe_embed_tokens=self.bpe_encoder_embed_tokens if args.two_inputs else None,
+            use_relative_position=self.use_relative_position,
             has_relative_attention_bias=self.has_relative_attention_bias,
             max_source_positions=args.max_source_positions
         )
@@ -1139,11 +1142,11 @@ def base_architecture(args):
     args.pooler_dropout = getattr(args, 'pooler_dropout', 0.0)
     args.encoder_layerdrop = getattr(args, 'encoder_layerdrop', 0.0)
     args.has_relative_attention_bias = getattr(args, 'has_relative_attention_bias', False)
-    pdb.set_trace()
     args.not_use_position_embeddings = getattr(args, 'not_use_position_embeddings', False)
     args.use_position_embeddings = not args.not_use_position_embeddings
 
     args.max_source_positions = getattr(args, 'max_source_positions', 512)
+
 
 
 @register_model_architecture('fastspeech', 'fastspeech_base')
@@ -1255,6 +1258,7 @@ class TransformerEncoder(nn.Module):
                  num_attention_heads= 2,
                  use_position_embeddings = True,
                  dropout = 0.1,
+                 use_relative_position = True,
                  has_relative_attention_bias = False,
                  relative_attention_num_buckets = 120,
                  max_distance = 240,
@@ -1276,6 +1280,7 @@ class TransformerEncoder(nn.Module):
         self.two_inputs = two_inputs
         self.bpe_embed_tokens = bpe_embed_tokens
         self.use_position_embeddings = use_position_embeddings
+        self.use_relative_position = use_relative_position
         self.has_relative_attention_bias = has_relative_attention_bias
         self.relative_attention_num_buckets = relative_attention_num_buckets
         self.embed_positions = (SinusoidalPositionalEmbedding(
@@ -1301,6 +1306,7 @@ class TransformerEncoder(nn.Module):
                 hidden_size=self.hidden_size,
                 num_attention_heads=self.num_attention_heads,
                 dropout=self.dropout,
+                use_relative_position=self.use_relative_position,
                 has_relative_attention_bias=self.has_relative_attention_bias,
                 relative_attention_num_buckets=self.relative_attention_num_buckets,
                 max_distance=self.max_distance,

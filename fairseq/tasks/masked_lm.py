@@ -144,7 +144,6 @@ class MaskedLMTask(FairseqTask):
             two_inputs=self.args.two_inputs,
         )
 
-        pdb.set_trace()
         print('| loaded {} blocks from: {}'.format(len(dataset), split_path))
 
         # prepend beginning-of-sentence token (<s>, equiv. to [CLS] in BERT)
