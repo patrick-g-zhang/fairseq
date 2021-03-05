@@ -857,7 +857,7 @@ class FastSpeech2(FairseqEncoderLanguageModel):
         # args for "Reducing Transformer Depth on Demand with Structured Dropout" (Fan et al., 2019)
         parser.add_argument('--encoder-layerdrop', type=float, metavar='D', default=0,
                             help='LayerDrop probability for encoder')
-        parser.add_argument('--max-source-positions', type=int, help='max source positions')
+        # parser.add_argument('--max-source-positions', type=int, help='max source positions')
         parser.add_argument('--not-use-position-embeddings', action='store_true')
 
 
@@ -1047,6 +1047,10 @@ class FastSpeech2Encoder(FairseqDecoder):
             has_relative_attention_bias=self.has_relative_attention_bias,
             max_source_positions=args.max_positions
         )
+
+        print("------------------------------------")
+        print(args.max_positions)
+        print("max positions")
 
         self.lm_head = RobertaLMHead(
             embed_dim=args.encoder_embed_dim,
