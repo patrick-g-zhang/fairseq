@@ -524,7 +524,7 @@ class RelativePositionMultiheadAttention(nn.Module):
                  add_bias_kv=False, add_zero_attn=False, self_attention=False,
                  encoder_decoder_attention=False, max_relative_positions=128):
         super().__init__()
-        pdb.set_trace()
+
         self.embed_dim = embed_dim
         self.kdim = kdim if kdim is not None else embed_dim
         self.vdim = vdim if vdim is not None else embed_dim
@@ -1021,7 +1021,7 @@ class FastSpeech2Encoder(FairseqDecoder):
     def __init__(self, args, dictionary, dictionary_b=None):
         super().__init__(dictionary)
         self.args = args
-        pdb.set_trace()
+
         self.padding_idx = dictionary.pad()
         self.enc_layers = args.encoder_layers
         self.encoder_embed_dim = args.encoder_embed_dim
@@ -1080,7 +1080,7 @@ class FastSpeech2Encoder(FairseqDecoder):
                   is a list of hidden states.
         """
 
-        pdb.set_trace()
+
         if self.args.two_inputs:
             phoneme_input = src_tokens['phoneme']
             bpe_input = src_tokens['bpe']
@@ -1298,7 +1298,7 @@ class TransformerEncoder(nn.Module):
             # 32 # num_attention_heads 12
             self.relative_attention_num_buckets = relative_attention_num_buckets
             self.relative_attention_bias = nn.Embedding(
-                self.relative_attention_num_buckets, 2, padding_idx=None)
+                self.relative_attention_num_buckets, self.num_attention_heads, padding_idx=None)
             self.max_distance = max_distance
         else:
             self.relative_attention_bias = None
@@ -1374,7 +1374,7 @@ class TransformerEncoder(nn.Module):
 
             embed += bpe_embed
 
-        pdb.set_trace()
+
         if self.embed_positions is not None:
             positions = self.embed_positions(src_tokens)
             x = embed + positions
@@ -1395,7 +1395,7 @@ class TransformerEncoder(nn.Module):
         }
         """
         if self.two_inputs:
-            pdb.set_trace()
+
             src_tokens = src_tokens.long()
             bpe = bpe.long()
             x, encoder_embedding = self.forward_embedding(src_tokens, bpe, phoneme2bpe)
