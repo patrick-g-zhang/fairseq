@@ -135,7 +135,7 @@ class MaskedLMTask(FairseqTask):
                 'Dataset not found: {} ({})'.format(split, split_path))
 
         # create continuous blocks of tokens
-        pdb.set_trace()
+
         dataset = TokenBlockDataset(
             dataset,
             dataset.sizes,
