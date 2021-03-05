@@ -1045,7 +1045,7 @@ class FastSpeech2Encoder(FairseqDecoder):
             bpe_embed_tokens=self.bpe_encoder_embed_tokens if args.two_inputs else None,
             use_relative_position=self.use_relative_position,
             has_relative_attention_bias=self.has_relative_attention_bias,
-            max_source_positions=args.max_source_positions
+            max_source_positions=args.max_positions
         )
 
         self.lm_head = RobertaLMHead(
@@ -1148,7 +1148,7 @@ def base_architecture(args):
     args.not_use_position_embeddings = getattr(args, 'not_use_position_embeddings', False)
     args.use_position_embeddings = not args.not_use_position_embeddings
 
-    args.max_source_positions = getattr(args, 'max_source_positions', 512)
+    # args.max_source_positions = getattr(args, 'max_source_positions', 512)
     args.use_relative_position = getattr(args, 'use_relative_position', False)
 
 
