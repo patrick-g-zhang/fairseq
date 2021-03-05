@@ -1040,6 +1040,7 @@ class FastSpeech2Encoder(FairseqDecoder):
             two_inputs=self.args.two_inputs,
             num_attention_heads=self.encoder_attention_heads,
             embed_tokens=self.encoder_embed_tokens,
+            use_position_embeddings=args.use_position_embeddings,
             bpe_embed_tokens=self.bpe_encoder_embed_tokens if args.two_inputs else None,
             use_relative_position=self.use_relative_position,
             has_relative_attention_bias=self.has_relative_attention_bias,
@@ -1372,6 +1373,7 @@ class TransformerEncoder(nn.Module):
 
             embed += bpe_embed
 
+        pdb.set_trace()
         if self.embed_positions is not None:
             positions = self.embed_positions(src_tokens)
             x = embed + positions
