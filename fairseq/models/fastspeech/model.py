@@ -844,7 +844,7 @@ class FastSpeech2(FairseqEncoderLanguageModel):
                             help='num encoder attention heads')
         parser.add_argument('--dropout', type=float, metavar='D',
                             help='dropout probability')
-        parser.add_argument('--has-relative-attention-bias', action='store_false')
+        parser.add_argument('--has-relative-attention-bias', action='store_true')
 
         parser.add_argument('--pooler-dropout', type=float, metavar='D',
                             help='dropout probability in the masked_lm pooler layers')
@@ -856,7 +856,8 @@ class FastSpeech2(FairseqEncoderLanguageModel):
         parser.add_argument('--encoder-layerdrop', type=float, metavar='D', default=0,
                             help='LayerDrop probability for encoder')
         parser.add_argument('--max-source-positions', type=int, help='max source positions')
-        parser.add_argument('--not-use-position-embeddings', action='store_false')
+        parser.add_argument('--not-use-position-embeddings', action='store_true')
+
 
     @classmethod
     def build_model(cls, args, task):
