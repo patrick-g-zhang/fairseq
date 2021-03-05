@@ -1078,6 +1078,7 @@ class FastSpeech2Encoder(FairseqDecoder):
                   is a list of hidden states.
         """
 
+        pdb.set_trace()
         if self.args.two_inputs:
             phoneme_input = src_tokens['phoneme']
             bpe_input = src_tokens['bpe']
