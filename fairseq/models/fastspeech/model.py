@@ -1147,7 +1147,7 @@ def base_architecture(args):
     args.use_position_embeddings = not args.not_use_position_embeddings
 
     args.max_source_positions = getattr(args, 'max_source_positions', 512)
-
+    args.use_relative_position = getattr(args, 'use_relative_position', False)
 
 
 @register_model_architecture('fastspeech', 'fastspeech_base')
