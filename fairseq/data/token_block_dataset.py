@@ -73,7 +73,7 @@ class TokenBlockDataset(FairseqDataset):
         self._sizes = slice_indices[:, 1] - slice_indices[:, 0]
 
         # build index mapping block indices to the underlying dataset indices
-        pdb.set_trace()
+
         block_to_dataset_index = _get_block_to_dataset_index_fast(
             sizes,
             slice_indices,
