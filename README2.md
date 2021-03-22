@@ -132,6 +132,11 @@ done
     
 ```
 
+SAVE_DIR=/blob/xuta/speech/tts/t-guzhang/fairseq/checkpoints/${ARCH}-Test
+DATA_DIR=/blob/xuta/speech/tts/t-guzhang/fairseq/experiments/data-bin/news.cn.bpe.10k.full
+LOG_DIR="logs/fastspeech-Test"
+
+
 #### Test with small data, 
 ```
 SAVE_DIR=/blob/xuta/speech/tts/t-guzhang/fairseq/checkpoints/${ARCH}-Test
