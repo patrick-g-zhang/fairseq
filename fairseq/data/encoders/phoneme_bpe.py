@@ -75,12 +75,13 @@ class BPE(object):
     def process_line(self, line, dropout=0, no_word_sep=False):
         """segment line, dealing with leading and trailing whitespace"""
 
-        return self.segment(line, dropout, no_word_sep)
+        return self.segment(line, dropout=dropout, no_word_sep=no_word_sep)
 
     def segment(self, sentence, dropout=0, no_word_sep=False):
         """segment single sentence (whitespace-tokenized string) with BPE encoding"""
         tokens = [word.strip() for word in sentence.split('|')]
-        segments = self.segment_tokens(tokens, dropout, no_word_sep)
+        segments = self.segment_tokens(
+            tokens, dropout=dropout, no_word_sep=no_word_sep)
         return segments
 
     def segment_tokens(self, tokens, dropout=0, no_word_sep=False):

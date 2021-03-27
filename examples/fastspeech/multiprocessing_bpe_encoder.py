@@ -109,7 +109,7 @@ class MultiprocessingEncoder(object):
 
     def encode(self, line):
         global bpe
-        ids = bpe.process_line(line, self.args.no_word_sep)
+        ids = bpe.process_line(line, no_word_sep=self.args.no_word_sep)
         return list(map(str, ids))
 
     def decode(self, tokens):
