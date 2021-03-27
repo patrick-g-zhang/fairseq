@@ -72,18 +72,18 @@ class BPE(object):
 
         self.cache = {}
 
-    def process_line(self, line, dropout=0):
+    def process_line(self, line, dropout=0, no_word_sep=False):
         """segment line, dealing with leading and trailing whitespace"""
 
-        return self.segment(line, dropout)
+        return self.segment(line, dropout, no_word_sep)
 
-    def segment(self, sentence, dropout=0):
+    def segment(self, sentence, dropout=0, no_word_sep=False):
         """segment single sentence (whitespace-tokenized string) with BPE encoding"""
         tokens = [word.strip() for word in sentence.split('|')]
-        segments = self.segment_tokens(tokens, dropout)
+        segments = self.segment_tokens(tokens, dropout, no_word_sep)
         return segments
 
-    def segment_tokens(self, tokens, dropout=0):
+    def segment_tokens(self, tokens, dropout=0, no_word_sep=False):
         """segment a sequence of tokens with BPE encoding"""
         output = []
         for word in tokens:
@@ -104,7 +104,10 @@ class BPE(object):
             for item in new_word[:-1]:
                 output.append(item + self.separator)
             output.append(new_word[-1])
-            output.append('|')
+            if not no_word_sep:
+                output.append('|')
+        if no_word_sep:
+            return output
         return output[:-1]
 
     def _isolate_glossaries(self, word):

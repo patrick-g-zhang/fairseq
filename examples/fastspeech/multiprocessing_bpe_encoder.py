@@ -31,6 +31,13 @@ def main():
         type=str,
         help='path to vocab.bpe',
     )
+
+    parser.add_argument(
+        "--no-word-sep",
+        action="store_true",
+        help='no word seperator',
+    )
+
     parser.add_argument(
         "--inputs",
         nargs="+",
@@ -67,13 +74,15 @@ def main():
         ]
 
         encoder = MultiprocessingEncoder(args)
-        pool = Pool(args.workers, initializer=encoder.initializer)
-        encoded_lines = pool.imap(encoder.encode_lines, zip(*inputs), 100)
-        # encoder.initializer()
-        # encoded_lines = []
-        # for encoded_line in zip(*inputs):
-        # encoded_line = encoder.encode_lines(encoded_line)
-        # encoded_lines.append(encoded_line)
+
+        # multiprocess
+        # pool = Pool(args.workers, initializer=encoder.initializer)
+        # encoded_lines = pool.imap(encoder.encode_lines, zip(*inputs), 100)
+        encoder.initializer()
+        encoded_lines = []
+        for encoded_line in zip(*inputs):
+            encoded_line = encoder.encode_lines(encoded_line)
+            encoded_lines.append(encoded_line)
 
         stats = Counter()
         for i, (filt, enc_lines) in enumerate(encoded_lines, start=1):
@@ -100,7 +109,7 @@ class MultiprocessingEncoder(object):
 
     def encode(self, line):
         global bpe
-        ids = bpe.process_line(line)
+        ids = bpe.process_line(line, self.args.no_word_sep)
         return list(map(str, ids))
 
     def decode(self, tokens):
@@ -111,13 +120,16 @@ class MultiprocessingEncoder(object):
         """
         Encode a set of lines. All lines will be encoded together.
         """
+        pdb.set_trace()
         enc_lines = []
         for rline in lines:
             rline = rline.strip()
             # remove repeat "|"
             rline = re.sub("(\|\s)+", r"\1", rline)
-            rline = re.sub('<UNK> \|', '<UNK>', rline)           # Delete pattern abc
-            rline = re.sub('\| <EOS>', '<EOS>', rline)           # Delete pattern abc
+            # Delete pattern abc
+            rline = re.sub('<UNK> \|', '<UNK>', rline)
+            # Delete pattern abc
+            rline = re.sub('\| <EOS>', '<EOS>', rline)
             line = re.sub('<UNK>', '', rline)           # Delete pattern abc
             line = re.sub('<EOS>', '', line)           # Delete pattern abc
             line = line.strip()
@@ -132,12 +144,6 @@ class MultiprocessingEncoder(object):
                 old_phonemes = rline.split(" ")
                 for ph_idx in range(min(len(new_phonemes), len(old_phonemes))):
                     print(new_phonemes[ph_idx], old_phonemes[ph_idx])
-
-                # print(old_phonemes)
-                # print(new_phonemes)
-                # print(len(old_phonemes))
-                # print(len(new_phonemes))
-                # exit(0)
 
             encoded_one_line = " ".join(phoneme_bpe_tokens) + ' $ ' + rline
             enc_lines.append(encoded_one_line)

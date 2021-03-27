@@ -19,7 +19,7 @@ python $dist_config /blob/xuta/speech/tts/t-guzhang/fairseq/train.py --fp16 $DAT
         2>&1 | tee -a ${SAVE_DIR}/train.log
 ```
 ### Add new dictionary class for phoneme dictionary
-
+- 27th March: add ‘nosep’ to phoneme dictionary indicates there is no word split, 'dict.txt' to 'dict_noseq.txt' 
 
 ## BPE and phoneme bert joint training
 
@@ -29,6 +29,7 @@ python $dist_config /blob/xuta/speech/tts/t-guzhang/fairseq/train.py --fp16 $DAT
 - we remove the UNK and EOS of phoneme string and add <s> and </s> as start and end of the bpe sequences
 - the ```vocab.bpe``` is bpe pair for bpe creation, the dictionary size is 30k
 - convert phoneme sequence to bpe sequence
+- 27th March, add ```no-word-sep``` as argument which indicates the word splitting not using
 ```
 for SPLIT in train valid test; do \
         python -m examples.fastspeech.multiprocessing_bpe_encoder \
