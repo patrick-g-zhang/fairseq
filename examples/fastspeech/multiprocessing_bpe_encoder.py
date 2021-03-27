@@ -134,7 +134,7 @@ class MultiprocessingEncoder(object):
             line = line.strip()
             if self.args.no_word_sep:
                 # no word sep
-                rline = re.sub('\|', '', rline)
+                rline = re.sub('\| ', '', rline)
             phoneme_bpe_tokens = self.encode(line)
             phoneme_bpe_tokens.insert(0, '<s>')
             phoneme_bpe_tokens.append('</s>')
