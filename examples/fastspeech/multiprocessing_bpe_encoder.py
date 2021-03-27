@@ -76,13 +76,13 @@ def main():
         encoder = MultiprocessingEncoder(args)
 
         # multiprocess
-        # pool = Pool(args.workers, initializer=encoder.initializer)
-        # encoded_lines = pool.imap(encoder.encode_lines, zip(*inputs), 100)
-        encoder.initializer()
-        encoded_lines = []
-        for encoded_line in zip(*inputs):
-            encoded_line = encoder.encode_lines(encoded_line)
-            encoded_lines.append(encoded_line)
+        pool = Pool(args.workers, initializer=encoder.initializer)
+        encoded_lines = pool.imap(encoder.encode_lines, zip(*inputs), 100)
+        # encoder.initializer()
+        # encoded_lines = []
+        # for encoded_line in zip(*inputs):
+            # encoded_line = encoder.encode_lines(encoded_line)
+            # encoded_lines.append(encoded_line)
 
         stats = Counter()
         for i, (filt, enc_lines) in enumerate(encoded_lines, start=1):
@@ -120,7 +120,6 @@ class MultiprocessingEncoder(object):
         """
         Encode a set of lines. All lines will be encoded together.
         """
-        pdb.set_trace()
         enc_lines = []
         for rline in lines:
             rline = rline.strip()
@@ -133,6 +132,9 @@ class MultiprocessingEncoder(object):
             line = re.sub('<UNK>', '', rline)           # Delete pattern abc
             line = re.sub('<EOS>', '', line)           # Delete pattern abc
             line = line.strip()
+            if self.args.no_word_sep:
+                # no word sep
+                rline = re.sub('\|', '', rline)
             phoneme_bpe_tokens = self.encode(line)
             phoneme_bpe_tokens.insert(0, '<s>')
             phoneme_bpe_tokens.append('</s>')
