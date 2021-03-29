@@ -39,6 +39,17 @@ for SPLIT in train valid test; do \
         --keep-empty \
         --workers 60; \
 done
+
+for SPLIT in valid test train; do \
+        python -m examples.fastspeech.multiprocessing_bpe_encoder \
+        --vocab-bpe experiments/phoneme_bpe_cn/vocab.10k.bpe \
+        --inputs experiments/news.ch/${SPLIT}_ch.txt \
+        --outputs experiments/news.ch/${SPLIT}_ch_no_sep_2.bpe \
+        --keep-empty \
+        --no-word-sep \
+        --workers 80; \
+done
+
 ```
 
 - convert phoneme sequence to bpe sequence dictionary size is 10k
@@ -130,12 +141,12 @@ done
 #### General configs
 ```
     ARCH=fastspeech
-    
+    SAVE_DIR=/blob/xuta/speech/tts/t-guzhang/fairseq/checkpoints/${ARCH}-Test
+    DATA_DIR=/blob/xuta/speech/tts/t-guzhang/fairseq/experiments/data-bin/news.cn.bpe.10k.full
+    LOG_DIR="logs/fastspeech-Test"
 ```
 
-SAVE_DIR=/blob/xuta/speech/tts/t-guzhang/fairseq/checkpoints/${ARCH}-Test
-DATA_DIR=/blob/xuta/speech/tts/t-guzhang/fairseq/experiments/data-bin/news.cn.bpe.10k.full
-LOG_DIR="logs/fastspeech-Test"
+
 
 
 #### Test with small data, 
