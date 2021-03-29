@@ -328,10 +328,9 @@ class BPEMaskTokensDataset(BaseWrapperDataset):
                     selected_indices = []
 
             else:
-                pdb.set_trace()
                     # mask for bpe
                     # if no sep bpe > 3 and if sep bpe > 4
-                non_special_indices = np.argwhere(bpe > 4)  # no
+                non_special_indices = np.argwhere(bpe > 3)  # no
                 num_mask = int(
                     # add a random number for probabilistic rounding
                     self.mask_prob * \

@@ -41,7 +41,6 @@ def main(args, init_distributed=False):
     # Print args
     print(args)
 
-    pdb.set_trace()
     # Setup task, e.g., translation, language modeling, etc.
     task = tasks.setup_task(args)
 
