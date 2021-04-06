@@ -17,6 +17,17 @@ import re
 import pdb
 import pickle
 import numpy as np
+import torch
+
+
+def process_f0(f0, f0_mean, f0_std):
+    f0_ = (f0 - f0_mean) / f0_std
+    f0_[f0 == 0] = np.interp(np.where(f0 == 0)[0],
+                             np.where(f0 > 0)[0], f0_[f0 > 0])
+    uv = (torch.FloatTensor(f0) == 0).float()
+    f0 = f0_
+    f0 = torch.FloatTensor(f0)
+    return f0, uv
 
 
 class IndexedDataset:
@@ -129,12 +140,10 @@ def main():
 
     with contextlib.ExitStack() as stack:
         pdb.set_trace()
-        inputs = [
-            # stack.enter_context(open(input, "r", encoding="utf-8"))
-            stack.enter_context(open(input, "rb"))
-            if input != "-" else sys.stdin
-            for input in args.inputs
-        ]
+
+        indexed_bs = IndexedDataset(args.inputs[0].split(".")[0])
+        spks_mv = np.load(
+            f'{args.inputs[0].split(".")[0]}_f0s.pkl', allow_pickle=True)
 
         # self.indexed_bs = IndexedDataset(
         # f'{self.data_dir}/{self.prefix}')
@@ -151,8 +160,8 @@ def main():
         # encoded_lines = pool.imap(encoder.encode_lines, zip(*inputs), 100)
         encoder.initializer()
         encoded_lines = []
-        for encoded_line in zip(*inputs):
-            encoded_line = encoder.encode_lines(encoded_line)
+        for item in indexed_bs:
+            encoded_line = encoder.encode_lines(item, spks_mv)
             encoded_lines.append(encoded_line)
 
         stats = Counter()
@@ -187,42 +196,46 @@ class MultiprocessingEncoder(object):
         global bpe
         return bpe.decode(tokens)
 
-    def encode_lines(self, lines):
+    def encode_lines(self, item, spks_mv):
         """
         Encode a set of lines. All lines will be encoded together.
         """
         enc_lines = []
-        for rline in lines:
-            pdb.set_trace()
-            rline = rline.strip()
-            pickle.load(rline)
-            # remove repeat "|"
-            rline = re.sub("(\|\s)+", r"\1", rline)
-            # Delete pattern abc
-            rline = re.sub('<UNK> \|', '<UNK>', rline)
-            # Delete pattern abc
-            rline = re.sub('\| <EOS>', '<EOS>', rline)
-            line = re.sub('<UNK>', '', rline)           # Delete pattern abc
-            line = re.sub('<EOS>', '', line)           # Delete pattern abc
-            line = line.strip()
-            if self.args.no_word_sep:
-                # no word sep
-                rline = re.sub('\| ', '', rline)
-            phoneme_bpe_tokens = self.encode(line)
-            phoneme_bpe_tokens.insert(0, '<s>')
-            phoneme_bpe_tokens.append('</s>')
+        pdb.set_trace()
+        mel2ph = item['mel2ph']
+        spk_id = item['spk_id']
+        f0, uv = process_f0(item["f0"], spks_mv[spk_id][0], spks_mv[spk_id][1])
+        pitch = item.get["pitch"]
+        ph = item.get['ph']
 
-            if not sum(map(lambda x: len(x.split("+")),
-                           phoneme_bpe_tokens)) == len(rline.split(" ")):
-                new_phonemes = []
-                for phoneme in phoneme_bpe_tokens:
-                    new_phonemes.extend(phoneme.split("+"))
-                old_phonemes = rline.split(" ")
-                for ph_idx in range(min(len(new_phonemes), len(old_phonemes))):
-                    print(new_phonemes[ph_idx], old_phonemes[ph_idx])
 
-            encoded_one_line = " ".join(phoneme_bpe_tokens) + ' $ ' + rline
-            enc_lines.append(encoded_one_line)
+        # remove repeat "|"
+        rline = re.sub("(\|\s)+", r"\1", rline)
+        # Delete pattern abc
+        rline = re.sub('<UNK> \|', '<UNK>', rline)
+        # Delete pattern abc
+        rline = re.sub('\| <EOS>', '<EOS>', rline)
+        line = re.sub('<UNK>', '', rline)           # Delete pattern abc
+        line = re.sub('<EOS>', '', line)           # Delete pattern abc
+        line = line.strip()
+        if self.args.no_word_sep:
+            # no word sep
+            rline = re.sub('\| ', '', rline)
+        phoneme_bpe_tokens = self.encode(line)
+        phoneme_bpe_tokens.insert(0, '<s>')
+        phoneme_bpe_tokens.append('</s>')
+
+        if not sum(map(lambda x: len(x.split("+")),
+                       phoneme_bpe_tokens)) == len(rline.split(" ")):
+            new_phonemes = []
+            for phoneme in phoneme_bpe_tokens:
+                new_phonemes.extend(phoneme.split("+"))
+            old_phonemes = rline.split(" ")
+            for ph_idx in range(min(len(new_phonemes), len(old_phonemes))):
+                print(new_phonemes[ph_idx], old_phonemes[ph_idx])
+
+        encoded_one_line = " ".join(phoneme_bpe_tokens) + ' $ ' + rline
+        enc_lines.append(encoded_one_line)
         return ["PASS", enc_lines]
 
     def decode_lines(self, lines):
