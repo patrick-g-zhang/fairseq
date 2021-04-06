@@ -123,6 +123,7 @@ def main():
     parser.add_argument("--workers", type=int, default=20)
     args = parser.parse_args()
 
+    pdb.set_trace()
     assert len(args.inputs) == len(args.outputs), \
         "number of input and output paths should match"
 
