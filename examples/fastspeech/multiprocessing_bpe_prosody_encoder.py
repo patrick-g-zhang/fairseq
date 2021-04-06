@@ -201,20 +201,15 @@ class MultiprocessingEncoder(object):
         Encode a set of lines. All lines will be encoded together.
         """
         enc_lines = []
-        pdb.set_trace()
         mel2ph = item['mel2ph']
         spk_id = item['spk_id']
         f0, uv = process_f0(item["f0"], spks_mv[spk_id][0], spks_mv[spk_id][1])
-        pitch = item.get["pitch"]
-        ph = item.get['ph']
+        pitch = item["pitch"]
+        ph = item['ph']
 
-
+        pdb.set_trace()
         # remove repeat "|"
-        rline = re.sub("(\|\s)+", r"\1", rline)
-        # Delete pattern abc
-        rline = re.sub('<UNK> \|', '<UNK>', rline)
-        # Delete pattern abc
-        rline = re.sub('\| <EOS>', '<EOS>', rline)
+        rline = re.sub("(\|\s)+", r"\1", ph)
         line = re.sub('<UNK>', '', rline)           # Delete pattern abc
         line = re.sub('<EOS>', '', line)           # Delete pattern abc
         line = line.strip()
