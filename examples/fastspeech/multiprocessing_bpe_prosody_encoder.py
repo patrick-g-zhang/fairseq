@@ -15,6 +15,7 @@ from multiprocessing import Pool
 from fairseq.data.encoders.phoneme_bpe import get_encoder
 import re
 import pdb
+import pickle
 
 
 def main():
@@ -128,6 +129,7 @@ class MultiprocessingEncoder(object):
         for rline in lines:
             pdb.set_trace()
             rline = rline.strip()
+            pickle.load(rline)
             # remove repeat "|"
             rline = re.sub("(\|\s)+", r"\1", rline)
             # Delete pattern abc
