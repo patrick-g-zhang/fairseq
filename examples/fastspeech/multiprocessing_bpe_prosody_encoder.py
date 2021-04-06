@@ -16,6 +16,67 @@ from fairseq.data.encoders.phoneme_bpe import get_encoder
 import re
 import pdb
 import pickle
+import numpy as np
+
+
+class IndexedDataset:
+    def __init__(self, path):
+        super().__init__()
+        self.path = path
+        self.data_file = None
+        self.data_offsets = np.load(
+            f"{path}.idx", allow_pickle=True).item()['offsets']
+        self.data_file = open(f"{path}.data", 'rb', buffering=0)
+
+    def check_index(self, i):
+        if i < 0 or i >= len(self.data_offsets) - 1:
+            raise IndexError('index out of range')
+
+    def __del__(self):
+        if self.data_file:
+            self.data_file.close()
+
+    def __getitem__(self, i):
+        self.check_index(i)
+        self.data_file.seek(self.data_offsets[i])
+        b = self.data_file.read(
+            self.data_offsets[i + 1] - self.data_offsets[i])
+        item = pickle.loads(b)
+        return item
+
+    def __len__(self):
+        return len(self.data_offsets) - 1
+
+
+class IndexedDatasetBuilder:
+    def __init__(self, path):
+        self.path = path
+        self.out_file = open(f"{path}.data", 'wb')
+        self.byte_offsets = [0]
+
+    def add_item(self, item):
+        s = pickle.dumps(item)
+        bytes = self.out_file.write(s)
+        self.byte_offsets.append(self.byte_offsets[-1] + bytes)
+
+    def finalize(self):
+        self.out_file.close()
+        np.save(open(f"{self.path}.idx", 'wb'), {'offsets': self.byte_offsets})
+
+    def merge_file_(self, another_file):
+        index = IndexedDataset(another_file)
+
+        begin = self.byte_offsets[-1]
+        for offset in index.data_offsets[1:]:
+            self.byte_offsets.append(begin + offset)
+
+        with open(f"{another_file}.data", 'rb') as f:
+            while True:
+                data = f.read(1024)
+                if data:
+                    self.out_file.write(data)
+                else:
+                    break
 
 
 def main():
@@ -66,12 +127,16 @@ def main():
         "number of input and output paths should match"
 
     with contextlib.ExitStack() as stack:
+        pdb.set_trace()
         inputs = [
             # stack.enter_context(open(input, "r", encoding="utf-8"))
             stack.enter_context(open(input, "rb"))
             if input != "-" else sys.stdin
             for input in args.inputs
         ]
+
+        # self.indexed_bs = IndexedDataset(
+        # f'{self.data_dir}/{self.prefix}')
         outputs = [
             stack.enter_context(open(output, "w", encoding="utf-8"))
             if output != "-" else sys.stdout
