@@ -149,13 +149,13 @@ def main():
         encoder = MultiprocessingEncoder(args, spks_mv)
 
         # multiprocess
-        pool = Pool(args.workers, initializer=encoder.initializer)
-        encoded_lines = pool.imap(encoder.encode_lines, indexed_bs, 100)
-        # encoder.initializer()
-        # encoded_lines = []
-        # for item in indexed_bs:
-        # encoded_line = encoder.encode_lines(item, spks_mv)
-        # encoded_lines.append(encoded_line)
+        # pool = Pool(args.workers, initializer=encoder.initializer)
+        # encoded_lines = pool.imap(encoder.encode_lines, indexed_bs, 100)
+        encoder.initializer()
+        encoded_lines = []
+        for item in indexed_bs:
+            encoded_line = encoder.encode_lines(item, spks_mv)
+            encoded_lines.append(encoded_line)
 
         stats = Counter()
 
@@ -220,7 +220,7 @@ class MultiprocessingEncoder(object):
         phoneme_bpe_tokens.insert(0, '<s>')
         phoneme_bpe_tokens.append('</s>')
 
-        out_item['phoneme_bpe_tokens'] = phoneme_bpe_tokens
+        out_item['phoneme_bpe_tokens'] = " ".join(phoneme_bpe_tokens)
         out_item['rline'] = rline
         if not sum(map(lambda x: len(x.split("+")),
                        phoneme_bpe_tokens)) == len(rline.split(" ")):
