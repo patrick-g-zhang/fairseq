@@ -134,7 +134,6 @@ def main():
     parser.add_argument("--workers", type=int, default=20)
     args = parser.parse_args()
 
-    pdb.set_trace()
     assert len(args.inputs) == len(args.outputs), \
         "number of input and output paths should match"
 
@@ -147,11 +146,7 @@ def main():
 
         # self.indexed_bs = IndexedDataset(
         # f'{self.data_dir}/{self.prefix}')
-        outputs = [
-            stack.enter_context(open(output, "w", encoding="utf-8"))
-            if output != "-" else sys.stdout
-            for output in args.outputs
-        ]
+        builder = IndexedDatasetBuilder(args.outputs[0].split(".")[0])
 
         encoder = MultiprocessingEncoder(args)
 
@@ -165,15 +160,16 @@ def main():
             encoded_lines.append(encoded_line)
 
         stats = Counter()
-        for i, (filt, enc_lines) in enumerate(encoded_lines, start=1):
+
+        for i, (filt, out_item) in enumerate(encoded_lines, start=1):
             if filt == "PASS":
-                for enc_line, output_h in zip(enc_lines, outputs):
-                    print(enc_line, file=output_h)
+                builder.add_item(out_item)
             else:
                 stats["num_filtered_" + filt] += 1
             if i % 10000 == 0:
                 print("processed {} lines".format(i), file=sys.stderr)
 
+        builder.finalize()
         for k, v in stats.most_common():
             print("[{}] filtered {} lines".format(k, v), file=sys.stderr)
 
@@ -200,12 +196,17 @@ class MultiprocessingEncoder(object):
         """
         Encode a set of lines. All lines will be encoded together.
         """
-        enc_lines = []
+        out_item = {}
         mel2ph = item['mel2ph']
+        out_item['mel2ph'] = mel2ph
         spk_id = item['spk_id']
+        out_item['spk_id'] = spk_id
         f0, uv = process_f0(item["f0"], spks_mv[spk_id][0], spks_mv[spk_id][1])
+        out_item['f0'] = f0
+        out_item['uv'] = uv
         pitch = item["pitch"]
-        ph = item['ph']
+        out_item['pitch'] = pitch
+        ph = item['phone']
 
         pdb.set_trace()
         # remove repeat "|"
@@ -220,6 +221,8 @@ class MultiprocessingEncoder(object):
         phoneme_bpe_tokens.insert(0, '<s>')
         phoneme_bpe_tokens.append('</s>')
 
+        out_item['phoneme_bpe_tokens'] = phoneme_bpe_tokens
+        out_item['rline'] = rline
         if not sum(map(lambda x: len(x.split("+")),
                        phoneme_bpe_tokens)) == len(rline.split(" ")):
             new_phonemes = []
@@ -229,9 +232,7 @@ class MultiprocessingEncoder(object):
             for ph_idx in range(min(len(new_phonemes), len(old_phonemes))):
                 print(new_phonemes[ph_idx], old_phonemes[ph_idx])
 
-        encoded_one_line = " ".join(phoneme_bpe_tokens) + ' $ ' + rline
-        enc_lines.append(encoded_one_line)
-        return ["PASS", enc_lines]
+        return ["PASS", out_item]
 
     def decode_lines(self, lines):
         dec_lines = []

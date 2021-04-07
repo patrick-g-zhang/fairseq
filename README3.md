@@ -38,13 +38,11 @@ python $dist_config /blob/xuta/speech/tts/t-guzhang/fairseq/train.py --fp16 $DAT
 for SPLIT in train valid test; do \
         python -m examples.fastspeech.multiprocessing_bpe_prosody_encoder \
         --vocab-bpe experiments/phoneme_bpe/vocab.10k.bpe \
-        --inputs experiments/librispeech-prosody/${SPLIT}-prosody.txt \
-        --outputs experiments/librispeech-prosody/${SPLIT}-prosody.bpe \
+        --inputs experiments/librispeech-prosody/${SPLIT} \
+        --outputs experiments/librispeech-prosody/${SPLIT}_processed \
         --keep-empty \
         --workers 1; \
 done
-
-
 ```
 
 ### Add joint training with subword phoneme
