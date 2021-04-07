@@ -112,7 +112,7 @@ def main(args):
         pool = None
 
         if num_workers > 1:
-            pool = Pool(processes=num_workers - 1)
+            # pool = Pool(processes=num_workers - 1)
             for worker_id in range(1, num_workers):
                 prefix = "{}{}".format(output_prefix, worker_id)
                 # pool.apply_async(
