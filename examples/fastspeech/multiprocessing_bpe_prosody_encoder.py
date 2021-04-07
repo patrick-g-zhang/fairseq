@@ -191,7 +191,7 @@ class MultiprocessingEncoder(object):
         global bpe
         return bpe.decode(tokens)
 
-    def encode_lines(self, item, spks_mv):
+    def encode_lines(self, item):
         """
         Encode a set of lines. All lines will be encoded together.
         """
