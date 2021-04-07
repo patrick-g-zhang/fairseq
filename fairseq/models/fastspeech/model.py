@@ -1301,11 +1301,12 @@ class FastSpeech2Encoder(FairseqDecoder):
             bpe_input = src_tokens['bpe']
             phoneme2bpe = src_tokens['phoneme2bpe']
 
-             x = self.extract_features(
+            x = self.extract_features(
                 phoneme_input, bpe_input=bpe_input, phoneme2bpe=phoneme2bpe)
 
             if self.args.prosody_predictor:
                 # 现在加上了韵律预测模块，需要多load 多一点信息
+                pass
 
 
 
