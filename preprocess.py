@@ -102,7 +102,6 @@ def main(args):
         # the files will be cut for different parts for processing
         # !!!! pay attention for my dataset
         # I will use dataset with multiple input
-        pdb.set_trace()
         if args.indexed_dataset:
             # the input will be indexed dataset
             offsets = Binarizer.find_indexdataset_offsets(
@@ -116,30 +115,30 @@ def main(args):
             pool = Pool(processes=num_workers - 1)
             for worker_id in range(1, num_workers):
                 prefix = "{}{}".format(output_prefix, worker_id)
-                pool.apply_async(
-                    binarize,
-                    (
-                        args,
-                        input_file,
-                        vocab,
-                        prefix,
-                        lang,
-                        offsets[worker_id],
-                        offsets[worker_id + 1],
-                        vocabb,
-                    ),
-                    callback=merge_result
-                )
+                # pool.apply_async(
+                #     binarize,
+                #     (
+                #         args,
+                #         input_file,
+                #         vocab,
+                #         prefix,
+                #         lang,
+                #         offsets[worker_id],
+                #         offsets[worker_id + 1],
+                #         vocabb,
+                #     ),
+                #     callback=merge_result
+                # )
                 # pdb.set_trace()
-                # binarize(args,
-                #          input_file,
-                #          vocab,
-                #          prefix,
-                #          lang,
-                #          offsets[worker_id],
-                #          offsets[worker_id + 1],
-                #          vocabb,
-                #          ),
+                binarize(args,
+                         input_file,
+                         vocab,
+                         prefix,
+                         lang,
+                         offsets[worker_id],
+                         offsets[worker_id + 1],
+                         vocabb,
+                         ),
             pool.close()
 
         ds = indexed_dataset.make_builder(dataset_dest_file(args, output_prefix, lang, "bin"),
@@ -275,8 +274,12 @@ def binarize(args, filename, vocab, output_prefix, lang, offset, end, vocabb=Non
         res = Binarizer.binarize(filename, vocab, consumer, append_eos=append_eos,
                                  offset=offset, end=end)
     else:
-        res = Binarizer.binarize_two(filename, vocab, vocabb, consumer, append_eos=append_eos,
-                                     offset=offset, end=end)
+        if self.indexed_dataset:
+            res = Binarizer.binarize_two_index_dataset(filename, vocab, vocabb, consumer, append_eos=append_eos,
+                                                       offset=offset, end=end)
+        else
+            res = Binarizer.binarize_two(filename, vocab, vocabb, consumer, append_eos=append_eos,
+                                         offset=offset, end=end)
     print(dataset_dest_file(args, output_prefix, lang, "idx"))
     ds.finalize(dataset_dest_file(args, output_prefix, lang, "idx"))
     return res

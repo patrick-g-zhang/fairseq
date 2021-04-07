@@ -142,6 +142,9 @@ class Binarizer:
         nseq, ntok = 0, 0
         indexed_bs = IndexedDataset(filename)
 
+        if offset > 0 and end == 0:
+            end = len(indexed_bs)
+
         for index in range(offset, end):
             pdb.set_trace()
             out_item = indexed_bs[index]
