@@ -259,8 +259,8 @@ def add_preprocess_args(parser):
                        help="number of parallel workers")
     group.add_argument("--two-inputs", action="store_true",
                        help="two inputs")
-    group.add_argument("--two-inputs", action="store_true",
-                       help="two inputs")
+    group.add_argument("--indexed-dataset", action="store_true",
+                       help="indexed dataset")
     # fmt: on
     return parser
 
@@ -283,6 +283,8 @@ def add_dataset_args(parser, train=False, gen=False):
                         help='output dataset implementation')
     group.add_argument("--two-inputs", action="store_true",
                        help="two inputs")
+    group.add_argument("--indexed-dataset", action="store_true",
+                       help="indexed dataset")
     if train:
         group.add_argument('--train-subset', default='train', metavar='SPLIT',
                            choices=['train', 'valid', 'test'],

@@ -87,6 +87,7 @@ done
     --destdir  ${DESTDIR}\
     --dataset-impl dict \
     --two-inputs \
+    --indexed-dataset\
     --workers 1
  ```
 
