@@ -88,7 +88,7 @@ done
     --dataset-impl dict \
     --two-inputs \
     --indexed-dataset\
-    --workers 1
+    --workers 3
  ```
 
 ### Binary data to training dataset
@@ -98,11 +98,12 @@ done
 
 ### Training Command
  - adding new argument ```--two-inputs``` to ```train.py``` file. The input needs both bpe and phoneme
+ - adding new argument ```--prosody-predict``` to ```train.py``` file. we will also predict prosody.
  - adding ```tensorboard-logdir```
  
 #### General configs
 ```
-    ARCH=fastspeech
+    ARCH=fastspeech # 我把韵律预测与归到这里了
     SAVE_DIR=/blob/xuta/speech/tts/t-guzhang/fairseq/checkpoints/${ARCH}-Test
     DATA_DIR=/blob/xuta/speech/tts/t-guzhang/fairseq/experiments/data-bin/news.cn.bpe.10k.full
     LOG_DIR="logs/fastspeech-Test"
@@ -110,13 +111,6 @@ done
 
 
 
-
-#### Test with small data, 
-```
-SAVE_DIR=/blob/xuta/speech/tts/t-guzhang/fairseq/checkpoints/${ARCH}-Test
-DATA_DIR=/blob/xuta/speech/tts/t-guzhang/fairseq/experiments/data-bin/news-2017-19.en.bpe
-LOG_DIR="logs/fastspeech-Test"
-```
 
 #### Full data, second version dictionary, 30k size with full data, 
 ```

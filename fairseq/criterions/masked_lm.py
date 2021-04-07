@@ -31,6 +31,7 @@ class MaskedLmLoss(FairseqCriterion):
         """
         # compute MLM loss
         if self.args.two_inputs:
+            # 多个输入
             bpe_masked_tokens = sample['target']['bpe'].ne(self.padding_idx)
             phoneme_masked_tokens = sample['target']['phoneme'].ne(
                 self.padding_idx)

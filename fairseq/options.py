@@ -285,6 +285,8 @@ def add_dataset_args(parser, train=False, gen=False):
                        help="two inputs")
     group.add_argument("--indexed-dataset", action="store_true",
                        help="indexed dataset")
+    group.add_argument("--prosody-predict", action="store_true",
+                       help="prosody predict")
     if train:
         group.add_argument('--train-subset', default='train', metavar='SPLIT',
                            choices=['train', 'valid', 'test'],

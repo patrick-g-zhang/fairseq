@@ -27,6 +27,149 @@ DEFAULT_MAX_SOURCE_POSITIONS = 2000
 DEFAULT_MAX_TARGET_POSITIONS = 2000
 from torch.nn import Parameter
 
+
+class DurationPredictor(torch.nn.Module):
+    """Duration predictor module.
+    This is a module of duration predictor described in `FastSpeech: Fast, Robust and Controllable Text to Speech`_.
+    The duration predictor predicts a duration of each frame in log domain from the hidden embeddings of encoder.
+    .. _`FastSpeech: Fast, Robust and Controllable Text to Speech`:
+        https://arxiv.org/pdf/1905.09263.pdf
+    Note:
+        The calculation domain of outputs is different between in `forward` and in `inference`. In `forward`,
+        the outputs are calculated in log domain but in `inference`, those are calculated in linear domain.
+    """
+
+    def __init__(self, idim, n_layers=2, n_chans=384, kernel_size=3, dropout_rate=0.1, offset=1.0, padding='SAME'):
+        """Initilize duration predictor module.
+        Args:
+            idim (int): Input dimension.
+            n_layers (int, optional): Number of convolutional layers.
+            n_chans (int, optional): Number of channels of convolutional layers.
+            kernel_size (int, optional): Kernel size of convolutional layers.
+            dropout_rate (float, optional): Dropout rate.
+            offset (float, optional): Offset value to avoid nan in log domain.
+        """
+        super(DurationPredictor, self).__init__()
+        self.offset = offset
+        self.conv = torch.nn.ModuleList()
+        self.kernel_size = kernel_size
+        self.padding = padding
+        for idx in range(n_layers):
+            in_chans = idim if idx == 0 else n_chans
+            self.conv += [torch.nn.Sequential(
+                torch.nn.Conv1d(in_chans, n_chans, kernel_size,
+                                stride=1, padding=0),
+                torch.nn.ReLU(),
+                LayerNorm(n_chans, dim=1),
+                torch.nn.Dropout(dropout_rate)
+            )]
+        self.linear = torch.nn.Linear(n_chans, 1)
+
+    def _forward(self, xs, x_masks=None, is_inference=False):
+        xs = xs.transpose(1, -1)  # (B, idim, Tmax)
+        for f in self.conv:
+            if self.padding == 'SAME':
+                xs = F.pad(xs, [self.kernel_size // 2, self.kernel_size // 2])
+            elif self.padding == 'LEFT':
+                xs = F.pad(xs, [self.kernel_size - 1, 0])
+            xs = f(xs)  # (B, C, Tmax)
+            if x_masks is not None:
+                xs = xs * (1 - x_masks.float())[:, None, :]
+
+        # NOTE: calculate in log domain
+        xs = self.linear(xs.transpose(1, -1)).squeeze(-1)  # (B, Tmax)
+
+        if is_inference:
+            # NOTE: calculate in linear domain
+            xs = torch.clamp(torch.round(xs.exp() - self.offset),
+                             min=0).long()  # avoid negative value
+
+        if x_masks is not None:
+            xs = xs.masked_fill(x_masks, 0.0)
+        return xs
+
+    def forward(self, xs, x_masks=None):
+        """Calculate forward propagation.
+        Args:
+            xs (Tensor): Batch of input sequences (B, Tmax, idim).
+            x_masks (ByteTensor, optional): Batch of masks indicating padded part (B, Tmax).
+        Returns:
+            Tensor: Batch of predicted durations in log domain (B, Tmax).
+        """
+        return self._forward(xs, x_masks, False)
+
+
+
+
+class PitchPredictor(torch.nn.Module):
+    def __init__(self,
+                 idim,
+                 n_layers=5,
+                 n_chans=384,
+                 odim=2,
+                 kernel_size=5,
+                 dropout_rate=0.1,
+                 padding='SAME',
+                 use_position_embeddings: bool = True,
+                 ):
+        """Initilize pitch predictor module.
+        Args:
+            idim (int): Input dimension.
+            n_layers (int, optional): Number of convolutional layers.
+            n_chans (int, optional): Number of channels of convolutional layers.
+            kernel_size (int, optional): Kernel size of convolutional layers.
+            dropout_rate (float, optional): Dropout rate.
+            offset (float, optional): Offset value to avoid nan in log domain.
+        """
+        super(PitchPredictor, self).__init__()
+        self.conv = torch.nn.ModuleList()
+        self.kernel_size = kernel_size
+        self.padding = padding
+        for idx in range(n_layers):
+            in_chans = idim if idx == 0 else n_chans
+            self.conv += [torch.nn.Sequential(
+                # torch.nn.ConstantPad1d(((kernel_size - 1) // 2, (kernel_size - 1) // 2)
+                #                        if padding == 'SAME'
+                #                        else (kernel_size - 1, 0), 0),
+                torch.nn.Conv1d(in_chans, n_chans, kernel_size,
+                                stride=1, padding=0),
+                torch.nn.ReLU(),
+                LayerNorm(n_chans, dim=1),
+                torch.nn.Dropout(dropout_rate)
+            )]
+        self.linear = torch.nn.Linear(n_chans, odim)
+
+        self.use_position_embeddings = use_position_embeddings
+
+        if self.use_position_embeddings:
+            self.embed_positions = SinusoidalPositionalEmbedding(
+                idim, 0, init_size=4096)
+            self.pos_embed_alpha = nn.Parameter(torch.Tensor([1]))
+
+    def forward(self, xs):
+        """
+
+        :param xs: [B, T, H]
+        :return: [B, T, H]
+        """
+        if self.use_position_embeddings:
+            positions = self.pos_embed_alpha * self.embed_positions(xs[..., 0])
+            xs = xs + positions
+        xs = xs.transpose(1, -1)  # (B, idim, Tmax)
+        for f in self.conv:
+            if self.padding == 'SAME':
+                xs = F.pad(xs, [self.kernel_size // 2, self.kernel_size // 2])
+            elif self.padding == 'LEFT':
+                xs = F.pad(xs, [self.kernel_size - 1, 0])
+            xs = f(xs)  # (B, C, Tmax)
+
+        # NOTE: calculate in log domain
+        xs = self.linear(xs.transpose(1, -1))  # (B, Tmax, H)
+        return xs
+
+class EnergyPredictor(PitchPredictor):
+    pass
+
 class LayerNorm2(torch.nn.LayerNorm):
     """Layer normalization module.
     :param int nout: output dim size
@@ -861,6 +1004,15 @@ class FastSpeech2(FairseqEncoderLanguageModel):
         parser.add_argument('--not-use-position-embeddings', action='store_true')
 
 
+        # add more pretraining task 
+
+        # 韵律预测
+        parser.add_argument('--prosody-predictor', action='store_true')
+        parser.add_argument('--use-spk-id', action='store_true')
+        parser.add_argument('--spk-num', type=int)
+
+
+
 
     @classmethod
     def build_model(cls, args, task):
@@ -1024,7 +1176,15 @@ class FastSpeech2Encoder(FairseqDecoder):
 
         self.padding_idx = dictionary.pad()
         self.enc_layers = args.encoder_layers
+
+        # encoder 的维度大小
         self.encoder_embed_dim = args.encoder_embed_dim
+
+        # decoder以及prosody predictor维度大小
+        self.decoder_embed_dim = args.decoder_embed_dim
+
+        self.num_spk = args.num_spk
+
         self.encoder_attention_heads = args.encoder_attention_heads
         self.has_relative_attention_bias = args.has_relative_attention_bias
         self.use_relative_position = args.use_relative_position
@@ -1067,6 +1227,56 @@ class FastSpeech2Encoder(FairseqDecoder):
             weight=self.bpe_encoder_embed_tokens.weight,
         )
 
+        # add prosody predictor 引入多余的预训练目标
+        if self.args.prosody_predictor:
+
+            # 将维度缩小到decoder阶段
+            self.encoder_map = Linear(
+                self.encoder_embed_dim, self.decoder_embed_dim, bias=True)
+
+            # 会有多个speaker进来，所以
+            if args.use_spk_id:
+                self.spk_embed_proj = nn.Embedding(
+                    self.num_spk, self.encoder_embed_dim)
+            else:
+                # 使用speaker embedding 这个地方需要注意
+                self.spk_embed_proj = Linear(256, self.decoder_embed_dim, bias=True)
+
+
+            # duration predictor 韵律预测  
+            self.dur_predictor = DurationPredictor(self.decoder_embed_dim,
+            n_chans=256,
+            dropout_rate=0.5, padding='SAME',
+            kernel_size=3)
+
+
+            self.pitch_embed = nn.Embedding(
+                300, self.decoder_embed_dim, self.padding_idx)
+            
+            self.pitch_predictor = PitchPredictor(
+                self.decoder_embed_dim,
+                n_chans=256,
+                dropout_rate=0.5,
+                padding='SAME',
+                odim=2,
+                use_position_embeddings=self.use_position_embeddings)
+            self.pitch_do = nn.Dropout(0.5)
+
+
+            self.energy_predictor = EnergyPredictor(
+                self.decoder_embed_dim,
+                n_chans=256,
+                dropout_rate=0.5,
+                odim=1,
+                padding='SAME',
+                use_position_embeddings=self.use_position_embeddings,
+            )
+            self.energy_embed = nn.Embedding(
+                256, self.decoder_embed_dim, self.padding_idx)
+            self.energy_do = nn.Dropout(0.5)
+
+
+
     def forward(self, src_tokens, features_only=False, return_all_hiddens=False, masked_tokens=None, bpe_masked_tokens=None, **unused):
         """
         Args:
@@ -1086,12 +1296,21 @@ class FastSpeech2Encoder(FairseqDecoder):
 
 
         if self.args.two_inputs:
+            # bpe和phoneme同时作为输入
             phoneme_input = src_tokens['phoneme']
             bpe_input = src_tokens['bpe']
             phoneme2bpe = src_tokens['phoneme2bpe']
 
-            x = self.extract_features(
+             x = self.extract_features(
                 phoneme_input, bpe_input=bpe_input, phoneme2bpe=phoneme2bpe)
+
+            if self.args.prosody_predictor:
+                # 现在加上了韵律预测模块，需要多load 多一点信息
+
+
+
+
+           
             if not features_only:
                 x = self.output_layer(x, masked_tokens=masked_tokens, phoneme2bpe=phoneme2bpe,bpe_masked_tokens=bpe_masked_tokens)
         else:
@@ -1100,6 +1319,25 @@ class FastSpeech2Encoder(FairseqDecoder):
             if not features_only:
                 x = self.output_layer(x, masked_tokens=masked_tokens)
         return x
+
+    def prosody_predictor(self, src_tokens, bpe_input=None, phoneme2bpe=None, **unused):
+        # 在这里把韵律预测和bpe loss集成在一起了
+        if self.args.two_inputs:
+            encoder_outputs = self.encoder(
+                src_tokens=src_tokens,
+                bpe=bpe_input,
+                phoneme2bpe=phoneme2bpe
+                )
+        else:
+            encoder_outputs = self.encoder(
+                    src_tokens)
+        encoder_outputs = encoder_outputs['encoder_out']  # [T, B, C]
+        #缩到decoder 维度
+        encoder_out = self.encoder_map(encoder_out)
+        src_nonpadding = (src_tokens > 0).float().permute(1, 0)[:, :, None]
+        # 加上speaker embedding
+        spk_embed = self.spk_embed_proj(spk_embed)[None, :, :]
+
 
     def extract_features(self, src_tokens, bpe_input=None, phoneme2bpe=None, **unused):
 
@@ -1154,6 +1392,8 @@ def base_architecture(args):
 
     # args.max_source_positions = getattr(args, 'max_source_positions', 512)
     args.use_relative_position = getattr(args, 'use_relative_position', False)
+    # decoder dim 在这里引入进来 默认为256
+    args.decoder_embed_dim = getattr(args, 'decoder_embed_dim', 256)
 
 
 @register_model_architecture('fastspeech', 'fastspeech_base')
