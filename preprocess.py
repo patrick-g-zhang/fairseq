@@ -274,12 +274,12 @@ def binarize(args, filename, vocab, output_prefix, lang, offset, end, vocabb=Non
         res = Binarizer.binarize(filename, vocab, consumer, append_eos=append_eos,
                                  offset=offset, end=end)
     else:
-        if self.indexed_dataset:
-            res = Binarizer.binarize_two_index_dataset(filename, vocab, vocabb, consumer, append_eos=append_eos,
-                                                       offset=offset, end=end)
-        else
-            res = Binarizer.binarize_two(filename, vocab, vocabb, consumer, append_eos=append_eos,
-                                         offset=offset, end=end)
+        if args.indexed_dataset:
+            res = Binarizer.binarize_two_index_dataset(
+                filename, vocab, vocabb, consumer, append_eos=append_eos, offset=offset, end=end)
+        else:
+            res = Binarizer.binarize_two(
+                filename, vocab, vocabb, consumer, append_eos=append_eos, offset=offset, end=end)
     print(dataset_dest_file(args, output_prefix, lang, "idx"))
     ds.finalize(dataset_dest_file(args, output_prefix, lang, "idx"))
     return res
