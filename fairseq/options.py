@@ -259,6 +259,8 @@ def add_preprocess_args(parser):
                        help="number of parallel workers")
     group.add_argument("--two-inputs", action="store_true",
                        help="two inputs")
+    group.add_argument("--two-inputs", action="store_true",
+                       help="two inputs")
     # fmt: on
     return parser
 

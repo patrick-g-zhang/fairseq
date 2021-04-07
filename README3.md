@@ -41,7 +41,7 @@ for SPLIT in train valid test; do \
         --inputs experiments/librispeech-prosody/${SPLIT} \
         --outputs experiments/librispeech-prosody/${SPLIT}_processed \
         --keep-empty \
-        --workers 1; \
+        --workers 20; \
 done
 ```
 
@@ -62,39 +62,19 @@ done
  - adding new argument ```--two-inputs``` to ```preprocess.py``` file. 
  - create a new index dataset named ```DictIndexedDataset```, since we need to store phoneme sequence, sub-word sequence, and phoneme2sub-word. The three vectors are stored in dictionary format.
  - changing argument ```--dataset-impl``` to ```dict```
- - preprocess short and test files
+ - adding new argument ```--indexed-dataset``` to indicate the input is indexed dataset instead of text 
 
-
- ```
- 
-     SRCDICT=experiments/phoneme/dict.txt # phoneme dictionary
-    TGTDICT=experiments/phoneme_bpe/bpe.30k.dict.txt # bpe dictionary
-    TRAINPREF=experiments/news-2017-19.en/news.train.test.bpe
-    VALIDPREF=experiments/news-2017-19.en/news.valid.test.bpe
-    TESTPREF=experiments/news-2017-19.en/news.test.test.bpe
-    DESTDIR=experiments/data-bin/news-2017-19.en.bpe # output
-    
- ```
- - preprocessing full dataset with vocab size 30k
- ```
-    SRCDICT=experiments/phoneme/dict.txt # phoneme dictionary
-    TGTDICT=experiments/phoneme_bpe/bpe.30k.dict.txt # bpe dictionary
-    TRAINPREF=experiments/news-2017-19.en/news.train.bpe
-    VALIDPREF=experiments/news-2017-19.en/news.valid.bpe
-    TESTPREF=experiments/news-2017-19.en/news.test.bpe
-    DESTDIR=experiments/data-bin/news-2017-19.en.bpe.30k.full # output
- ```
  
   - preprocessing full dataset with vocab size 10k
  ```
     SRCDICT=experiments/phoneme/dict.txt # phoneme dictionary
     TGTDICT=experiments/phoneme_bpe/bpe.10k.dict.txt # bpe dictionary
-    TRAINPREF=experiments/news-2017-19.en/news.train.10k.bpe
-    VALIDPREF=experiments/news-2017-19.en/news.valid.10k.bpe
-    TESTPREF=experiments/news-2017-19.en/news.test.10k.bpe
-    DESTDIR=experiments/data-bin/news-2017-19.en.bpe.10k.full # output
+    TRAINPREF=experiments/librispeech-prosody/train_processed
+    VALIDPREF=experiments/librispeech-prosody/valid_processed
+    TESTPREF=experiments/librispeech-prosody/test_processed
+    DESTDIR=experiments/data-bin/librispeech-prosody # output
  ```
- 
+    
  - run command
  ```
       python preprocess.py \
@@ -107,7 +87,7 @@ done
     --destdir  ${DESTDIR}\
     --dataset-impl dict \
     --two-inputs \
-    --workers 64
+    --workers 1
  ```
 
 ### Binary data to training dataset

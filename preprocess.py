@@ -21,7 +21,6 @@ import pdb
 
 
 def main(args):
-    pdb.set_trace()
     utils.import_user_module(args)
 
     print(args)
@@ -103,7 +102,14 @@ def main(args):
         # the files will be cut for different parts for processing
         # !!!! pay attention for my dataset
         # I will use dataset with multiple input
-        offsets = Binarizer.find_offsets(input_file, num_workers)
+        pdb.set_trace()
+        if args.indexed_dataset:
+            # the input will be indexed dataset
+            offsets = Binarizer.find_indexdataset_offsets(
+                input_file, num_workers)
+        else:
+            # 输入是普通文本
+            offsets = Binarizer.find_offsets(input_file, num_workers)
         pool = None
 
         if num_workers > 1:
