@@ -138,26 +138,24 @@ def main():
         "number of input and output paths should match"
 
     with contextlib.ExitStack() as stack:
-        pdb.set_trace()
-
-        indexed_bs = IndexedDataset(args.inputs[0].split(".")[0])
+        indexed_bs = IndexedDataset(args.inputs[0])
         spks_mv = np.load(
             f'{args.inputs[0].split(".")[0]}_f0s.pkl', allow_pickle=True)
 
         # self.indexed_bs = IndexedDataset(
         # f'{self.data_dir}/{self.prefix}')
-        builder = IndexedDatasetBuilder(args.outputs[0].split(".")[0])
+        builder = IndexedDatasetBuilder(args.outputs[0])
 
-        encoder = MultiprocessingEncoder(args)
+        encoder = MultiprocessingEncoder(args, spks_mv)
 
         # multiprocess
-        # pool = Pool(args.workers, initializer=encoder.initializer)
-        # encoded_lines = pool.imap(encoder.encode_lines, zip(*inputs), 100)
-        encoder.initializer()
-        encoded_lines = []
-        for item in indexed_bs:
-            encoded_line = encoder.encode_lines(item, spks_mv)
-            encoded_lines.append(encoded_line)
+        pool = Pool(args.workers, initializer=encoder.initializer)
+        encoded_lines = pool.imap(encoder.encode_lines, indexed_bs, 100)
+        # encoder.initializer()
+        # encoded_lines = []
+        # for item in indexed_bs:
+        # encoded_line = encoder.encode_lines(item, spks_mv)
+        # encoded_lines.append(encoded_line)
 
         stats = Counter()
 
@@ -176,8 +174,9 @@ def main():
 
 class MultiprocessingEncoder(object):
 
-    def __init__(self, args):
+    def __init__(self, args, spks_mv):
         self.args = args
+        self.spks_mv = spks_mv
 
     def initializer(self):
         global bpe
@@ -201,14 +200,14 @@ class MultiprocessingEncoder(object):
         out_item['mel2ph'] = mel2ph
         spk_id = item['spk_id']
         out_item['spk_id'] = spk_id
-        f0, uv = process_f0(item["f0"], spks_mv[spk_id][0], spks_mv[spk_id][1])
+        f0, uv = process_f0(
+            item["f0"], self.spks_mv[spk_id][0], self.spks_mv[spk_id][1])
         out_item['f0'] = f0
         out_item['uv'] = uv
         pitch = item["pitch"]
         out_item['pitch'] = pitch
         ph = item['phone']
 
-        pdb.set_trace()
         # remove repeat "|"
         rline = re.sub("(\|\s)+", r"\1", ph)
         line = re.sub('<UNK>', '', rline)           # Delete pattern abc
