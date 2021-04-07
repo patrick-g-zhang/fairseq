@@ -146,7 +146,6 @@ class Binarizer:
             end = len(indexed_bs)
 
         for index in range(offset, end):
-            pdb.set_trace()
             out_item = indexed_bs[index]
 
             line2 = out_item['rline']
