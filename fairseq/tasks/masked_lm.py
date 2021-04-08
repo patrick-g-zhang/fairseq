@@ -115,7 +115,7 @@ class MaskedLMTask(FairseqTask):
         data_path = paths[epoch % len(paths)]
         split_path = os.path.join(data_path, split)
         if self.args.two_inputs:
-            dataset = data_utils.load_two_indexed_datasets(
+            dataset = data_utils.load_prosodic_indexed_datasets(
                 path=split_path,
                 dictionary_p=self.phoneme_dictionary,
                 dictionary_b=self.bpe_dictionary,
@@ -136,13 +136,19 @@ class MaskedLMTask(FairseqTask):
 
         # create continuous blocks of tokens
 
+        pdb.set_trace()
         dataset = TokenBlockDataset(
             dataset,
             dataset.sizes,
             self.args.tokens_per_sample - 1,  # one less for <s>
             break_mode=self.args.sample_break_mode,
             two_inputs=self.args.two_inputs,
+            prosody_predict=self.args.prosody_predict,
         )
+
+        if self.args.prosody_predict:
+            pdb.set_trace()
+            dataset.__getitem__(0)
 
         print('| loaded {} blocks from: {}'.format(len(dataset), split_path))
 
@@ -185,8 +191,9 @@ class MaskedLMTask(FairseqTask):
                 random_token_prob=self.args.random_token_prob,
                 freq_weighted_replacement=self.args.freq_weighted_replacement,
                 mask_whole_words=self.args.mask_whole_words,
+                no_word_sep=self.args.no_word_sep,
+                prosody_predict=self.prosody_predict,
             )
-
 
         with data_utils.numpy_seed(self.args.seed + epoch):
             shuffle = np.random.permutation(len(src_dataset))
