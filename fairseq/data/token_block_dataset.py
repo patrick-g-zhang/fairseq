@@ -162,8 +162,8 @@ class TokenBlockDataset(FairseqDataset):
                     'f0': f0_buffer,
                     'energy': energy_buffer,
                     'uv': uv_buffer,
-                    'mel2ph_buffer': mel2ph_buffer,
-                    'spk_buffer': spk_buffer
+                    'mel2ph': mel2ph_buffer,
+                    'spk': spk_buffer
                 }
 
             else:
