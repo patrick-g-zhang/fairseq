@@ -245,7 +245,7 @@ class BPEMaskTokensDataset(BaseWrapperDataset):
         freq_weighted_replacement: bool = False,
         mask_whole_words: bool = False,
         no_word_sep: bool = False,
-        prosody_predict: bool=False,
+        prosody_predict: bool = False,
     ):
         assert 0.0 < mask_prob < 1.0
         assert 0.0 <= random_token_prob <= 1.0

@@ -186,7 +186,7 @@ class MaskedLMTask(FairseqTask):
                 freq_weighted_replacement=self.args.freq_weighted_replacement,
                 mask_whole_words=self.args.mask_whole_words,
                 no_word_sep=self.args.no_word_sep,
-                prosody_predict=self.prosody_predict,
+                prosody_predict=self.args.prosody_predict,
             )
 
         if self.prosody_predict:
