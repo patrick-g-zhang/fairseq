@@ -186,7 +186,8 @@ class Binarizer:
                 'spk_id': out_item['spk_id'],
                 'f0': out_item['f0'],
                 'uv': out_item['uv'],
-                'pitch': out_item['pitch'],
+                'energy': out_item['energy'],
+
             }
 
             nseq += 1
