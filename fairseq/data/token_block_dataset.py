@@ -130,7 +130,7 @@ class TokenBlockDataset(FairseqDataset):
                     uv_buffer.append(self.dataset[idx]['uv'])
 
                     mel2ph_buffer.append(
-                        torch.IntTensor(self.dataset[idx]['mel2ph']) + prev_ph)
+                        torch.LongTensor(self.dataset[idx]['mel2ph']) + prev_ph)
                     prev_ph += self.dataset[idx]['phoneme_ids'].size(0)
 
                     # 为了方便spk id 可以进行升到和 phoneme数据量一致
