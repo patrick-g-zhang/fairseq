@@ -1307,6 +1307,7 @@ class FastSpeech2Encoder(FairseqDecoder):
                 # 现在加上了韵律预测模块，需要多load 多一点信息
             else:
             # 韵律预测或者其他待补充
+                mel2ph = src_tokens['mel2ph']
                 x = self.prosody_predictor(phoneme_input, bpe_input=None, phoneme2bpe=None,mel2ph=None,masked_tokens=None,bpe_masked_tokens=None)
             
         else:
