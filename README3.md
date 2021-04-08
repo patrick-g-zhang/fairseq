@@ -33,7 +33,7 @@ python $dist_config /blob/xuta/speech/tts/t-guzhang/fairseq/train.py --fp16 $DAT
 - convert phoneme sequence to bpe sequence
 - 27th March, add ```no-word-sep``` as argument which indicates the word splitting not using
 - convert phoneme sequence to bpe sequence dictionary size is 10k
-- add prosody predictor part
+- add prosody predictor part ```multiprocessing_bpe_prosody_encoder```
 ```
 for SPLIT in train valid test; do \
         python -m examples.fastspeech.multiprocessing_bpe_prosody_encoder \
@@ -45,19 +45,8 @@ for SPLIT in train valid test; do \
 done
 ```
 
-### Add joint training with subword phoneme
-- adding ```load_two_dictionary``` method to ```fairseq_task.py```
+
     
-### Phoneme bpe files and Data
-- ```./experiment/phoneme_bpe/vocab.bpe```, this file is for bpe pairs creation
--  ```./experiment/phoneme_bpe/dict.txt```, this file is for bpe dictionary
--  ```./experiment/phoneme_bpe/bpe.30k.dict.txt```, this file is for bpe dictionary with corrected bpe method, avoid unk problem !!!!
--   creation
-- ```experiments/news-2017-19.en/news.train.bpe```, this file is for saving raw data, ```{bpe-sequence} $ {phoneme sequence}```
-    
-
-
-
 ### Preprocessing Command- preprocess the raw bpe data to binary file
  - adding new argument ```--two-inputs``` to ```preprocess.py``` file. 
  - create a new index dataset named ```DictIndexedDataset```, since we need to store phoneme sequence, sub-word sequence, and phoneme2sub-word. The three vectors are stored in dictionary format.

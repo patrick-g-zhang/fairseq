@@ -101,7 +101,7 @@ def main(args):
         )
         # the files will be cut for different parts for processing
         # !!!! pay attention for my dataset
-        # I will use dataset with multiple input
+        # I will use dataset with multiple input 现在的输入不是文本而是indexed dataset
         if args.indexed_dataset:
             # the input will be indexed dataset
             offsets = Binarizer.find_indexdataset_offsets(

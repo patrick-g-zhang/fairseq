@@ -106,7 +106,6 @@ class TokenBlockDataset(FairseqDataset):
         if self.two_inputs:
             if self.prosody_predict:
                 # 需要把多句话合并成一句话
-                pdb.set_trace()
                 f0_buffer = []
                 energy_buffer = []
                 mel2ph_buffer = []
@@ -130,8 +129,9 @@ class TokenBlockDataset(FairseqDataset):
                     energy_buffer.append(self.dataset[idx]['energy'])
                     uv_buffer.append(self.dataset[idx]['uv'])
 
+                    pdb.set_trace()
                     mel2ph_buffer.append(
-                        torch.IntTensor(self.dataset[idx]['mel2ph_buffer']) + prev_ph)
+                        torch.IntTensor(self.dataset[idx]['mel2ph']) + prev_ph)
                     prev_ph += self.dataset[idx]['phoneme_ids'].size(0)
 
                     # 为了方便spk id 可以进行升到和 phoneme数据量一致

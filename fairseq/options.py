@@ -261,6 +261,10 @@ def add_preprocess_args(parser):
                        help="two inputs")
     group.add_argument("--indexed-dataset", action="store_true",
                        help="indexed dataset")
+
+    # 添加prosody predict 参数为了保证适应输入
+    group.add_argument("--prosody-predict", action="store_true",
+                       help="predict prosody")
     # fmt: on
     return parser
 

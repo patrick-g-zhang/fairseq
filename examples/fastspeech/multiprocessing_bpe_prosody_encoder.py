@@ -196,16 +196,14 @@ class MultiprocessingEncoder(object):
         Encode a set of lines. All lines will be encoded together.
         """
         out_item = {}
-        mel2ph = item['mel2ph']
-        out_item['mel2ph'] = mel2ph
-        spk_id = item['spk_id']
-        out_item['spk_id'] = spk_id
+
+        out_item['mel2ph'] = item['mel2ph']
+        out_item['spk_id'] = item['spk_id']
         f0, uv = process_f0(
             item["f0"], self.spks_mv[spk_id][0], self.spks_mv[spk_id][1])
         out_item['f0'] = f0
         out_item['uv'] = uv
-        energy = item["energy"]
-        out_item['energy'] = energy
+        out_item['energy'] = item["energy"]
         ph = item['phone']
 
         # remove repeat "|"
