@@ -1009,7 +1009,7 @@ class FastSpeech2(FairseqEncoderLanguageModel):
         # 韵律预测
         parser.add_argument('--prosody-predictor', action='store_true')
         parser.add_argument('--use-spk-id', action='store_true')
-        parser.add_argument('--spk-num', type=int)
+        parser.add_argument('--num-spk', type=int)
 
 
 
