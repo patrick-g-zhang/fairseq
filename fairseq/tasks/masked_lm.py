@@ -135,7 +135,6 @@ class MaskedLMTask(FairseqTask):
                 'Dataset not found: {} ({})'.format(split, split_path))
 
         # create continuous blocks of tokens
-        pdb.set_trace()
         dataset = TokenBlockDataset(
             dataset,
             dataset.sizes,
@@ -144,10 +143,6 @@ class MaskedLMTask(FairseqTask):
             two_inputs=self.args.two_inputs,
             prosody_predict=self.args.prosody_predict,
         )
-
-        if self.args.prosody_predict:
-            pdb.set_trace()
-            dataset.__getitem__(0)
 
         print('| loaded {} blocks from: {}'.format(len(dataset), split_path))
 
@@ -193,6 +188,9 @@ class MaskedLMTask(FairseqTask):
                 no_word_sep=self.args.no_word_sep,
                 prosody_predict=self.prosody_predict,
             )
+
+        if self.prosody_predict:
+            tgt_dataset.__getitem__(0)
 
         with data_utils.numpy_seed(self.args.seed + epoch):
             shuffle = np.random.permutation(len(src_dataset))

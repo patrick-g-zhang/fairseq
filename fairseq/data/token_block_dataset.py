@@ -135,9 +135,8 @@ class TokenBlockDataset(FairseqDataset):
 
                     # 为了方便spk id 可以进行升到和 phoneme数据量一致
                     spk_buffer.append(
-                        [self.dataset[idx]['spk_id']] * self.dataset[idx]['phoneme_ids'].size(0))
+                        torch.LongTensor([self.dataset[idx]['spk_id']] * self.dataset[idx]['phoneme_ids'].size(0)))
 
-                pdb.set_trace()
                 phoneme_buffer = torch.cat(phoneme_buffer)
                 bpe_buffer = torch.cat(bpe_buffer)
                 phoneme2bpe_buffer = torch.cat(phoneme2bpe_buffer)
@@ -145,7 +144,11 @@ class TokenBlockDataset(FairseqDataset):
                 energy_buffer = torch.cat(energy_buffer)
                 uv_buffer = torch.cat(uv_buffer)
                 mel2ph_buffer = torch.cat(mel2ph_buffer)
+
+                # 这个地方需要注意 我讲spk upsample到 phoneme层级
                 spk_buffer = torch.cat(spk_buffer)
+                assert phoneme_buffer.size(0) == phoneme2bpe_buffer.size(0)
+                assert f0_buffer.size(0) == mel2ph_buffer.size(0)
 
                 slice_s, slice_e = self.slice_indices[index]
                 length = slice_e - slice_s
