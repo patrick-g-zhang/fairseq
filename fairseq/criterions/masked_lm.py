@@ -13,7 +13,7 @@ from fairseq import utils
 from . import FairseqCriterion, register_criterion
 
 
-def dur_loss(self, dur_pred, dur_gt, input):
+def dur_loss(dur_pred, dur_gt, input):
 
     nonpadding = (input != 0).float()
 
@@ -26,7 +26,7 @@ def dur_loss(self, dur_pred, dur_gt, input):
     return ph_dur_loss
 
 
-def pitch_loss(self, p_pred, pitch, uv):
+def pitch_loss(p_pred, pitch, uv):
     assert p_pred[..., 0].shape == pitch.shape
     assert p_pred[..., 0].shape == uv.shape
     nonpadding = (pitch != -200).float().reshape(-1)
@@ -42,7 +42,7 @@ def pitch_loss(self, p_pred, pitch, uv):
     return uv_loss, pitch_loss
 
 
-def energy_loss(self, energy_pred, energy):
+def energy_loss(energy_pred, energy):
     nonpadding = (energy != 0).float()
     loss = (F.mse_loss(energy_pred, energy, reduction='none')
             * nonpadding).sum() / nonpadding.sum()
@@ -132,8 +132,28 @@ class MaskedLmLoss(FairseqCriterion):
             pdb.set_trace()
             if self.args.prosody_predict:
                 # 增加额外的loss
-                # duration loss
-                loss_energy =
+                # energy loss
+                energy = sample['target']['energy']
+                loss_energy = energy_loss(energy_pred, energy)
+                loss += loss_energy
+                logging_output['loss_energy'] = utils.item(
+                    loss_energy.data) if reduce else loss_energy.data
+
+                # dur loss
+                dur_gt = sample['target']['dur_gt']
+                loss_dur = dur_loss(
+                    dur_pred, dur_gt, sample['net_input']['phoneme'])
+                loss += loss_dur
+                logging_output['loss_dur'] = utils.item(
+                    loss_dur.data) if reduce else loss_dur.data
+
+                # pitch loss
+                f0 = sample['target']['f0']
+                uv = sample['target']['uv']
+                loss_f0 = pitch_loss(pitch_pred, f0, uv)
+                loss += loss_f0
+                logging_output['loss_f0'] = utils.item(
+                    loss_f0.data) if reduce else loss_f0.data
 
         else:
             masked_tokens = sample['target'].ne(self.padding_idx)
