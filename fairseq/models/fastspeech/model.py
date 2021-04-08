@@ -1007,7 +1007,7 @@ class FastSpeech2(FairseqEncoderLanguageModel):
         # add more pretraining task 
 
         # 韵律预测
-        parser.add_argument('--prosody-predictor', action='store_true')
+        parser.add_argument('--prosody-predict', action='store_true')
         parser.add_argument('--use-spk-id', action='store_true')
         
         # 说话人数量 需要去修改
@@ -1436,7 +1436,8 @@ def base_architecture(args):
     args.use_relative_position = getattr(args, 'use_relative_position', False)
     # decoder dim 在这里引入进来 默认为256
     args.decoder_embed_dim = getattr(args, 'decoder_embed_dim', 256)
-
+    args.use_spk_id = getattr(args, 'use_spk_id', False)
+    args.num_spk = getattr(args, 'num_spk', 40)
 
 @register_model_architecture('fastspeech', 'fastspeech_base')
 def roberta_base_architecture(args):
