@@ -151,6 +151,7 @@ def main(args):
                 )
             )
         else:
+            # indexed dataset as input
             if args.indexed_dataset:
                 merge_result(
                     Binarizer.binarize_two_index_dataset(
@@ -283,6 +284,7 @@ def binarize(args, filename, vocab, output_prefix, lang, offset, end, vocabb=Non
         res = Binarizer.binarize(filename, vocab, consumer, append_eos=append_eos,
                                  offset=offset, end=end)
     else:
+        # indexed dataset 作为输入
         if args.indexed_dataset:
             res = Binarizer.binarize_two_index_dataset(
                 filename, vocab, vocabb, consumer, append_eos=append_eos, offset=offset, end=end)
