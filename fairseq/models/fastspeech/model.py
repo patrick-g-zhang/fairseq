@@ -1236,7 +1236,7 @@ class FastSpeech2Encoder(FairseqDecoder):
             # 会有多个speaker进来，所以
             if self.args.use_spk_id:
                 self.spk_embed_proj = nn.Embedding(
-                    self.args.num_spk, self.encoder_embed_dim)
+                    self.args.num_spk, self.decoder_embed_dim)
             else:
                 # 使用speaker embedding 这个地方需要注意
                 self.spk_embed_proj = Linear(256, self.decoder_embed_dim, bias=True)
@@ -1352,8 +1352,8 @@ class FastSpeech2Encoder(FairseqDecoder):
 
         # 加上speaker embedding
         pdb.set_trace()
-        spk_embed = self.spk_embed_proj(spk_id)[None, :, :]
-        encoder_out += spk_embed
+        spk_embed = self.spk_embed_proj(spk_id).transpose(0, 1) #[B, T, D] -> [T,B,D]
+        encoder_outputs += spk_embed
         encoder_outputs = encoder_outputs * src_nonpadding  # [T, B, C]
         
         # 预测韵律
