@@ -189,7 +189,7 @@ class MaskedLMTask(FairseqTask):
                 prosody_predict=self.args.prosody_predict,
             )
 
-        if self.prosody_predict:
+        if self.args.prosody_predict:
             tgt_dataset.__getitem__(0)
 
         with data_utils.numpy_seed(self.args.seed + epoch):
