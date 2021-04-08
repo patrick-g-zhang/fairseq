@@ -1231,7 +1231,7 @@ class FastSpeech2Encoder(FairseqDecoder):
         )
 
         # add prosody predictor 引入多余的预训练目标
-        if self.args.prosody_predictor:
+        if self.args.prosody_predict:
 
             # 将维度缩小到decoder阶段
             self.encoder_map = Linear(
