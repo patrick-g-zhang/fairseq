@@ -1308,7 +1308,7 @@ class FastSpeech2Encoder(FairseqDecoder):
             else:
             # 韵律预测或者其他待补充
                 mel2ph = src_tokens['mel2ph']
-                x = self.prosody_predictor(phoneme_input, bpe_input=None, phoneme2bpe=None,mel2ph=None,masked_tokens=None,bpe_masked_tokens=None)
+                x = self.prosody_predictor(phoneme_input, bpe_input=bpe_input, phoneme2bpe=phoneme2bpe,mel2ph=mel2ph,masked_tokens=masked_tokens,bpe_masked_tokens=bpe_masked_tokens)
             
         else:
         # 单个input
