@@ -1331,9 +1331,7 @@ class FastSpeech2Encoder(FairseqDecoder):
         encoder_outputs = self.encoder(
                 src_tokens=src_tokens,
                 bpe=bpe_input,
-                phoneme2bpe=phoneme2bpe,
-                masked_tokens=None, 
-                bpe_masked_tokens=None,
+                phoneme2bpe=phoneme2bpe
                 )
 
         encoder_outputs = encoder_outputs['encoder_out']  # [T, B, C]
