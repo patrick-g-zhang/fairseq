@@ -1297,7 +1297,8 @@ class FastSpeech2Encoder(FairseqDecoder):
             bpe_input = src_tokens['bpe']
             phoneme2bpe = src_tokens['phoneme2bpe']
 
-            if not self.args.prosody_predictor:
+            pdb.set_trace()
+            if not self.args.prosody_predict:
             # 最简单的两个输入
                 x = self.extract_features(
                     phoneme_input, bpe_input=bpe_input, phoneme2bpe=phoneme2bpe)
