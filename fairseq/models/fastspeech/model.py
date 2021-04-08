@@ -1173,7 +1173,6 @@ class FastSpeech2Encoder(FairseqDecoder):
     """
 
     def __init__(self, args, dictionary, dictionary_b=None):
-        pdb.set_trace()
         super().__init__(dictionary)
         self.args = args
 
@@ -1232,7 +1231,7 @@ class FastSpeech2Encoder(FairseqDecoder):
 
         # add prosody predictor 引入多余的预训练目标
         if self.args.prosody_predict:
-
+            pdb.set_trace()
             # 将维度缩小到decoder阶段
             self.encoder_map = Linear(
                 self.encoder_embed_dim, self.decoder_embed_dim, bias=True)
