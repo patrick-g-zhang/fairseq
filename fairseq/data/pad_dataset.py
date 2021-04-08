@@ -20,13 +20,13 @@ class PadDataset(BaseWrapperDataset):
 
 
 class DictPadDataset(BaseWrapperDataset):
-    def __init__(self, dataset, pad_idx, left_pad, prosody_predict=False,is_target=False):
+    def __init__(self, dataset, pad_idx, left_pad, prosody_predict=False, is_target=False):
         super().__init__(dataset)
         self.phoneme_pad_idx = pad_idx
         self.bpe_pad_idx = pad_idx
         self.left_pad = left_pad
         self.is_target = is_target
-        self.prosody_predict=prosody_predict,
+        self.prosody_predict = prosody_predict,
 
     def collater(self, samples):
         phonemes = [sample['phoneme'] for sample in samples]
@@ -40,13 +40,17 @@ class DictPadDataset(BaseWrapperDataset):
 
         if self.is_target:
             if self.prosody_predict:
-                f0 = data_utils.collate_tokens([s['f0'] for s in samples], pad_idx=-200)
+                f0 = data_utils.collate_tokens(
+                    [s['f0'] for s in samples], pad_idx=-200)
                 items['f0'] = f0
-                uv = data_utils.collate_tokens([s['uv'] for s in samples], pad_idx=0)
+                uv = data_utils.collate_tokens(
+                    [s['uv'] for s in samples], pad_idx=0)
                 items['uv'] = uv
-                energy = data_utils.collate_tokens([s['energy'] for s in samples], pad_idx=0)
+                energy = data_utils.collate_tokens(
+                    [s['energy'] for s in samples], pad_idx=0)
                 items['energy'] = energy
-                dur_gt = data_utils.collate_tokens([s['dur_gt'] for s in samples], pad_idx=0)
+                dur_gt = data_utils.collate_tokens(
+                    [s['dur_gt'] for s in samples], pad_idx=0)
                 items['dur_gt'] = dur_gt
             return items
 
@@ -56,8 +60,12 @@ class DictPadDataset(BaseWrapperDataset):
 
         items['phoneme2bpe'] = phoneme2bpes
         if self.prosody_predict:
-            mel2ph = data_utils.collate_tokens([s['mel2ph'] for s in samples], pad_idx=0)
+            mel2ph = data_utils.collate_tokens(
+                [s['mel2ph'] for s in samples], pad_idx=0)
             items['mel2ph'] = mel2ph
+            spk_id = data_utils.collate_tokens(
+                [s['spk_id'] for s in samples], pad_idx=0)
+            items['spk_id'] = spk_id
         return items
 
 

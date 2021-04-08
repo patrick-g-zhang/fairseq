@@ -1297,7 +1297,6 @@ class FastSpeech2Encoder(FairseqDecoder):
             bpe_input = src_tokens['bpe']
             phoneme2bpe = src_tokens['phoneme2bpe']
 
-            pdb.set_trace()
             if not self.args.prosody_predict:
             # 最简单的两个输入
                 x = self.extract_features(
@@ -1307,6 +1306,7 @@ class FastSpeech2Encoder(FairseqDecoder):
                 # 现在加上了韵律预测模块，需要多load 多一点信息
             else:
             # 韵律预测或者其他待补充
+                pdb.set_trace()
                 mel2ph = src_tokens['mel2ph']
                 x = self.prosody_predictor(phoneme_input, bpe_input=bpe_input, phoneme2bpe=phoneme2bpe,mel2ph=mel2ph,masked_tokens=masked_tokens,bpe_masked_tokens=bpe_masked_tokens)
             
@@ -1327,7 +1327,6 @@ class FastSpeech2Encoder(FairseqDecoder):
                           bpe_masked_tokens=None,
                           **unused):
         # 在这里把韵律预测和bpe loss集成在一起了
-        pdb.set_trace()
         encoder_outputs = self.encoder(
                 src_tokens=src_tokens,
                 bpe=bpe_input,

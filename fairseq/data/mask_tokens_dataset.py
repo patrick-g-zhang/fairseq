@@ -423,6 +423,7 @@ class BPEMaskTokensDataset(BaseWrapperDataset):
 
             if self.prosody_predict:
                 new_item['mel2ph'] = item['mel2ph']
+                new_item['spk_id'] = item['spk_id']
 
             # if rand_mask is not None:
             #     num_rand = rand_mask.sum()
