@@ -1008,7 +1008,8 @@ class FastSpeech2(FairseqEncoderLanguageModel):
 
         # 韵律预测
         # parser.add_argument('--prosody-predict', action='store_true')
-        parser.add_argument('--use-spk-id', action='store_true')
+        # 添加多余的speaker
+        parser.add_argument('--use-spk-id', action='store_false')
         
         # 说话人数量 需要去修改
         parser.add_argument('--num-spk', type=int, default=40)
@@ -1237,9 +1238,9 @@ class FastSpeech2Encoder(FairseqDecoder):
                 self.encoder_embed_dim, self.decoder_embed_dim, bias=True)
 
             # 会有多个speaker进来，所以
-            if args.use_spk_id:
+            if self.args.use_spk_id:
                 self.spk_embed_proj = nn.Embedding(
-                    self.num_spk, self.encoder_embed_dim)
+                    self.args.num_spk, self.encoder_embed_dim)
             else:
                 # 使用speaker embedding 这个地方需要注意
                 self.spk_embed_proj = Linear(256, self.decoder_embed_dim, bias=True)
@@ -1436,7 +1437,7 @@ def base_architecture(args):
     args.use_relative_position = getattr(args, 'use_relative_position', False)
     # decoder dim 在这里引入进来 默认为256
     args.decoder_embed_dim = getattr(args, 'decoder_embed_dim', 256)
-    args.use_spk_id = getattr(args, 'use_spk_id', False)
+    args.use_spk_id = getattr(args, 'use_spk_id', True)
     args.num_spk = getattr(args, 'num_spk', 40)
 
 @register_model_architecture('fastspeech', 'fastspeech_base')
