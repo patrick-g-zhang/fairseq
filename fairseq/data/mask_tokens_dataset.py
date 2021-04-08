@@ -369,13 +369,13 @@ class BPEMaskTokensDataset(BaseWrapperDataset):
                             'phoneme': torch.from_numpy(phoneme_target),
                             }
                 if self.prosody_predict:
-                    pdb.set_trace()
                     T_t = phoneme_target.shape[-1]
                     mel2ph = item['mel2ph']
 
                     #
                     dur_gt = mel2ph.new_zeros(
-                        1, T_t + 1).scatter_add(1, mel2ph, torch.ones_like(mel2ph))
+                        T_t + 1).scatter_add(0, mel2ph, torch.ones_like(mel2ph))
+                    dur_gt = dur_gt[1:]
                     new_item['dur_gt'] = dur_gt
                     new_item['f0'] = item['f0']
                     new_item['uv'] = item['uv']

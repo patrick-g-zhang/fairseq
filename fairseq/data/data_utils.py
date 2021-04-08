@@ -45,6 +45,7 @@ def collate_tokens(values, pad_idx, eos_idx=None, left_pad=False, move_eos_to_be
     return res
 
 
+
 def load_two_indexed_datasets(path, dictionary_p=None, dictionary_b=None, dataset_impl='dict', combine=False, default='cached'):
     """A helper function for loading indexed datasets.
 

@@ -189,9 +189,6 @@ class MaskedLMTask(FairseqTask):
                 prosody_predict=self.args.prosody_predict,
             )
 
-        if self.args.prosody_predict:
-            tgt_dataset.__getitem__(0)
-
         with data_utils.numpy_seed(self.args.seed + epoch):
             shuffle = np.random.permutation(len(src_dataset))
 
@@ -224,6 +221,8 @@ class MaskedLMTask(FairseqTask):
                 ],
             )
         else:
+            # 输入为多个 却不是单个
+
             self.datasets[split] = SortDataset(
                 NestedDictionaryDataset(
                     {
@@ -233,6 +232,7 @@ class MaskedLMTask(FairseqTask):
                                 src_dataset,
                                 pad_idx=self.phoneme_dictionary.pad(),
                                 left_pad=False,
+                                prosody_predict=self.prosody_predict,
                             ),
                             'src_lengths': DictNumelDataset(src_dataset, reduce=False),
                         },
@@ -241,6 +241,7 @@ class MaskedLMTask(FairseqTask):
                             pad_idx=self.phoneme_dictionary.pad(),
                             left_pad=False,
                             is_target=True,
+                            prosody_predict=self.prosody_predict,
                         ),
                         'nsentences': NumSamplesDataset(),
                         'ntokens': DictNumelDataset(src_dataset, reduce=True),
@@ -252,6 +253,9 @@ class MaskedLMTask(FairseqTask):
                     src_dataset.sizes,
                 ],
             )
+
+            if self.args.prosody_predict:
+                self.datasets[split].__getitem__(0)
 
     def build_dataset_for_inference(self, src_tokens, src_lengths, sort=True):
         src_dataset = PadDataset(

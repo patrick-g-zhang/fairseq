@@ -13,6 +13,42 @@ from fairseq import utils
 from . import FairseqCriterion, register_criterion
 
 
+def dur_loss(self, dur_pred, dur_gt, input):
+
+    nonpadding = (input != 0).float()
+
+    # 对targets 取对数
+    targets = torch.log(dur_gt.float() + 1.0)
+    loss = torch.nn.MSELoss(reduction=reduction)(dur_pred, targets.float())
+    loss = (loss * nonpadding).sum() / nonpadding.sum()
+    ph_dur_loss = self.dur_loss_fn(
+        dur_pred, dur_gt, nonpadding)
+    return ph_dur_loss
+
+
+def pitch_loss(self, p_pred, pitch, uv):
+    assert p_pred[..., 0].shape == pitch.shape
+    assert p_pred[..., 0].shape == uv.shape
+    nonpadding = (pitch != -200).float().reshape(-1)
+    uv_loss = (F.binary_cross_entropy_with_logits(
+        p_pred[:, :, 1].reshape(-1), uv.reshape(-1), reduction='none') * nonpadding).sum() \
+        / nonpadding.sum()
+    nonpadding = (pitch != -200).float() * (uv == 0).float()
+    nonpadding = nonpadding.reshape(-1)
+
+    pitch_loss = (F.l1_loss(
+        p_pred[:, :, 0].reshape(-1), pitch.reshape(-1), reduction='none') * nonpadding).sum() \
+        / nonpadding.sum()
+    return uv_loss, pitch_loss
+
+
+def energy_loss(self, energy_pred, energy):
+    nonpadding = (energy != 0).float()
+    loss = (F.mse_loss(energy_pred, energy, reduction='none')
+            * nonpadding).sum() / nonpadding.sum()
+    return loss
+
+
 @register_criterion('masked_lm')
 class MaskedLmLoss(FairseqCriterion):
     """
@@ -40,8 +76,16 @@ class MaskedLmLoss(FairseqCriterion):
             # tensor and gives CUDA error.
             if sample_size == 0:
                 phoneme_masked_tokens = None
-            logitps, logitbs = model(**sample['net_input'], masked_tokens=phoneme_masked_tokens,
-                                     bpe_masked_tokens=bpe_masked_tokens)
+
+            if self.prosody_predict:
+                # 如果是做韵律预测 要会有多个输出
+                logitps, logitbs, dur_pred, pitch_pred, energy_pred = model(**sample['net_input'], masked_tokens=phoneme_masked_tokens,
+                                                                            bpe_masked_tokens=bpe_masked_tokens)
+
+            else:
+                logitps, logitbs = model(**sample['net_input'], masked_tokens=phoneme_masked_tokens,
+                                         bpe_masked_tokens=bpe_masked_tokens)
+
             targets = model.get_targets(sample, [logitps])
             targets_p = targets['phoneme']
             targets_b = targets['bpe']
@@ -84,6 +128,12 @@ class MaskedLmLoss(FairseqCriterion):
                 'nsentences': sample['nsentences'],
                 'sample_size': sample_size,
             }
+
+            pdb.set_trace()
+            if self.args.prosody_predict:
+                # 增加额外的loss
+                # duration loss
+                loss_energy =
 
         else:
             masked_tokens = sample['target'].ne(self.padding_idx)

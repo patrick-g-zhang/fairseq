@@ -1171,6 +1171,7 @@ class FastSpeech2Encoder(FairseqDecoder):
     """
 
     def __init__(self, args, dictionary, dictionary_b=None):
+        pdb.set_trace()
         super().__init__(dictionary)
         self.args = args
 
@@ -1250,9 +1251,7 @@ class FastSpeech2Encoder(FairseqDecoder):
             kernel_size=3)
 
 
-            self.pitch_embed = nn.Embedding(
-                300, self.decoder_embed_dim, self.padding_idx)
-            
+            # pitch 预测            
             self.pitch_predictor = PitchPredictor(
                 self.decoder_embed_dim,
                 n_chans=256,
@@ -1260,9 +1259,9 @@ class FastSpeech2Encoder(FairseqDecoder):
                 padding='SAME',
                 odim=2,
                 use_position_embeddings=self.use_position_embeddings)
-            self.pitch_do = nn.Dropout(0.5)
 
 
+            # energy 预测
             self.energy_predictor = EnergyPredictor(
                 self.decoder_embed_dim,
                 n_chans=256,
@@ -1271,9 +1270,8 @@ class FastSpeech2Encoder(FairseqDecoder):
                 padding='SAME',
                 use_position_embeddings=self.use_position_embeddings,
             )
-            self.energy_embed = nn.Embedding(
-                256, self.decoder_embed_dim, self.padding_idx)
-            self.energy_do = nn.Dropout(0.5)
+
+
 
 
 
@@ -1296,48 +1294,90 @@ class FastSpeech2Encoder(FairseqDecoder):
 
 
         if self.args.two_inputs:
-            # bpe和phoneme同时作为输入
+        # bpe和phoneme同时作为输入
             phoneme_input = src_tokens['phoneme']
             bpe_input = src_tokens['bpe']
             phoneme2bpe = src_tokens['phoneme2bpe']
 
-            x = self.extract_features(
-                phoneme_input, bpe_input=bpe_input, phoneme2bpe=phoneme2bpe)
-
-            if self.args.prosody_predictor:
-                # 现在加上了韵律预测模块，需要多load 多一点信息
-                pass
-
-
-
-
-           
-            if not features_only:
+            if not self.args.prosody_predictor:
+            # 最简单的两个输入
+                x = self.extract_features(
+                    phoneme_input, bpe_input=bpe_input, phoneme2bpe=phoneme2bpe)
                 x = self.output_layer(x, masked_tokens=masked_tokens, phoneme2bpe=phoneme2bpe,bpe_masked_tokens=bpe_masked_tokens)
+            
+                # 现在加上了韵律预测模块，需要多load 多一点信息
+            else:
+            # 韵律预测或者其他待补充
+                x = self.prosody_predictor(phoneme_input, bpe_input=None, phoneme2bpe=None,mel2ph=None,masked_tokens=None,bpe_masked_tokens=None)
+            
         else:
+        # 单个input
             x = self.extract_features(
                 src_tokens, )
             if not features_only:
                 x = self.output_layer(x, masked_tokens=masked_tokens)
         return x
 
-    def prosody_predictor(self, src_tokens, bpe_input=None, phoneme2bpe=None, **unused):
+    def prosody_predictor(self, 
+                          src_tokens, 
+                          bpe_input=None, 
+                          phoneme2bpe=None, 
+                          mel2ph=None, 
+                          masked_tokens=None,
+                          bpe_masked_tokens=None,
+                          **unused):
         # 在这里把韵律预测和bpe loss集成在一起了
-        if self.args.two_inputs:
-            encoder_outputs = self.encoder(
+        pdb.set_trace()
+        encoder_outputs = self.encoder(
                 src_tokens=src_tokens,
                 bpe=bpe_input,
-                phoneme2bpe=phoneme2bpe
+                phoneme2bpe=phoneme2bpe,
+                masked_tokens=None, 
+                bpe_masked_tokens=None,
                 )
-        else:
-            encoder_outputs = self.encoder(
-                    src_tokens)
+
         encoder_outputs = encoder_outputs['encoder_out']  # [T, B, C]
+        src_nonpadding = (src_tokens > 0).type(encoder_outputs.dtype).permute(1, 0)[:, :, None]
+        encoder_outputs = encoder_outputs * src_nonpadding  # [T, B, C]
+        
+        # masked loss output
+        features = encoder_outputs.transpose(0, 1)
+        B, T = bpe_masked_tokens.size()
+        phoneme2bpe = phoneme2bpe.long()
+        bpe_features = features.new_zeros(
+                B,  T + 1, self.encoder_embed_dim).scatter_add_(1, phoneme2bpe[:,:, None].repeat(1, 1, self.encoder_embed_dim), features)
+        bpe_features = bpe_features[:, 1:, :]
+        
         #缩到decoder 维度
-        encoder_out = self.encoder_map(encoder_out)
-        src_nonpadding = (src_tokens > 0).float().permute(1, 0)[:, :, None]
+        encoder_outputs = self.encoder_map(encoder_outputs)
+
         # 加上speaker embedding
+        pdb.set_trace()
         spk_embed = self.spk_embed_proj(spk_embed)[None, :, :]
+        encoder_out += spk_embed
+        encoder_outputs = encoder_outputs * src_nonpadding  # [T, B, C]
+        
+        # 预测韵律
+        dur_input = encoder_outputs.transpose(0, 1)  # 【B, T, C]
+        dur_pred = self.dur_predictor(dur_input, 0)
+        
+        # 展开到frame level
+        decoder_inp = F.pad(encoder_out, [0, 0, 0, 0, 1, 0])
+        mel2ph_ = mel2ph.permute([1, 0])[..., None].repeat(
+            [1, 1, encoder_out.shape[-1]]).contiguous()
+        
+        decoder_inp = torch.gather(
+            decoder_inp, 0, mel2ph_).transpose(0, 1)  # [B, T, H]
+
+        # 预测 pitch
+        pitch_pred = self.pitch_predictor(decoder_inp)
+
+        # 预测energy
+        energy_pred = self.energy_predictor(decoder_inp)[
+            :, :, 0]
+
+
+        return self.lm_head(features, masked_tokens), self.bpe_lm_head(bpe_features, bpe_masked_tokens),dur_pred, pitch_pred, energy_pred
 
 
     def extract_features(self, src_tokens, bpe_input=None, phoneme2bpe=None, **unused):
