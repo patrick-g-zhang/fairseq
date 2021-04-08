@@ -1352,7 +1352,7 @@ class FastSpeech2Encoder(FairseqDecoder):
 
         # 加上speaker embedding
         pdb.set_trace()
-        spk_embed = self.spk_embed_proj(spk_id).transpose(0, 1) #[B, T, D] -> [T,B,D]
+        spk_embed = self.spk_embed_proj(spk_id).transpose(0, 1) #[B, T, D] -> [T, B, D]
         encoder_outputs += spk_embed
         encoder_outputs = encoder_outputs * src_nonpadding  # [T, B, C]
         
@@ -1361,9 +1361,9 @@ class FastSpeech2Encoder(FairseqDecoder):
         dur_pred = self.dur_predictor(dur_input, 0)
         
         # 展开到frame level
-        decoder_inp = F.pad(encoder_out, [0, 0, 0, 0, 1, 0])
+        decoder_inp = F.pad(encoder_outputs, [0, 0, 0, 0, 1, 0])
         mel2ph_ = mel2ph.permute([1, 0])[..., None].repeat(
-            [1, 1, encoder_out.shape[-1]]).contiguous()
+            [1, 1, encoder_outputs.shape[-1]]).contiguous()
         
         decoder_inp = torch.gather(
             decoder_inp, 0, mel2ph_).transpose(0, 1)  # [B, T, H]
