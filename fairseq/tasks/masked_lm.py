@@ -115,7 +115,7 @@ class MaskedLMTask(FairseqTask):
         data_path = paths[epoch % len(paths)]
         split_path = os.path.join(data_path, split)
         if self.args.two_inputs:
-            dataset = data_utils.load_prosodic_indexed_datasets(
+            dataset = data_utils.load_two_indexed_datasets(
                 path=split_path,
                 dictionary_p=self.phoneme_dictionary,
                 dictionary_b=self.bpe_dictionary,
@@ -135,7 +135,6 @@ class MaskedLMTask(FairseqTask):
                 'Dataset not found: {} ({})'.format(split, split_path))
 
         # create continuous blocks of tokens
-
         pdb.set_trace()
         dataset = TokenBlockDataset(
             dataset,
