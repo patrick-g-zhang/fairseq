@@ -86,7 +86,6 @@ def load_two_indexed_datasets(path, dictionary_p=None, dictionary_b=None, datase
         return ConcatDataset(datasets)
 
 
-
 def load_indexed_dataset(path, dictionary, dataset_impl=None, combine=False, default='cached'):
     """A helper function for loading indexed datasets.
 

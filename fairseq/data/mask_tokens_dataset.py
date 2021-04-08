@@ -370,11 +370,12 @@ class BPEMaskTokensDataset(BaseWrapperDataset):
                             }
                 if self.prosody_predict:
                     pdb.set_trace()
+                    mel2ph = torch.from_numpy(item['mel2ph'])
                     dur_gt = mel2ph.new_zeros(
                         B, T_t + 1).scatter_add(1, mel2ph, torch.ones_like(mel2ph))
                     new_item['f0'] = torch.from_numpy(item['f0'])
                     new_item['uv'] = torch.from_numpy(item['uv'])
-                    new_item['mel2ph'] = torch.from_numpy(item['mel2ph'])
+                    new_item['energy'] = torch.from_numpy(item['energy'])
                 return new_item
 
             # decide unmasking and random replacement
