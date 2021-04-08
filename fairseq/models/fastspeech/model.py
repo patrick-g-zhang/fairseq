@@ -1308,7 +1308,8 @@ class FastSpeech2Encoder(FairseqDecoder):
             # 韵律预测或者其他待补充
                 pdb.set_trace()
                 mel2ph = src_tokens['mel2ph']
-                x = self.prosody_predictor(phoneme_input, bpe_input=bpe_input, phoneme2bpe=phoneme2bpe,mel2ph=mel2ph,masked_tokens=masked_tokens,bpe_masked_tokens=bpe_masked_tokens)
+                spk_id = src_tokens['spk_id']
+                x = self.prosody_predictor(phoneme_input, bpe_input=bpe_input, phoneme2bpe=phoneme2bpe,mel2ph=mel2ph, spk_id=spk_id, masked_tokens=masked_tokens,bpe_masked_tokens=bpe_masked_tokens)
             
         else:
         # 单个input
@@ -1323,6 +1324,7 @@ class FastSpeech2Encoder(FairseqDecoder):
                           bpe_input=None, 
                           phoneme2bpe=None, 
                           mel2ph=None, 
+                          spk_id=None,
                           masked_tokens=None,
                           bpe_masked_tokens=None,
                           **unused):
@@ -1350,7 +1352,7 @@ class FastSpeech2Encoder(FairseqDecoder):
 
         # 加上speaker embedding
         pdb.set_trace()
-        spk_embed = self.spk_embed_proj(spk_embed)[None, :, :]
+        spk_embed = self.spk_embed_proj(spk_id)[None, :, :]
         encoder_out += spk_embed
         encoder_outputs = encoder_outputs * src_nonpadding  # [T, B, C]
         
@@ -1433,7 +1435,8 @@ def base_architecture(args):
     # decoder dim 在这里引入进来 默认为256
     args.decoder_embed_dim = getattr(args, 'decoder_embed_dim', 256)
     args.use_spk_id = getattr(args, 'use_spk_id', True)
-    args.num_spk = getattr(args, 'num_spk', 40)
+    # 在预训练的时候吧0的位置空出来
+    args.num_spk = getattr(args, 'num_spk', 1000)
 
 @register_model_architecture('fastspeech', 'fastspeech_base')
 def roberta_base_architecture(args):
