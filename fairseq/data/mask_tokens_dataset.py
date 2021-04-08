@@ -312,7 +312,7 @@ class BPEMaskTokensDataset(BaseWrapperDataset):
                 # only end and SEP
                 try:
                     special_indices = np.squeeze(np.argwhere(
-                        (bpe == 4) | (bpe == 2))).tolist()  # the number of word
+                        (bpe == self.special_end) | (bpe == 2))).tolist()  # the number of word
                     if not isinstance(special_indices, list):
                         special_indices = [special_indices]
                     # insert first SOS
@@ -370,12 +370,16 @@ class BPEMaskTokensDataset(BaseWrapperDataset):
                             }
                 if self.prosody_predict:
                     pdb.set_trace()
-                    mel2ph = torch.from_numpy(item['mel2ph'])
+                    T_t = phoneme_target.shape[-1]
+                    mel2ph = item['mel2ph']
+
+                    #
                     dur_gt = mel2ph.new_zeros(
-                        B, T_t + 1).scatter_add(1, mel2ph, torch.ones_like(mel2ph))
-                    new_item['f0'] = torch.from_numpy(item['f0'])
-                    new_item['uv'] = torch.from_numpy(item['uv'])
-                    new_item['energy'] = torch.from_numpy(item['energy'])
+                        1, T_t + 1).scatter_add(1, mel2ph, torch.ones_like(mel2ph))
+                    new_item['dur_gt'] = dur_gt
+                    new_item['f0'] = item['f0']
+                    new_item['uv'] = item['uv']
+                    new_item['energy'] = item['energy']
                 return new_item
 
             # decide unmasking and random replacement
@@ -416,6 +420,9 @@ class BPEMaskTokensDataset(BaseWrapperDataset):
                 'phoneme': torch.from_numpy(phoneme_target),
                 'phoneme2bpe': phoneme2bpe,
             }
+
+            if self.prosody_predict:
+                new_item['mel2ph'] = item['mel2ph']
 
             # if rand_mask is not None:
             #     num_rand = rand_mask.sum()
