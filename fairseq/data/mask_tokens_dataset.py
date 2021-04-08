@@ -244,6 +244,8 @@ class BPEMaskTokensDataset(BaseWrapperDataset):
         random_token_prob: float = 0.08,
         freq_weighted_replacement: bool = False,
         mask_whole_words: bool = False,
+        no_word_sep: bool = False,
+        prosody_predict: bool=False,
     ):
         assert 0.0 < mask_prob < 1.0
         assert 0.0 <= random_token_prob <= 1.0
@@ -265,6 +267,11 @@ class BPEMaskTokensDataset(BaseWrapperDataset):
         self.random_token_prob = random_token_prob
 
         self.mask_whole_words = mask_whole_words
+        self.no_word_sep = no_word_sep
+        # 如果存在word sep 那么非特殊符号从5开始，如果不存在word sep 从4 开始
+        self.special_end = 3 if self.no_word_sep else 4
+
+        self.prosody_predict = prosody_predict
         if random_token_prob > 0.0:
             if freq_weighted_replacement:
                 weights = np.array(self.vocab_b.count)
@@ -330,7 +337,7 @@ class BPEMaskTokensDataset(BaseWrapperDataset):
             else:
                     # mask for bpe
                     # if no sep bpe > 3 and if sep bpe > 4
-                non_special_indices = np.argwhere(bpe > 3)  # no
+                non_special_indices = np.argwhere(bpe > self.special_end)  # no
                 num_mask = int(
                     # add a random number for probabilistic rounding
                     self.mask_prob * \
@@ -361,6 +368,13 @@ class BPEMaskTokensDataset(BaseWrapperDataset):
                 new_item = {'bpe': torch.from_numpy(bpe_target),
                             'phoneme': torch.from_numpy(phoneme_target),
                             }
+                if self.prosody_predict:
+                    pdb.set_trace()
+                    dur_gt = mel2ph.new_zeros(
+                        B, T_t + 1).scatter_add(1, mel2ph, torch.ones_like(mel2ph))
+                    new_item['f0'] = torch.from_numpy(item['f0'])
+                    new_item['uv'] = torch.from_numpy(item['uv'])
+                    new_item['mel2ph'] = torch.from_numpy(item['mel2ph'])
                 return new_item
 
             # decide unmasking and random replacement

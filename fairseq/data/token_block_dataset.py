@@ -40,6 +40,7 @@ class TokenBlockDataset(FairseqDataset):
         break_mode=None,
         document_sep_len=1,
         two_inputs=False,
+        prosody_predict=False,
     ):
         try:
             from fairseq.data.token_block_utils_fast import (
@@ -55,6 +56,7 @@ class TokenBlockDataset(FairseqDataset):
         super().__init__()
         self.dataset = dataset
         self.two_inputs = two_inputs
+        self.prosody_predict = prosody_predict
 
         assert len(dataset) == len(sizes)
         assert len(dataset) > 0
@@ -102,31 +104,92 @@ class TokenBlockDataset(FairseqDataset):
     def __getitem__(self, index):
         start_ds_idx, start_offset, end_ds_idx = self.block_to_dataset_index[index]
         if self.two_inputs:
-            phoneme_buffer = []
-            bpe_buffer = []
-            phoneme2bpe_buffer = []
-            prev_bpe = 0
-            for idx in range(start_ds_idx, end_ds_idx + 1):
-                phoneme_buffer.append(self.dataset[idx]['phoneme_ids'])
-                bpe_buffer.append(self.dataset[idx]['bpe_ids'])
-                phoneme2bpe_buffer.append(
-                    torch.IntTensor(self.dataset[idx]['phoneme2bpe']) + prev_bpe)
-                prev_bpe += self.dataset[idx]['bpe_ids'].size(0)
+            if self.prosody_predict:
+                # 需要把多句话合并成一句话
+                pdb.set_trace()
+                f0_buffer = []
+                energy_buffer = []
+                mel2ph_buffer = []
+                uv_buffer = []
+                spk_buffer = []
+                phoneme_buffer = []
+                bpe_buffer = []
+                phoneme2bpe_buffer = []
 
-            phoneme_buffer = torch.cat(phoneme_buffer)
-            bpe_buffer = torch.cat(bpe_buffer)
-            phoneme2bpe_buffer = torch.cat(phoneme2bpe_buffer)
-            slice_s, slice_e = self.slice_indices[index]
-            length = slice_e - slice_s
-            s, e = start_offset, start_offset + length
-            assert s == 0
-            assert e == phoneme_buffer.size(0)
-            item = {
-                'phoneme': phoneme_buffer,
-                'bpe': bpe_buffer,
-                'phoneme2bpe': phoneme2bpe_buffer,
+                prev_bpe = 0
+                prev_ph = 0
 
-            }
+                for idx in range(start_ds_idx, end_ds_idx + 1):
+                    phoneme_buffer.append(self.dataset[idx]['phoneme_ids'])
+                    bpe_buffer.append(self.dataset[idx]['bpe_ids'])
+                    phoneme2bpe_buffer.append(
+                        torch.IntTensor(self.dataset[idx]['phoneme2bpe']) + prev_bpe)
+                    prev_bpe += self.dataset[idx]['bpe_ids'].size(0)
+
+                    f0_buffer.append(self.dataset[idx]['f0'])
+                    energy_buffer.append(self.dataset[idx]['energy'])
+                    uv_buffer.append(self.dataset[idx]['uv'])
+
+                    mel2ph_buffer.append(
+                        torch.IntTensor(self.dataset[idx]['mel2ph_buffer']) + prev_ph)
+                    prev_ph += self.dataset[idx]['phoneme_ids'].size(0)
+
+                    # 为了方便spk id 可以进行升到和 phoneme数据量一致
+                    spk_buffer.append(
+                        [self.dataset[idx]['spk_id']] * self.dataset[idx]['phoneme_ids'].size(0))
+
+                phoneme_buffer = torch.cat(phoneme_buffer)
+                bpe_buffer = torch.cat(bpe_buffer)
+                phoneme2bpe_buffer = torch.cat(phoneme2bpe_buffer)
+                f0_buffer = torch.cat(f0_buffer)
+                energy_buffer = torch.cat(energy_buffer)
+                uv_buffer = torch.cat(uv_buffer)
+                mel2ph_buffer = torch.cat(mel2ph_buffer)
+                spk_buffer = torch.cat(spk_buffer)
+
+                slice_s, slice_e = self.slice_indices[index]
+                length = slice_e - slice_s
+                s, e = start_offset, start_offset + length
+                assert s == 0
+                assert e == phoneme_buffer.size(0)
+                item = {
+                    'phoneme': phoneme_buffer,
+                    'bpe': bpe_buffer,
+                    'phoneme2bpe': phoneme2bpe_buffer,
+                    'f0': f0_buffer,
+                    'energy': energy_buffer,
+                    'uv': uv_buffer,
+                    'mel2ph_buffer': mel2ph_buffer,
+                    'spk_buffer': spk_buffer
+                }
+
+            else:
+                phoneme_buffer = []
+                bpe_buffer = []
+                phoneme2bpe_buffer = []
+                prev_bpe = 0
+                for idx in range(start_ds_idx, end_ds_idx + 1):
+                    phoneme_buffer.append(self.dataset[idx]['phoneme_ids'])
+                    bpe_buffer.append(self.dataset[idx]['bpe_ids'])
+                    phoneme2bpe_buffer.append(
+                        torch.IntTensor(self.dataset[idx]['phoneme2bpe']) + prev_bpe)
+                    prev_bpe += self.dataset[idx]['bpe_ids'].size(0)
+
+                phoneme_buffer = torch.cat(phoneme_buffer)
+                bpe_buffer = torch.cat(bpe_buffer)
+                phoneme2bpe_buffer = torch.cat(phoneme2bpe_buffer)
+                slice_s, slice_e = self.slice_indices[index]
+                length = slice_e - slice_s
+                s, e = start_offset, start_offset + length
+                assert s == 0
+                assert e == phoneme_buffer.size(0)
+                item = {
+                    'phoneme': phoneme_buffer,
+                    'bpe': bpe_buffer,
+                    'phoneme2bpe': phoneme2bpe_buffer,
+
+                }
+
         else:
 
             buffer = torch.cat(
