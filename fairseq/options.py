@@ -265,8 +265,7 @@ def add_preprocess_args(parser):
     # 添加prosody predict 参数为了保证适应输入
     group.add_argument("--prosody-predict", action="store_true",
                        help="predict prosody")
-    group.add_argument("--no-word-sep", action="store_true",
-                       help="no word split")
+
     # fmt: on
     return parser
 
@@ -293,6 +292,8 @@ def add_dataset_args(parser, train=False, gen=False):
                        help="indexed dataset")
     group.add_argument("--prosody-predict", action="store_true",
                        help="prosody predict")
+    group.add_argument("--no-word-sep", action="store_true",
+                       help="no word split")
     if train:
         group.add_argument('--train-subset', default='train', metavar='SPLIT',
                            choices=['train', 'valid', 'test'],
@@ -314,6 +315,7 @@ def add_dataset_args(parser, train=False, gen=False):
                                 ' (defaults to --max-sentences)')
         group.add_argument('--curriculum', default=0, type=int, metavar='N',
                            help='don\'t shuffle batches for first N epochs')
+
     if gen:
         group.add_argument('--gen-subset', default='test', metavar='SPLIT',
                            help='data subset to generate (train, valid, test)')
