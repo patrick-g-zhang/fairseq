@@ -204,8 +204,8 @@ class MultiprocessingEncoder(object):
             item["f0"], self.spks_mv[spk_id][0], self.spks_mv[spk_id][1])
         out_item['f0'] = f0
         out_item['uv'] = uv
-        pitch = item["pitch"]
-        out_item['pitch'] = pitch
+        energy = item["energy"]
+        out_item['energy'] = energy
         ph = item['phone']
 
         # remove repeat "|"
