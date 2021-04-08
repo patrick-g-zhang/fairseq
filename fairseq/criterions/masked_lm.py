@@ -66,6 +66,7 @@ class MaskedLmLoss(FairseqCriterion):
         3) logging outputs to display while training
         """
         # compute MLM loss
+
         if self.args.two_inputs:
             # 多个输入
             bpe_masked_tokens = sample['target']['bpe'].ne(self.padding_idx)
@@ -77,7 +78,8 @@ class MaskedLmLoss(FairseqCriterion):
             if sample_size == 0:
                 phoneme_masked_tokens = None
 
-            if self.prosody_predict:
+            if self.args.prosody_predict:
+                pdb.set_trace()
                 # 如果是做韵律预测 要会有多个输出
                 logitps, logitbs, dur_pred, pitch_pred, energy_pred = model(**sample['net_input'], masked_tokens=phoneme_masked_tokens,
                                                                             bpe_masked_tokens=bpe_masked_tokens)

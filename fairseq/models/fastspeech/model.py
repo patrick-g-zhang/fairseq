@@ -1229,7 +1229,6 @@ class FastSpeech2Encoder(FairseqDecoder):
 
         # add prosody predictor 引入多余的预训练目标
         if self.args.prosody_predict:
-            pdb.set_trace()
             # 将维度缩小到decoder阶段
             self.encoder_map = Linear(
                 self.encoder_embed_dim, self.decoder_embed_dim, bias=True)
@@ -1257,7 +1256,7 @@ class FastSpeech2Encoder(FairseqDecoder):
                 dropout_rate=0.5,
                 padding='SAME',
                 odim=2,
-                use_position_embeddings=self.use_position_embeddings)
+                use_position_embeddings=args.use_position_embeddings)
 
 
             # energy 预测
@@ -1267,7 +1266,7 @@ class FastSpeech2Encoder(FairseqDecoder):
                 dropout_rate=0.5,
                 odim=1,
                 padding='SAME',
-                use_position_embeddings=self.use_position_embeddings,
+                use_position_embeddings=args.use_position_embeddings,
             )
 
 
