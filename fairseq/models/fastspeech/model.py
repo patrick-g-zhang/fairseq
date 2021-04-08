@@ -1007,7 +1007,7 @@ class FastSpeech2(FairseqEncoderLanguageModel):
         # add more pretraining task 
 
         # 韵律预测
-        parser.add_argument('--prosody-predict', action='store_true')
+        # parser.add_argument('--prosody-predict', action='store_true')
         parser.add_argument('--use-spk-id', action='store_true')
         
         # 说话人数量 需要去修改
