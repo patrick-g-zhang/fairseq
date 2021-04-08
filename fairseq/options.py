@@ -265,6 +265,8 @@ def add_preprocess_args(parser):
     # 添加prosody predict 参数为了保证适应输入
     group.add_argument("--prosody-predict", action="store_true",
                        help="predict prosody")
+    group.add_argument("--no-word-sep", action="store_true",
+                       help="no word split")
     # fmt: on
     return parser
 
