@@ -79,11 +79,6 @@ class DurationPredictor(torch.nn.Module):
         # NOTE: calculate in log domain
         xs = self.linear(xs.transpose(1, -1)).squeeze(-1)  # (B, Tmax)
 
-        if is_inference:
-            # NOTE: calculate in linear domain
-            xs = torch.clamp(torch.round(xs.exp() - self.offset),
-                             min=0).long()  # avoid negative value
-
         if x_masks is not None:
             xs = xs.masked_fill(x_masks, 0.0)
         return xs
@@ -1009,7 +1004,7 @@ class FastSpeech2(FairseqEncoderLanguageModel):
         parser.add_argument('--use-spk-id', action='store_false')
         
         # 说话人数量 需要去修改
-        parser.add_argument('--num-spk', type=int, default=40)
+        parser.add_argument('--num-spk', type=int, default=1000)
 
 
 
@@ -1306,7 +1301,6 @@ class FastSpeech2Encoder(FairseqDecoder):
                 # 现在加上了韵律预测模块，需要多load 多一点信息
             else:
             # 韵律预测或者其他待补充
-                pdb.set_trace()
                 mel2ph = src_tokens['mel2ph']
                 spk_id = src_tokens['spk_id']
                 x = self.prosody_predictor(phoneme_input, bpe_input=bpe_input, phoneme2bpe=phoneme2bpe,mel2ph=mel2ph, spk_id=spk_id, masked_tokens=masked_tokens,bpe_masked_tokens=bpe_masked_tokens)
