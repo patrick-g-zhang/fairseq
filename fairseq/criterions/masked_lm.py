@@ -19,11 +19,10 @@ def dur_loss(dur_pred, dur_gt, input):
 
     # 对targets 取对数
     targets = torch.log(dur_gt.float() + 1.0)
-    loss = torch.nn.MSELoss(reduction=reduction)(dur_pred, targets.float())
+    loss = torch.nn.MSELoss(reduction="none")(dur_pred, targets.float())
     loss = (loss * nonpadding).sum() / nonpadding.sum()
-    ph_dur_loss = self.dur_loss_fn(
-        dur_pred, dur_gt, nonpadding)
-    return ph_dur_loss
+
+    return loss
 
 
 def pitch_loss(p_pred, pitch, uv):
