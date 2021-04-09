@@ -35,7 +35,7 @@ def pitch_loss(p_pred, pitch, uv):
     nonpadding = (pitch != -200).float() * (uv == 0).float()
     nonpadding = nonpadding.reshape(-1)
 
-    pitch_loss = (F.l1_loss(
+    f0_loss = (F.l1_loss(
         p_pred[:, :, 0].reshape(-1), pitch.reshape(-1), reduction='none') * nonpadding).sum() \
         / nonpadding.sum()
     return uv_loss, f0_loss
