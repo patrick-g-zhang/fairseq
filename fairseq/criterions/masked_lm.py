@@ -38,7 +38,7 @@ def pitch_loss(p_pred, pitch, uv):
     pitch_loss = (F.l1_loss(
         p_pred[:, :, 0].reshape(-1), pitch.reshape(-1), reduction='none') * nonpadding).sum() \
         / nonpadding.sum()
-    return uv_loss, pitch_loss
+    return uv_loss, f0_loss
 
 
 def energy_loss(energy_pred, energy):
@@ -129,7 +129,6 @@ class MaskedLmLoss(FairseqCriterion):
                 'sample_size': sample_size,
             }
 
-            pdb.set_trace()
             if self.args.prosody_predict:
                 # 增加额外的loss
                 # energy loss
@@ -150,10 +149,14 @@ class MaskedLmLoss(FairseqCriterion):
                 # pitch loss
                 f0 = sample['target']['f0']
                 uv = sample['target']['uv']
-                loss_f0 = pitch_loss(pitch_pred, f0, uv)
+                pdb.set_trace()
+                loss_uv, loss_f0 = pitch_loss(pitch_pred, f0, uv)
                 loss += loss_f0
                 logging_output['loss_f0'] = utils.item(
                     loss_f0.data) if reduce else loss_f0.data
+                loss += loss_uv
+                logging_output['loss_uv'] = utils.item(
+                    loss_uv.data) if reduce else loss_uv.data
 
         else:
             masked_tokens = sample['target'].ne(self.padding_idx)
