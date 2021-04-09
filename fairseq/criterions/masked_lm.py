@@ -216,4 +216,20 @@ class MaskedLmLoss(FairseqCriterion):
             'nsentences': nsentences,
             'sample_size': sample_size,
         }
+
+        if logging_outputs[0].get('loss_energy', 0) > 0:
+            # 需要输出韵律相关的特征
+            loss_energy = sum(log.get('loss_energy', 0)
+                              for log in logging_outputs)
+            agg_output['loss_energy'] = loss_energy / sample_size / math.log(2)
+
+            loss_dur = sum(log.get('loss_dur', 0) for log in logging_outputs)
+            agg_output['loss_dur'] = loss_dur / sample_size / math.log(2)
+
+            loss_f0 = sum(log.get('loss_f0', 0) for log in logging_outputs)
+            agg_output['loss_f0'] = loss_f0 / sample_size / math.log(2)
+
+            loss_uv = sum(log.get('loss_uv', 0) for log in logging_outputs)
+            agg_output['loss_uv'] = loss_uv / sample_size / math.log(2)
+
         return agg_output
