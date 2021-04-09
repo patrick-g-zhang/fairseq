@@ -1353,7 +1353,6 @@ class FastSpeech2Encoder(FairseqDecoder):
         dur_input = encoder_outputs.transpose(0, 1)  # 【B, T, C]
         
         # mask
-        pdb.set_trace()
         pad_mask = src_tokens == 0
         dur_pred = self.dur_predictor(dur_input, pad_mask)
         

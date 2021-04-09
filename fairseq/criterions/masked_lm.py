@@ -79,7 +79,6 @@ class MaskedLmLoss(FairseqCriterion):
                 phoneme_masked_tokens = None
 
             if self.args.prosody_predict:
-                pdb.set_trace()
                 # 如果是做韵律预测 要会有多个输出
                 logitps, logitbs, dur_pred, pitch_pred, energy_pred = model(**sample['net_input'], masked_tokens=phoneme_masked_tokens,
                                                                             bpe_masked_tokens=bpe_masked_tokens)
