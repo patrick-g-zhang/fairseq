@@ -149,7 +149,7 @@ class MaskedLmLoss(FairseqCriterion):
                 # pitch loss
                 f0 = sample['target']['f0']
                 uv = sample['target']['uv']
-                pdb.set_trace()
+
                 loss_uv, loss_f0 = pitch_loss(pitch_pred, f0, uv)
                 loss += loss_f0
                 logging_output['loss_f0'] = utils.item(
