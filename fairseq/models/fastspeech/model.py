@@ -1345,14 +1345,17 @@ class FastSpeech2Encoder(FairseqDecoder):
         encoder_outputs = self.encoder_map(encoder_outputs)
 
         # 加上speaker embedding
-        pdb.set_trace()
         spk_embed = self.spk_embed_proj(spk_id).transpose(0, 1) #[B, T, D] -> [T, B, D]
         encoder_outputs += spk_embed
         encoder_outputs = encoder_outputs * src_nonpadding  # [T, B, C]
         
         # 预测韵律
         dur_input = encoder_outputs.transpose(0, 1)  # 【B, T, C]
-        dur_pred = self.dur_predictor(dur_input, 0)
+        
+        # mask
+        pdb.set_trace()
+        pad_mask = src_tokens == 0
+        dur_pred = self.dur_predictor(dur_input, pad_mask)
         
         # 展开到frame level
         decoder_inp = F.pad(encoder_outputs, [0, 0, 0, 0, 1, 0])
