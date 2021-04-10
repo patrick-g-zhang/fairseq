@@ -12,6 +12,7 @@ import traceback
 from collections import OrderedDict
 from typing import Union
 import pdb
+import glob
 import torch
 from fairseq.models import FairseqDecoder, FairseqEncoder
 from torch.serialization import default_restore_location
@@ -107,7 +108,6 @@ def load_checkpoint(args, trainer, **passthrough_args):
     ``trainer.get_train_iterator``.
     """
     # only one worker should attempt to create the required dir
-    pdb.set_trace()
     if args.distributed_rank == 0:
         os.makedirs(args.save_dir, exist_ok=True)
 
@@ -116,13 +116,30 @@ def load_checkpoint(args, trainer, **passthrough_args):
     else:
         checkpoint_path = args.restore_file
 
-    extra_state = trainer.load_checkpoint(
-        checkpoint_path,
-        args.reset_optimizer,
-        args.reset_lr_scheduler,
-        eval(args.optimizer_overrides),
-        reset_meters=args.reset_meters,
-    )
+    # 如何处理warm start,只有特定的checkponts name 才能启动warm start
+    # 一旦生成新的checkpoint 不用warm
+    pdb.set_trace()
+    warm_start = False
+    ckpts = glob.glob(args.save_dir + "/*.pt")
+    if len(ckpts) == 1 and ckpts[0] == "checkpoint_pretrained.pt":
+        warm_start = True
+
+    if warm_start:
+        extra_state = trainer.load_pretrained_checkpoint(
+            checkpoint_path,
+            args.reset_optimizer,
+            args.reset_lr_scheduler,
+            eval(args.optimizer_overrides),
+            reset_meters=args.reset_meters,
+        )
+    else:
+        extra_state = trainer.load_checkpoint(
+            checkpoint_path,
+            args.reset_optimizer,
+            args.reset_lr_scheduler,
+            eval(args.optimizer_overrides),
+            reset_meters=args.reset_meters,
+        )
 
     if (
         extra_state is not None

@@ -172,6 +172,32 @@ class Trainer(object):
                 extra_state,
             )
 
+    def load_pretrained_checkpoint(
+        self,
+        filename,
+    ):
+        """Load all training state from a checkpoint file."""
+        extra_state, self._optim_history = None, [], None
+
+        state = checkpoint_utils.load_checkpoint_to_cpu(filename)
+
+        # load model parameters
+        try:
+            self.get_model().load_state_dict(
+                state["model"], strict=False, args=self.args
+            )
+
+        except Exception:
+            raise Exception(
+                "Cannot load model parameters from checkpoint {}; "
+                "please ensure that the architectures match.".format(
+                    filename)
+            )
+
+        print("warm start from {}".format(filename))
+
+        return extra_state
+
     def load_checkpoint(
         self,
         filename,
