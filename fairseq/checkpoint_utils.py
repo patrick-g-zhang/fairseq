@@ -124,7 +124,7 @@ def load_checkpoint(args, trainer, **passthrough_args):
         if os.path.basename(ckpts[0]) == "checkpoint_pretrained.pt":
             warm_start = True
             checkpoint_path = ckpts[0]
-    pdb.set_trace()
+
     if warm_start:
         extra_state = trainer.load_pretrained_checkpoint(
             checkpoint_path,

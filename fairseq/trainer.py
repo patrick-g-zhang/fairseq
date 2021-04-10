@@ -206,7 +206,7 @@ class Trainer(object):
         optimizer_overrides=None,
         reset_meters=False,
     ):
-        pdb.set_trace()
+
         """Load all training state from a checkpoint file."""
         extra_state, self._optim_history, last_optim_state = None, [], None
 
