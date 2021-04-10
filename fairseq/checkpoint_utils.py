@@ -107,6 +107,7 @@ def load_checkpoint(args, trainer, **passthrough_args):
     ``trainer.get_train_iterator``.
     """
     # only one worker should attempt to create the required dir
+    pdb.set_trace()
     if args.distributed_rank == 0:
         os.makedirs(args.save_dir, exist_ok=True)
 
