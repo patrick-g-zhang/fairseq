@@ -4,6 +4,8 @@
 #
 # This source code is licensed under the license found in the
 # LICENSE file in the root directory of this source tree.
+# 用来处理韵律的输入
+
 
 import argparse
 import contextlib
@@ -139,6 +141,7 @@ def main():
 
     with contextlib.ExitStack() as stack:
         indexed_bs = IndexedDataset(args.inputs[0])
+        pdb.set_trace()
         spks_mv = np.load(
             f'{args.inputs[0].split(".")[0]}_f0s.pkl', allow_pickle=True)
 
