@@ -180,6 +180,7 @@ class Trainer(object):
         optimizer_overrides=None,
         reset_meters=False,
     ):
+        pdb.set_trace()
         """Load all training state from a checkpoint file."""
         extra_state, self._optim_history, last_optim_state = None, [], None
 
@@ -196,11 +197,11 @@ class Trainer(object):
             # load model parameters
             try:
                 self.get_model().load_state_dict(
-                    state["model"], strict=True, args=self.args
+                    state["model"], strict=False, args=self.args
                 )
                 if utils.has_parameters(self.get_criterion()):
                     self.get_criterion().load_state_dict(
-                        state["criterion"], strict=True
+                        state["criterion"], strict=False
                     )
             except Exception:
                 raise Exception(
