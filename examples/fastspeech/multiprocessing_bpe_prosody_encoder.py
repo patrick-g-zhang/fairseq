@@ -144,10 +144,6 @@ def main():
         spks_mv = np.load(
             f'{"/".join(args.inputs[0].split("/")[:-1])}/train_f0s.pkl', allow_pickle=True)
 
-        for k, v in spks_mv.items():
-            if v[1] <= 0:
-                pdb.set_trace()
-        pdb.set_trace()
         # self.indexed_bs = IndexedDataset(
         # f'{self.data_dir}/{self.prefix}')
         builder = IndexedDatasetBuilder(args.outputs[0])
