@@ -118,12 +118,14 @@ def load_checkpoint(args, trainer, **passthrough_args):
 
     # 如何处理warm start,只有特定的checkponts name 才能启动warm start
     # 一旦生成新的checkpoint 不用warm
-    pdb.set_trace()
     warm_start = False
     ckpts = glob.glob(args.save_dir + "/*.pt")
-    if len(ckpts) == 1 and ckpts[0] == "checkpoint_pretrained.pt":
-        warm_start = True
+    if len(ckpts) == 1:
+        if os.path.basename(ckpts[0]) == "checkpoint_pretrained.pt":
+            warm_start = True
+            checkpoint_path = ckpts[0]
 
+    pdb.set_trace()
     if warm_start:
         extra_state = trainer.load_pretrained_checkpoint(
             checkpoint_path,
