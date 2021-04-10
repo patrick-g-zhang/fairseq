@@ -144,7 +144,7 @@ def main():
         spks_mv = np.load(
             f'{args.inputs[0].split(".")[0]}_f0s.pkl', allow_pickle=True)
 
-        for k, v in enumerate(spks_mv):
+        for k, v in spks_mv.items():
             if v[1] <= 0:
                 pdb.set_trace()
         pdb.set_trace()
