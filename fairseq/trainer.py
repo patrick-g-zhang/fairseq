@@ -177,7 +177,7 @@ class Trainer(object):
         filename,
     ):
         """Load all training state from a checkpoint file."""
-        extra_state, self._optim_history = None, [], None
+        extra_state, self._optim_history = None, None
 
         state = checkpoint_utils.load_checkpoint_to_cpu(filename)
 
