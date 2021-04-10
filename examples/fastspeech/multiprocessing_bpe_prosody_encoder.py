@@ -141,10 +141,13 @@ def main():
 
     with contextlib.ExitStack() as stack:
         indexed_bs = IndexedDataset(args.inputs[0])
-        pdb.set_trace()
         spks_mv = np.load(
             f'{args.inputs[0].split(".")[0]}_f0s.pkl', allow_pickle=True)
 
+        for k, v in enumerate(spks_mv):
+            if v[1] <= 0:
+                pdb.set_trace()
+        pdb.set_trace()
         # self.indexed_bs = IndexedDataset(
         # f'{self.data_dir}/{self.prefix}')
         builder = IndexedDatasetBuilder(args.outputs[0])
