@@ -137,10 +137,6 @@ def load_checkpoint(args, trainer, **passthrough_args):
     else:
         extra_state = trainer.load_checkpoint(
             checkpoint_path,
-            args.reset_optimizer,
-            args.reset_lr_scheduler,
-            eval(args.optimizer_overrides),
-            reset_meters=args.reset_meters,
         )
 
     if (
