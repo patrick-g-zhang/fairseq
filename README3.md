@@ -63,12 +63,12 @@ done
  - adding new argument ```--two-inputs``` to ```train.py``` file. The input needs both bpe and phoneme
  - adding new argument ```--prosody-predict``` to ```train.py``` file. we will also predict prosody.
  - adding ```tensorboard-logdir```
- - adding ```num-spk```
+ - adding ```num-spk``` 
 #### General configs
 ```
     ARCH=fastspeech # 我把韵律预测与归到这里了
     SAVE_DIR=/blob/xuta/speech/tts/t-guzhang/fairseq/checkpoints/${ARCH}-Test
-    DATA_DIR=/blob/xuta/speech/tts/t-guzhang/fairseq/experiments/data-bin/news.cn.bpe.10k.full
+    DATA_DIR=experiments/data-bin/librispeech-prosody
     LOG_DIR="logs/fastspeech-Test"
     TOTAL_UPDATES=225000    # Total number of training steps 
     WARMUP_UPDATES=10000    # Warmup the learning rate over this many updates
@@ -78,16 +78,9 @@ done
     ARCH=fastspeech 
     MAX_SENTENCES=16        # Number of sequences per batch (batch size)
     UPDATE_FREQ=16          # Increase the batch size 16x  
+    NUM_SPK=2485 # number of speaker for librispeech 1000
 ```
 
-
-
-
-#### Full data, second version dictionary, 30k size with full data, 
-```
-
-
-```
 
  ```
  python -m pdb /blob/xuta/speech/tts/t-guzhang/fairseq/train.py $DATA_DIR \
@@ -97,7 +90,7 @@ done
     --lr-scheduler polynomial_decay --lr $PEAK_LR --warmup-updates $WARMUP_UPDATES --total-num-update $TOTAL_UPDATES \
     --dropout 0.1 --weight-decay 0.01 \
     --batch-size $MAX_SENTENCES --update-freq $UPDATE_FREQ  \
-    --max-update $TOTAL_UPDATES --log-format simple --log-interval 1 --dataset-impl dict --two-inputs --no-pad-prepend-token --prosody-predict
+    --max-update $TOTAL_UPDATES --log-format simple --log-interval 1 --dataset-impl dict --two-inputs --no-pad-prepend-token --prosody-predict --num-spk $NUM_SPK
  ```
 
 

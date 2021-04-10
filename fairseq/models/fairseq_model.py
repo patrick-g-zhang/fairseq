@@ -60,7 +60,7 @@ class BaseFairseqModel(nn.Module):
         """Maximum length supported by the model."""
         return None
 
-    def load_state_dict(self, state_dict, strict=True, args=None):
+    def load_state_dict(self, state_dict, strict=False, args=None):
         """Copies parameters and buffers from *state_dict* into this module and
         its descendants.
 
