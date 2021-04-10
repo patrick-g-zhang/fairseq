@@ -142,7 +142,7 @@ def main():
     with contextlib.ExitStack() as stack:
         indexed_bs = IndexedDataset(args.inputs[0])
         spks_mv = np.load(
-            f'{args.inputs[0].split(".")[0]}_f0s.pkl', allow_pickle=True)
+            f'{"/".join(args.inputs[0].split("/")[:-1])}/train_f0s.pkl', allow_pickle=True)
 
         for k, v in spks_mv.items():
             if v[1] <= 0:
