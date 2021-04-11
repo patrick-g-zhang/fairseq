@@ -1437,11 +1437,13 @@ def base_architecture(args):
 
 @register_model_architecture('fastspeech', 'fastspeech_base')
 def fastspeech_base_architecture(args):
+    pdb.set_trace()
     base_architecture(args)
 
 
 @register_model_architecture('fastspeech', 'fastspeech_large')
 def fastspeech_large_architecture(args):
+    pdb.set_trace()
     args.encoder_layers = getattr(args, 'encoder_layers', 12)
     args.encoder_embed_dim = getattr(args, 'encoder_embed_dim', 768)
     args.encoder_attention_heads = getattr(args, 'encoder_attention_heads', 12)
