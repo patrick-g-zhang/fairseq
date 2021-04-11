@@ -29,7 +29,7 @@ class RobertaModel(FairseqLanguageModel):
 
     def __init__(self, args, encoder):
         super().__init__(encoder)
-        pdb.set_trace()
+
         self.args = args
         # We follow BERT's random weight initialization
         self.apply(init_bert_params)
