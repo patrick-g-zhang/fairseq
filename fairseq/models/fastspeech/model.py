@@ -1412,6 +1412,7 @@ class FastSpeech2Encoder(FairseqDecoder):
 
 @register_model_architecture('fastspeech', 'fastspeech')
 def base_architecture(args):
+    pdb.set_trace()
     args.encoder_layers = getattr(args, 'encoder_layers', 8)
     args.encoder_embed_dim = getattr(args, 'encoder_embed_dim', 512)
     args.encoder_attention_heads = getattr(args, 'encoder_attention_heads', 8)
@@ -1435,15 +1436,15 @@ def base_architecture(args):
     args.num_spk = getattr(args, 'num_spk', 1000)
 
 @register_model_architecture('fastspeech', 'fastspeech_base')
-def roberta_base_architecture(args):
+def fastspeech_base_architecture(args):
     base_architecture(args)
 
 
 @register_model_architecture('fastspeech', 'fastspeech_large')
-def roberta_large_architecture(args):
-    args.encoder_layers = getattr(args, 'encoder_layers', 24)
-    args.encoder_embed_dim = getattr(args, 'encoder_embed_dim', 1024)
-    args.encoder_attention_heads = getattr(args, 'encoder_attention_heads', 16)
+def fastspeech_large_architecture(args):
+    args.encoder_layers = getattr(args, 'encoder_layers', 12)
+    args.encoder_embed_dim = getattr(args, 'encoder_embed_dim', 768)
+    args.encoder_attention_heads = getattr(args, 'encoder_attention_heads', 12)
     base_architecture(args)
 
 
