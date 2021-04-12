@@ -50,6 +50,7 @@ for SPLIT in valid test train; do \
         --workers 80; \
 done
 
+
 ```
 
 - convert phoneme sequence to bpe sequence dictionary size is 10k
@@ -174,7 +175,7 @@ LOG_DIR=/blob/xuta/speech/tts/t-guzhang/fairseq/logs/${ARCH}-BPE-12W-Steps-FP16-
     --max-update $TOTAL_UPDATES --log-format simple --log-interval 1 --dataset-impl dict --two-inputs --no-pad-prepend-token --tensorboard-logdir=$
  ```
  
-  ```
+```
  python /blob/xuta/speech/tts/t-guzhang/fairseq/train.py $DATA_DIR \
     --task masked_lm --criterion masked_lm --save-dir $SAVE_DIR\
     --arch $ARCH --sample-break-mode complete --tokens-per-sample $TOKENS_PER_SAMPLE \
@@ -183,6 +184,62 @@ LOG_DIR=/blob/xuta/speech/tts/t-guzhang/fairseq/logs/${ARCH}-BPE-12W-Steps-FP16-
     --dropout 0.1 --weight-decay 0.01 \
     --batch-size $MAX_SENTENCES --update-freq $UPDATE_FREQ  \
     --max-update $TOTAL_UPDATES --log-format simple --log-interval 1 --dataset-impl dict --two-inputs --no-pad-prepend-token
+```
+
+### Add new and large english data and 150M data
+
+150M news-2015-20.en
+```
+for SPLIT in train valid test; do \
+        python -m examples.fastspeech.multiprocessing_bpe_encoder \
+        --vocab-bpe experiments/phoneme_bpe/vocab.10k.bpe \
+        --inputs experiments/news-2015-20.en/news.${SPLIT}.txt \
+        --outputs experiments/news-2015-20.en/news.${SPLIT}.bpe \
+        --keep-empty \
+        --workers 80; \
+done
+```
+
+
+  - preprocessing full dataset with vocab size 10k
  ```
- 
- 
+    SRCDICT=experiments/phoneme/dict.txt # phoneme dictionary
+    TGTDICT=experiments/phoneme_bpe/bpe.10k.dict.txt # bpe dictionary
+    TRAINPREF=experiments/news-2015-20.en/news.train.bpe
+    VALIDPREF=experiments/news-2015-20.en/news.valid.bpe
+    TESTPREF=experiments/news-2015-20.en/news.test.bpe
+    DESTDIR=experiments/data-bin/news-2015-20.en.bpe.10k.full # output
+ ```
+
+  - run command
+ ```
+      python preprocess.py \
+    --only-source \
+    --srcdict ${SRCDICT} \
+    --tgtdict ${TGTDICT} \
+    --trainpref ${TRAINPREF} \
+    --validpref  ${VALIDPREF} \
+    --testpref  ${TESTPREF}\
+    --destdir  ${DESTDIR}\
+    --dataset-impl dict \
+    --two-inputs \
+    --workers 64
+ ```
+
+ #### Full data 15-20 en data, 10k size with full data, 
+```
+SAVE_DIR=/blob/xuta/speech/tts/t-guzhang/fairseq/checkpoints/${ARCH}-BPE-22W-Steps-FP16-10k-sc4
+DATA_DIR=/blob/xuta/speech/tts/t-guzhang/fairseq/experiments/data-bin/news-2015-20.en.bpe.10k.full
+LOG_DIR=/blob/xuta/speech/tts/t-guzhang/fairseq/logs/${ARCH}-BPE-22W-Steps-FP16-10k-sc4
+```
+
+ ```
+ python  /blob/xuta/speech/tts/t-guzhang/fairseq/train.py $DATA_DIR \
+    --task masked_lm --criterion masked_lm --save-dir $SAVE_DIR\
+    --arch $ARCH --sample-break-mode complete --tokens-per-sample $TOKENS_PER_SAMPLE \
+    --optimizer adam --adam-betas '(0.9,0.98)' --adam-eps 1e-6 --clip-norm 0.0 \
+    --lr-scheduler polynomial_decay --lr $PEAK_LR --warmup-updates $WARMUP_UPDATES --total-num-update $TOTAL_UPDATES \
+    --dropout 0.1 --weight-decay 0.01 \
+    --batch-size $MAX_SENTENCES --update-freq $UPDATE_FREQ  \
+    --max-update $TOTAL_UPDATES --log-format simple --log-interval 1 --dataset-impl dict --two-inputs --no-pad-prepend-token --tensorboard-logdir=$
+ ```

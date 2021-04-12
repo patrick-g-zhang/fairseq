@@ -26,7 +26,8 @@ class DictPadDataset(BaseWrapperDataset):
         self.bpe_pad_idx = pad_idx
         self.left_pad = left_pad
         self.is_target = is_target
-        self.prosody_predict = prosody_predict,
+        self.prosody_predict = prosody_predict
+        print(self.prosody_predict)
 
     def collater(self, samples):
         phonemes = [sample['phoneme'] for sample in samples]
