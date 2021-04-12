@@ -133,7 +133,8 @@ class MaskedLmLoss(FairseqCriterion):
                 # 增加额外的loss
                 # energy loss
                 energy = sample['target']['energy']
-                loss_energy = energy_loss(energy_pred, energy)
+                loss_energy = energy_loss(
+                    energy_pred, energy) * self.args.prosody_loss_coeff
                 loss += loss_energy
                 logging_output['loss_energy'] = utils.item(
                     loss_energy.data) if reduce else loss_energy.data
@@ -141,7 +142,7 @@ class MaskedLmLoss(FairseqCriterion):
                 # dur loss
                 dur_gt = sample['target']['dur_gt']
                 loss_dur = dur_loss(
-                    dur_pred, dur_gt, sample['net_input']['src_tokens']['phoneme'])
+                    dur_pred, dur_gt, sample['net_input']['src_tokens']['phoneme']) * self.args.prosody_loss_coeff
                 loss += loss_dur
                 logging_output['loss_dur'] = utils.item(
                     loss_dur.data) if reduce else loss_dur.data
@@ -151,6 +152,8 @@ class MaskedLmLoss(FairseqCriterion):
                 uv = sample['target']['uv']
 
                 loss_uv, loss_f0 = pitch_loss(pitch_pred, f0, uv)
+                loss_uv = loss_uv * self.args.prosody_loss_coeff
+                loss_f0 = loss_f0 * self.args.prosody_loss_coeff
                 loss += loss_f0
                 logging_output['loss_f0'] = utils.item(
                     loss_f0.data) if reduce else loss_f0.data

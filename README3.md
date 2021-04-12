@@ -64,6 +64,7 @@ done
  - adding new argument ```--prosody-predict``` to ```train.py``` file. we will also predict prosody.
  - adding ```tensorboard-logdir```
  - adding ```num-spk``` 
+ - adding ```prosody-loss-coeff```
 #### General configs
 ```
     ARCH=fastspeech # 我把韵律预测与归到这里了
@@ -75,29 +76,14 @@ done
     PEAK_LR=0.0005          # Peak learning rate, adjust as needed
     TOKENS_PER_SAMPLE=512   # Max sequence length 
     MAX_POSITIONS=512       # Num. positional embeddings (usually same as above)
-    ARCH=fastspeech 
     MAX_SENTENCES=16        # Number of sequences per batch (batch size)
     UPDATE_FREQ=16          # Increase the batch size 16x  
     NUM_SPK=2485 # number of speaker for librispeech 1000
 ```
 
+--save-interval
 
  ```
- python -m pdb /blob/xuta/speech/tts/t-guzhang/fairseq/train.py $DATA_DIR \
-    --task masked_lm --criterion masked_lm --save-dir $SAVE_DIR\
-    --arch $ARCH --sample-break-mode complete --tokens-per-sample $TOKENS_PER_SAMPLE \
-    --optimizer adam --adam-betas '(0.9,0.98)' --adam-eps 1e-6 --clip-norm 0.0 \
-    --lr-scheduler polynomial_decay --lr $PEAK_LR --warmup-updates $WARMUP_UPDATES --total-num-update $TOTAL_UPDATES \
-    --dropout 0.1 --weight-decay 0.01 \
-    --batch-size $MAX_SENTENCES --update-freq $UPDATE_FREQ  \
-    --max-update $TOTAL_UPDATES --log-format simple --log-interval 1 --dataset-impl dict --two-inputs --no-pad-prepend-token --prosody-predict --num-spk $NUM_SPK
- ```
-
-
-
-
- 
-  ```
  python /blob/xuta/speech/tts/t-guzhang/fairseq/train.py $DATA_DIR \
     --task masked_lm --criterion masked_lm --save-dir $SAVE_DIR\
     --arch $ARCH --sample-break-mode complete --tokens-per-sample $TOKENS_PER_SAMPLE \
@@ -105,7 +91,41 @@ done
     --lr-scheduler polynomial_decay --lr $PEAK_LR --warmup-updates $WARMUP_UPDATES --total-num-update $TOTAL_UPDATES \
     --dropout 0.1 --weight-decay 0.01 \
     --batch-size $MAX_SENTENCES --update-freq $UPDATE_FREQ  \
-    --max-update $TOTAL_UPDATES --log-format simple --log-interval 1 --dataset-impl dict --two-inputs --no-pad-prepend-token
+    --max-update $TOTAL_UPDATES --log-format simple --log-interval 1 --dataset-impl dict --two-inputs --no-pad-prepend-token --prosody-predict --num-spk $NUM_SPK --mask-whole-words
  ```
+
+
+
+
+### Warm start from a pretrained MLM model
+- add ```load_pretrained_checkpoint ``` to ```checkpoint_utils.py```
+- 确保存在 ```checkpointpretrained.pt ``` 的时候并且没有其他的checkpoint的时候进行warm start
  
- 
+
+### Adding some parameters for prosody predictor coefficient
+```
+    ARCH=fastspeech # 我把韵律预测与归到这里了
+    SAVE_DIR=/blob/xuta/speech/tts/t-guzhang/fairseq/checkpoints/${ARCH}-Test
+    DATA_DIR=experiments/data-bin/librispeech-prosody
+    LOG_DIR="logs/fastspeech-Test"
+    TOTAL_UPDATES=225000    # Total number of training steps 
+    WARMUP_UPDATES=10000    # Warmup the learning rate over this many updates
+    PEAK_LR=0.0005          # Peak learning rate, adjust as needed
+    TOKENS_PER_SAMPLE=512   # Max sequence length 
+    MAX_POSITIONS=512       # Num. positional embeddings (usually same as above)
+    MAX_SENTENCES=16        # Number of sequences per batch (batch size)
+    UPDATE_FREQ=16          # Increase the batch size 16x  
+    NUM_SPK=2485 # number of speaker for librispeech 1000
+    PCOEFF=1000
+```
+
+ ```
+ python /blob/xuta/speech/tts/t-guzhang/fairseq/train.py $DATA_DIR \
+    --task masked_lm --criterion masked_lm --save-dir $SAVE_DIR\
+    --arch $ARCH --sample-break-mode complete --tokens-per-sample $TOKENS_PER_SAMPLE \
+    --optimizer adam --adam-betas '(0.9,0.98)' --adam-eps 1e-6 --clip-norm 0.0 \
+    --lr-scheduler polynomial_decay --lr $PEAK_LR --warmup-updates $WARMUP_UPDATES --total-num-update $TOTAL_UPDATES \
+    --dropout 0.1 --weight-decay 0.01 \
+    --batch-size $MAX_SENTENCES --update-freq $UPDATE_FREQ  \
+    --max-update $TOTAL_UPDATES --log-format simple --log-interval 1 --dataset-impl dict --two-inputs --no-pad-prepend-token --prosody-predict --num-spk $NUM_SPK --mask-whole-words --prosody-loss-coeff 1000
+ ```

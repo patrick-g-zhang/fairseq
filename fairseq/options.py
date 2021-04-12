@@ -265,6 +265,9 @@ def add_preprocess_args(parser):
     # 添加prosody predict 参数为了保证适应输入
     group.add_argument("--prosody-predict", action="store_true",
                        help="predict prosody")
+    # 需要给预测韵律前面加一个系数
+    group.add_argument("--prosody-loss-coeff", default=1,
+                       type=int, help="prosody loss coeffiencent")
 
     # fmt: on
     return parser

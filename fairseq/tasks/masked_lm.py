@@ -254,8 +254,6 @@ class MaskedLMTask(FairseqTask):
                 ],
             )
 
-            if self.args.prosody_predict:
-                self.datasets[split].__getitem__(0)
 
     def build_dataset_for_inference(self, src_tokens, src_lengths, sort=True):
         src_dataset = PadDataset(
