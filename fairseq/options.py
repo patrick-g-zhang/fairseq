@@ -318,6 +318,9 @@ def add_dataset_args(parser, train=False, gen=False):
                                 ' (defaults to --max-sentences)')
         group.add_argument('--curriculum', default=0, type=int, metavar='N',
                            help='don\'t shuffle batches for first N epochs')
+        # 需要给预测韵律前面加一个系数
+        group.add_argument("--prosody-loss-coeff", default=1,
+                           type=int, help="prosody loss coeffiencent")
 
     if gen:
         group.add_argument('--gen-subset', default='test', metavar='SPLIT',
