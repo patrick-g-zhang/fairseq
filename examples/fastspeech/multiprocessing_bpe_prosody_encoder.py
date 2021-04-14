@@ -22,11 +22,34 @@ import numpy as np
 import torch
 
 
-def process_f0(f0, f0_mean, f0_std):
-    f0_ = (f0 - f0_mean) / f0_std
-    f0_[f0 == 0] = np.interp(np.where(f0 == 0)[0],
-                             np.where(f0 > 0)[0], f0_[f0 > 0])
-    uv = (torch.FloatTensor(f0) == 0).float()
+# def process_f0(f0, f0_mean, f0_std):
+#     f0_ = (f0 - f0_mean) / f0_std
+#     f0_[f0 == 0] = np.interp(np.where(f0 == 0)[0],
+#                              np.where(f0 > 0)[0], f0_[f0 > 0])
+#     uv = (torch.FloatTensor(f0) == 0).float()
+#     f0 = f0_
+#     f0 = torch.FloatTensor(f0)
+#     return f0, uv
+
+
+def process_f0(f0, f0_mean, f0_std, phoneme_prosody=False):
+    """
+        对f0的预处理,如果hparams['phoneme_prosody'],使用phoneme level韵律
+        这里的f0是原始的f0
+    """
+    # 减去均值和处以方差
+    if phoneme_prosody:
+        # f0先内插 再减去均值除以std
+        f0_ = f0.copy()
+        f0_[f0 == 0] = np.interp(np.where(f0 == 0)[0],
+                                 np.where(f0 > 0)[0], f0_[f0 > 0])
+        f0_ = (f0_ - f0_mean) / f0_std
+        uv = None
+    else:
+        f0_ = (f0_ - f0_mean) / f0_std
+        f0_[f0 == 0] = np.interp(np.where(f0 == 0)[0],
+                                 np.where(f0 > 0)[0], f0_[f0 > 0])
+        uv = (torch.FloatTensor(f0) == 0).float()
     f0 = f0_
     f0 = torch.FloatTensor(f0)
     return f0, uv
@@ -133,6 +156,14 @@ def main():
         action="store_true",
         help="keep empty lines",
     )
+
+    parser.add_argument(
+        "--phoneme-prosody",
+        action="store_true",
+        help="keep empty lines",
+    )
+
+    # 增加phoneme-prosody 参数 预测是在phoneme level
     parser.add_argument("--workers", type=int, default=20)
     args = parser.parse_args()
 
@@ -141,8 +172,13 @@ def main():
 
     with contextlib.ExitStack() as stack:
         indexed_bs = IndexedDataset(args.inputs[0])
-        spks_mv = np.load(
-            f'{"/".join(args.inputs[0].split("/")[:-1])}/train_f0s.pkl', allow_pickle=True)
+        if args.phoneme_prosody:
+            print("phoneme level prosody")
+            spks_mv = np.load(
+                f'{"/".join(args.inputs[0].split("/")[:-1])}/train_interpolate_f0s.pkl', allow_pickle=True)
+        else:
+            spks_mv = np.load(
+                f'{"/".join(args.inputs[0].split("/")[:-1])}/train_f0s.pkl', allow_pickle=True)
 
         # self.indexed_bs = IndexedDataset(
         # f'{self.data_dir}/{self.prefix}')
@@ -204,7 +240,7 @@ class MultiprocessingEncoder(object):
         out_item['spk_id'] = item['spk_id'] + 1
         spk_id = item['spk_id']
         f0, uv = process_f0(
-            item["f0"], self.spks_mv[spk_id][0], self.spks_mv[spk_id][1])
+            item["f0"], self.spks_mv[spk_id][0], self.spks_mv[spk_id][1], self.args.phoneme_prosody)
         out_item['f0'] = f0
         out_item['uv'] = uv
         out_item['energy'] = torch.FloatTensor(item["energy"])

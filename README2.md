@@ -241,5 +241,5 @@ LOG_DIR=/blob/xuta/speech/tts/t-guzhang/fairseq/logs/${ARCH}-BPE-22W-Steps-FP16-
     --lr-scheduler polynomial_decay --lr $PEAK_LR --warmup-updates $WARMUP_UPDATES --total-num-update $TOTAL_UPDATES \
     --dropout 0.1 --weight-decay 0.01 \
     --batch-size $MAX_SENTENCES --update-freq $UPDATE_FREQ  \
-    --max-update $TOTAL_UPDATES --log-format simple --log-interval 1 --dataset-impl dict --two-inputs --no-pad-prepend-token --tensorboard-logdir=$
+    --max-update $TOTAL_UPDATES --log-format simple --log-interval 1 --dataset-impl dict --two-inputs --no-pad-prepend-token 
  ```

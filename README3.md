@@ -8,6 +8,7 @@
 - 27th March, add ```no-word-sep``` as argument which indicates the word splitting not using
 - convert phoneme sequence to bpe sequence dictionary size is 10k
 - add prosody predictor part ```multiprocessing_bpe_prosody_encoder.py```
+
 ```
 for SPLIT in train valid test; do \
         python -m examples.fastspeech.multiprocessing_bpe_prosody_encoder \
@@ -19,13 +20,26 @@ for SPLIT in train valid test; do \
 done
 ```
 
-
+- add new argument --phoneme-prosody 
+- new data dir librispeech-prosody-interplote
+```
+for SPLIT in train valid test; do \
+        python -m examples.fastspeech.multiprocessing_bpe_prosody_encoder \
+        --vocab-bpe experiments/phoneme_bpe/vocab.10k.bpe \
+        --inputs experiments/librispeech-prosody-interplote/${SPLIT} \
+        --outputs experiments/librispeech-prosody-interplote/${SPLIT}_processed \
+        --keep-empty \
+        --phoneme-prosody \
+        --workers 40; \
+done
+```
     
 ### Preprocessing Command- preprocess the raw bpe data to binary file
  - adding new argument ```--two-inputs``` to ```preprocess.py``` file. 
  - create a new index dataset named ```DictIndexedDataset```, since we need to store phoneme sequence, sub-word sequence, and phoneme2sub-word. The three vectors are stored in dictionary format.
  - changing argument ```--dataset-impl``` to ```dict```
  - adding new argument ```--indexed-dataset``` to indicate the input is indexed dataset instead of text 
+ - adding 
 
  
   - preprocessing full dataset with vocab size 10k
@@ -81,7 +95,6 @@ done
     NUM_SPK=2485 # number of speaker for librispeech 1000
 ```
 
---save-interval
 
  ```
  python /blob/xuta/speech/tts/t-guzhang/fairseq/train.py $DATA_DIR \
@@ -120,7 +133,7 @@ done
 ```
 
  ```
- python /blob/xuta/speech/tts/t-guzhang/fairseq/train.py $DATA_DIR \
+ python -m pdb /blob/xuta/speech/tts/t-guzhang/fairseq/train.py $DATA_DIR \
     --task masked_lm --criterion masked_lm --save-dir $SAVE_DIR\
     --arch $ARCH --sample-break-mode complete --tokens-per-sample $TOKENS_PER_SAMPLE \
     --optimizer adam --adam-betas '(0.9,0.98)' --adam-eps 1e-6 --clip-norm 0.0 \
