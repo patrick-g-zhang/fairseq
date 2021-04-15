@@ -299,7 +299,7 @@ def add_dataset_args(parser, train=False, gen=False):
                        help="prosody predict")
     # add new arguments for phoneme level prosody pretraining
     group.add_argument("--phoneme-prosody", action="store_true",
-                       help="prosody predict")
+                       help="phoneme level prosody")
     group.add_argument("--no-word-sep", action="store_true",
                        help="no word split")
     if train:
