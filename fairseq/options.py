@@ -266,7 +266,7 @@ def add_preprocess_args(parser):
     group.add_argument("--prosody-predict", action="store_true",
                        help="predict prosody")
     group.add_argument("--phoneme-prosody", action="store_true",
-                       help="prosody predict")
+                       help="phoneme level prosody")
     # 需要给预测韵律前面加一个系数
     group.add_argument("--prosody-loss-coeff", default=1,
                        type=int, help="prosody loss coeffiencent")
