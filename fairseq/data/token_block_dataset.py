@@ -132,11 +132,11 @@ class TokenBlockDataset(FairseqDataset):
                             torch.IntTensor(self.dataset[idx]['phoneme2bpe']) + prev_bpe)
                         prev_bpe += self.dataset[idx]['bpe_ids'].size(0)
 
-                        mel2ph = self.dataset[idx]['mel2ph'].long
+                        mel2ph = torch.LongTensor(self.dataset[idx]['mel2ph'])
                         mel2ph_buffer.append(mel2ph + prev_ph)
 
-                        f0 = self.dataset[idx]['f0']
-                        energy = self.dataset[idx]['energy']
+                        f0 = torch.FloatTensor(self.dataset[idx]['f0'])
+                        energy = torch.FloatTensor(self.dataset[idx]['energy'])
                         assert self.dataset[idx].get('uv', None) is None
 
                         T_t = phoneme_ids.size(0)
