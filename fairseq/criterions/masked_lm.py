@@ -251,7 +251,8 @@ class MaskedLmLoss(FairseqCriterion):
             loss_f0 = sum(log.get('loss_f0', 0) for log in logging_outputs)
             agg_output['loss_f0'] = loss_f0 / sample_size / math.log(2)
 
-            loss_uv = sum(log.get('loss_uv', 0) for log in logging_outputs)
-            agg_output['loss_uv'] = loss_uv / sample_size / math.log(2)
+            if logging_outputs[0].get('loss_uv', 0) > 0:
+                loss_uv = sum(log.get('loss_uv', 0) for log in logging_outputs)
+                agg_output['loss_uv'] = loss_uv / sample_size / math.log(2)
 
         return agg_output
