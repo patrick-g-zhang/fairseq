@@ -1301,9 +1301,9 @@ class FastSpeech2Encoder(FairseqDecoder):
                 # 现在加上了韵律预测模块，需要多load 多一点信息
             else:
             # 韵律预测或者其他待补充
-                mel2ph = src_tokens['mel2ph']
+                mel2ph = src_tokens.get('mel2ph', None)
                 spk_id = src_tokens['spk_id']
-                x = self.prosody_predictor(phoneme_input, bpe_input=bpe_input, phoneme2bpe=phoneme2bpe,mel2ph=mel2ph, spk_id=spk_id, masked_tokens=masked_tokens,bpe_masked_tokens=bpe_masked_tokens)
+                x = self.prosody_predictor(phoneme_input, phoneme_prosody=self.args.phoneme_prosody, bpe_input=bpe_input, phoneme2bpe=phoneme2bpe,mel2ph=mel2ph, spk_id=spk_id, masked_tokens=masked_tokens,bpe_masked_tokens=bpe_masked_tokens)
             
         else:
         # 单个input
@@ -1315,6 +1315,7 @@ class FastSpeech2Encoder(FairseqDecoder):
 
     def prosody_predictor(self, 
                           src_tokens, 
+                          phoneme_prosody=False,
                           bpe_input=None, 
                           phoneme2bpe=None, 
                           mel2ph=None, 
@@ -1350,20 +1351,23 @@ class FastSpeech2Encoder(FairseqDecoder):
         encoder_outputs = encoder_outputs * src_nonpadding  # [T, B, C]
         
         # 预测韵律
-        dur_input = encoder_outputs.transpose(0, 1)  # 【B, T, C]
+        dur_input = decoder_inp = encoder_outputs.transpose(0, 1)  # 【B, T, C]
         
         # mask
         pad_mask = src_tokens == 0
         dur_pred = self.dur_predictor(dur_input, pad_mask)
-        
-        # 展开到frame level
-        decoder_inp = F.pad(encoder_outputs, [0, 0, 0, 0, 1, 0])
-        mel2ph_ = mel2ph.permute([1, 0])[..., None].repeat(
-            [1, 1, encoder_outputs.shape[-1]]).contiguous()
-        
-        decoder_inp = torch.gather(
-            decoder_inp, 0, mel2ph_).transpose(0, 1)  # [B, T, H]
 
+          # 如果在frome层面预测韵律的话，需要展开
+        if not phoneme_prosody:
+            # 展开到frame level
+            decoder_inp = F.pad(encoder_outputs, [0, 0, 0, 0, 1, 0])
+            mel2ph_ = mel2ph.permute([1, 0])[..., None].repeat(
+                [1, 1, encoder_outputs.shape[-1]]).contiguous()
+            
+            decoder_inp = torch.gather(
+                decoder_inp, 0, mel2ph_).transpose(0, 1)  # [B, T, H]
+
+           
         # 预测 pitch
         pitch_pred = self.pitch_predictor(decoder_inp)
 

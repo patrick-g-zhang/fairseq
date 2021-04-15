@@ -39,9 +39,6 @@ done
  - create a new index dataset named ```DictIndexedDataset```, since we need to store phoneme sequence, sub-word sequence, and phoneme2sub-word. The three vectors are stored in dictionary format.
  - changing argument ```--dataset-impl``` to ```dict```
  - adding new argument ```--indexed-dataset``` to indicate the input is indexed dataset instead of text 
- - adding 
-
- 
   - preprocessing full dataset with vocab size 10k
  ```
     SRCDICT=experiments/phoneme/dict.txt # phoneme dictionary
@@ -51,7 +48,18 @@ done
     TESTPREF=experiments/librispeech-prosody/test_processed
     DESTDIR=experiments/data-bin/librispeech-prosody # output
  ```
-    
+
+- phoneme level prosody
+ ```
+    SRCDICT=experiments/phoneme/dict.txt # phoneme dictionary
+    TGTDICT=experiments/phoneme_bpe/bpe.10k.dict.txt # bpe dictionary
+    TRAINPREF=experiments/librispeech-prosody-interplote/train_processed
+    VALIDPREF=experiments/librispeech-prosody-interplote/valid_processed
+    TESTPREF=experiments/librispeech-prosody-interplote/test_processed
+    DESTDIR=experiments/data-bin/librispeech-prosody # output
+ ```
+
+
  - run command
  ```
       python preprocess.py \

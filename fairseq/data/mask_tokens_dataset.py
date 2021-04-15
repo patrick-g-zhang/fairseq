@@ -246,6 +246,7 @@ class BPEMaskTokensDataset(BaseWrapperDataset):
         mask_whole_words: bool = False,
         no_word_sep: bool = False,
         prosody_predict: bool = False,
+        phoneme_prosody: bool = False,
     ):
         assert 0.0 < mask_prob < 1.0
         assert 0.0 <= random_token_prob <= 1.0
@@ -272,6 +273,8 @@ class BPEMaskTokensDataset(BaseWrapperDataset):
         self.special_end = 3 if self.no_word_sep else 4
 
         self.prosody_predict = prosody_predict
+        self.phoneme_prosody = phoneme_prosody
+
         if random_token_prob > 0.0:
             if freq_weighted_replacement:
                 weights = np.array(self.vocab_b.count)
@@ -378,8 +381,9 @@ class BPEMaskTokensDataset(BaseWrapperDataset):
                     dur_gt = dur_gt[1:]
                     new_item['dur_gt'] = dur_gt
                     new_item['f0'] = item['f0']
-                    new_item['uv'] = item['uv']
                     new_item['energy'] = item['energy']
+                    if not self.phoneme_prosody:
+                        new_item['uv'] = item['uv']
                 return new_item
 
             # decide unmasking and random replacement
@@ -422,8 +426,9 @@ class BPEMaskTokensDataset(BaseWrapperDataset):
             }
 
             if self.prosody_predict:
-                new_item['mel2ph'] = item['mel2ph']
                 new_item['spk_id'] = item['spk_id']
+                if not self.phoneme_prosody:
+                    new_item['mel2ph'] = item['mel2ph']
 
             # if rand_mask is not None:
             #     num_rand = rand_mask.sum()

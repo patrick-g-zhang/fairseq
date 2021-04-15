@@ -41,6 +41,18 @@ def pitch_loss(p_pred, pitch, uv):
     return uv_loss, f0_loss
 
 
+def phoneme_pitch_loss(p_pred, pitch):
+    assert p_pred[..., 0].shape == pitch.shape
+
+    nonpadding = (pitch != -200).float().reshape(-1)
+    uv_loss = None
+
+    pitch_loss = (F.l1_loss(
+        p_pred[:, :, 0].reshape(-1), pitch.reshape(-1), reduction='none') * nonpadding).sum() \
+        / nonpadding.sum()
+    return uv_loss, pitch_loss
+
+
 def energy_loss(energy_pred, energy):
     nonpadding = (energy != 0).float()
     loss = (F.mse_loss(energy_pred, energy, reduction='none')
@@ -148,18 +160,25 @@ class MaskedLmLoss(FairseqCriterion):
                     loss_dur.data) if reduce else loss_dur.data
 
                 # pitch loss
-                f0 = sample['target']['f0']
-                uv = sample['target']['uv']
 
-                loss_uv, loss_f0 = pitch_loss(pitch_pred, f0, uv)
-                loss_uv = loss_uv * self.args.prosody_loss_coeff
+                f0 = sample['target']['f0']
+
+                # 如果不是phoneme prosody 那么需要保存
+                if not self.args.phoneme_prosody:
+                    uv = sample['target'].get('uv', None)
+                    loss_uv, loss_f0 = pitch_loss(pitch_pred, f0, uv)
+                    loss_uv = loss_uv * self.args.prosody_loss_coeff
+                    loss += loss_uv
+                    logging_output['loss_uv'] = utils.item(
+                        loss_uv.data) if reduce else loss_uv.data
+
+                else:
+                    _, loss_f0 = phoneme_pitch_loss(pitch_pred, f0)
+
                 loss_f0 = loss_f0 * self.args.prosody_loss_coeff
                 loss += loss_f0
                 logging_output['loss_f0'] = utils.item(
                     loss_f0.data) if reduce else loss_f0.data
-                loss += loss_uv
-                logging_output['loss_uv'] = utils.item(
-                    loss_uv.data) if reduce else loss_uv.data
 
         else:
             masked_tokens = sample['target'].ne(self.padding_idx)
