@@ -185,7 +185,7 @@ class Binarizer:
                 'mel2ph': out_item['mel2ph'],
                 'spk_id': out_item['spk_id'],
                 'f0': out_item['f0'],
-                'uv': out_item['uv'],
+                'uv': out_item.get('uv', None),
                 'energy': out_item['energy'],
 
             }
