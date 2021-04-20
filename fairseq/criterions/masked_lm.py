@@ -242,6 +242,7 @@ class MaskedLmLoss(FairseqCriterion):
 
         if logging_outputs[0].get('loss_energy', 0) > 0:
             # 需要输出韵律相关的特征
+            pdb.set_trace()
             loss_energy = sum(log.get('loss_energy', 0)
                               for log in logging_outputs)
             agg_output['loss_energy'] = loss_energy
