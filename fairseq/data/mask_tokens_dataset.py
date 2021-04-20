@@ -271,7 +271,6 @@ class BPEMaskTokensDataset(BaseWrapperDataset):
         self.no_word_sep = no_word_sep
         # 如果存在word sep 那么非特殊符号从5开始，如果不存在word sep 从4 开始
         self.special_end = 3 if self.no_word_sep else 4
-        pdb.set_trace()
         print(f"special end {self.special_end}")
         self.prosody_predict = prosody_predict
         self.phoneme_prosody = phoneme_prosody
