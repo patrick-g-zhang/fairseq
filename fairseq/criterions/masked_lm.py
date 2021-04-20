@@ -144,7 +144,6 @@ class MaskedLmLoss(FairseqCriterion):
             if self.args.prosody_predict:
                 # 增加额外的loss
                 # energy loss
-                pdb.set_trace()
                 energy = sample['target']['energy']
                 loss_energy = energy_loss(
                     energy_pred, energy) * self.args.prosody_loss_coeff
