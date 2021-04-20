@@ -74,7 +74,7 @@ class DurationPredictor(torch.nn.Module):
                 xs = F.pad(xs, [self.kernel_size - 1, 0])
             xs = f(xs)  # (B, C, Tmax)
             if x_masks is not None:
-                x_masks = x_masks.to(xs.dtyp)
+                x_masks = x_masks.type(xs.dtype)
                 xs = xs * (1 - x_masks)[:, None, :]
 
         # NOTE: calculate in log domain
@@ -1355,7 +1355,8 @@ class FastSpeech2Encoder(FairseqDecoder):
         dur_input = decoder_inp = encoder_outputs.transpose(0, 1)  # 【B, T, C]
         
         # mask
-        pad_mask = (src_tokens == 0).to(src_tokens.device)
+        # pad_mask = (src_tokens == 0).to(src_tokens.device)
+        pad_mask = src_tokens == 0
         dur_pred = self.dur_predictor(dur_input, pad_mask)
 
           # 如果在frome层面预测韵律的话，需要展开
