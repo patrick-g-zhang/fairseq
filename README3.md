@@ -154,7 +154,7 @@ done
     SAVE_DIR=/blob/xuta/speech/tts/t-guzhang/fairseq/checkpoints/${ARCH}-Test
     DATA_DIR=experiments/data-bin/librispeech-prosody-interplote
     LOG_DIR="logs/fastspeech-Test"
-    TOTAL_UPDATES=225000    # Total number of training steps 
+    TOTAL_UPDATES=125000    # Total number of training steps 
     WARMUP_UPDATES=10000    # Warmup the learning rate over this many updates
     PEAK_LR=0.0005          # Peak learning rate, adjust as needed
     TOKENS_PER_SAMPLE=512   # Max sequence length 
@@ -162,7 +162,6 @@ done
     MAX_SENTENCES=16        # Number of sequences per batch (batch size)
     UPDATE_FREQ=16          # Increase the batch size 16x  
     NUM_SPK=2485 # number of speaker for librispeech 1000
-    PCOEFF=1000
 ```
 
  ```
