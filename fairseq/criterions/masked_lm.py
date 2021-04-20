@@ -241,19 +241,19 @@ class MaskedLmLoss(FairseqCriterion):
 
         if logging_outputs[0].get('loss_energy', 0) > 0:
             # 需要输出韵律相关的特征
-            pdb.set_trace()
+            # 注意在这里不应该除以sample size(number of masked phoneme) 应该除以语音的数量 len(logging_outputs)
             loss_energy = sum(log.get('loss_energy', 0)
                               for log in logging_outputs)
-            agg_output['loss_energy'] = loss_energy
+            agg_output['loss_energy'] = loss_energy / len(logging_outputs)
 
             loss_dur = sum(log.get('loss_dur', 0) for log in logging_outputs)
-            agg_output['loss_dur'] = loss_dur
+            agg_output['loss_dur'] = loss_dur / len(logging_outputs)
 
             loss_f0 = sum(log.get('loss_f0', 0) for log in logging_outputs)
-            agg_output['loss_f0'] = loss_f0
+            agg_output['loss_f0'] = loss_f0 / len(logging_outputs)
 
             if logging_outputs[0].get('loss_uv', 0) > 0:
                 loss_uv = sum(log.get('loss_uv', 0) for log in logging_outputs)
-                agg_output['loss_uv'] = loss_uv
+                agg_output['loss_uv'] = loss_uv / len(logging_outputs)
 
         return agg_output
