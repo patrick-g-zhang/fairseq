@@ -144,6 +144,7 @@ class MaskedLmLoss(FairseqCriterion):
             if self.args.prosody_predict:
                 # 增加额外的loss
                 # energy loss
+                pdb.set_trace()
                 energy = sample['target']['energy']
                 loss_energy = energy_loss(
                     energy_pred, energy) * self.args.prosody_loss_coeff
@@ -243,16 +244,16 @@ class MaskedLmLoss(FairseqCriterion):
             # 需要输出韵律相关的特征
             loss_energy = sum(log.get('loss_energy', 0)
                               for log in logging_outputs)
-            agg_output['loss_energy'] = loss_energy / sample_size / math.log(2)
+            agg_output['loss_energy'] = loss_energy
 
             loss_dur = sum(log.get('loss_dur', 0) for log in logging_outputs)
-            agg_output['loss_dur'] = loss_dur / sample_size / math.log(2)
+            agg_output['loss_dur'] = loss_dur
 
             loss_f0 = sum(log.get('loss_f0', 0) for log in logging_outputs)
-            agg_output['loss_f0'] = loss_f0 / sample_size / math.log(2)
+            agg_output['loss_f0'] = loss_f0
 
             if logging_outputs[0].get('loss_uv', 0) > 0:
                 loss_uv = sum(log.get('loss_uv', 0) for log in logging_outputs)
-                agg_output['loss_uv'] = loss_uv / sample_size / math.log(2)
+                agg_output['loss_uv'] = loss_uv
 
         return agg_output
