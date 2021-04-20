@@ -180,6 +180,9 @@ class MaskedLmLoss(FairseqCriterion):
                 logging_output['loss_f0'] = utils.item(
                     loss_f0.data) if reduce else loss_f0.data
 
+                # 保证不会被干掉
+                logging_output['pcoeff'] = self.args.prosody_loss_coeff
+
         else:
             masked_tokens = sample['target'].ne(self.padding_idx)
             sample_size = masked_tokens.int().sum().item()
@@ -242,18 +245,23 @@ class MaskedLmLoss(FairseqCriterion):
         if logging_outputs[0].get('loss_energy', 0) > 0:
             # 需要输出韵律相关的特征
             # 注意在这里不应该除以sample size(number of masked phoneme) 应该除以语音的数量 len(logging_outputs)
+            pdb.set_trace()
             loss_energy = sum(log.get('loss_energy', 0)
                               for log in logging_outputs)
-            agg_output['loss_energy'] = loss_energy / len(logging_outputs)
+            agg_output['loss_energy'] = loss_energy / \
+                len(logging_outputs) / logging_outputs[0]['pcoeff']
 
             loss_dur = sum(log.get('loss_dur', 0) for log in logging_outputs)
-            agg_output['loss_dur'] = loss_dur / len(logging_outputs)
+            agg_output['loss_dur'] = loss_dur / \
+                len(logging_outputs) / logging_outputs[0]['pcoeff']
 
             loss_f0 = sum(log.get('loss_f0', 0) for log in logging_outputs)
-            agg_output['loss_f0'] = loss_f0 / len(logging_outputs)
+            agg_output['loss_f0'] = loss_f0 / \
+                len(logging_outputs) / logging_outputs[0]['pcoeff']
 
             if logging_outputs[0].get('loss_uv', 0) > 0:
                 loss_uv = sum(log.get('loss_uv', 0) for log in logging_outputs)
-                agg_output['loss_uv'] = loss_uv / len(logging_outputs)
+                agg_output['loss_uv'] = loss_uv / \
+                    len(logging_outputs) / logging_outputs[0]['pcoeff']
 
         return agg_output
