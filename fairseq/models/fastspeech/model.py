@@ -158,7 +158,7 @@ class PitchPredictor(torch.nn.Module):
 
         # NOTE: calculate in log domain
         xs = self.linear(xs.transpose(1, -1))  # (B, Tmax, H)
-        return xs.detach()
+        return xs
 
 class EnergyPredictor(PitchPredictor):
     pass

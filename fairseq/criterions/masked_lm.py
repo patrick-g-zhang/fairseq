@@ -59,7 +59,7 @@ def energy_loss(energy_pred, energy):
     nonpadding = (energy != 0).type(energy.dtype).to(energy.device)
     loss = (F.mse_loss(energy_pred, energy, reduction='none')
             * nonpadding).sum() / nonpadding.sum()
-    return loss
+    return loss.detach()
 
 
 @register_criterion('masked_lm')
