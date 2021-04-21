@@ -158,7 +158,7 @@ class PitchPredictor(torch.nn.Module):
 
         # NOTE: calculate in log domain
         xs = self.linear(xs.transpose(1, -1))  # (B, Tmax, H)
-        return xs
+        return xs.detach()
 
 class EnergyPredictor(PitchPredictor):
     pass
@@ -1372,7 +1372,7 @@ class FastSpeech2Encoder(FairseqDecoder):
         pitch_pred = self.pitch_predictor(decoder_inp)
 
         # 预测energy
-        energy_pred = self.energy_predictor(decoder_inp.detach())[
+        energy_pred = self.energy_predictor(decoder_inp)[
             :, :, 0]
 
 
