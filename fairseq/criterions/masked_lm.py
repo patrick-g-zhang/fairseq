@@ -156,8 +156,8 @@ class MaskedLmLoss(FairseqCriterion):
                 # dur loss
                 dur_gt = sample['target']['dur_gt']
                 loss_dur = dur_loss(
-                    dur_pred, dur_gt, sample['net_input']['src_tokens']['phoneme']) * self.args.prosody_loss_coeff
-                loss += loss_dur.detach()
+                    dur_pred.detach(), dur_gt, sample['net_input']['src_tokens']['phoneme']) * self.args.prosody_loss_coeff
+                loss += loss_dur
                 logging_output['loss_dur'] = utils.item(
                     loss_dur.data) if reduce else loss_dur.data
 
