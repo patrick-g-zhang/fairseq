@@ -15,7 +15,6 @@ from . import FairseqCriterion, register_criterion
 
 def dur_loss(dur_pred, dur_gt, input):
 
-    dur_pred = dur_pred.detach()
     nonpadding = (input != 0).type(dur_pred.dtype).to(dur_pred.device)
 
     # 对targets 取对数
