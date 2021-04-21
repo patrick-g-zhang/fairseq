@@ -91,7 +91,7 @@ class DurationPredictor(torch.nn.Module):
         Returns:
             Tensor: Batch of predicted durations in log domain (B, Tmax).
         """
-        return self._forward(xs, x_masks, False)
+        return self._forward(xs, x_masks)
 
 
 
