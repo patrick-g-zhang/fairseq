@@ -67,16 +67,16 @@ class DurationPredictor(torch.nn.Module):
 
     def _forward(self, xs, x_masks=None):
         xs = xs.transpose(1, -1)  # (B, idim, Tmax)
-        xs = xs.detach()
         for f in self.conv:
             xs = F.pad(xs, [self.kernel_size // 2, self.kernel_size // 2])
             xs = f(xs)  # (B, C, Tmax)
             if x_masks is not None:
                 xs = xs * (1 - x_masks.type(xs.dtype)).unsqueeze(1).to(xs.device)
 
+        xs = xs.detach()
         # NOTE: calculate in log domain
         xs = self.linear(xs.transpose(1, 2).contiguous())
-        xs = xs[:, :, 0].type(xs.dtype).to(xs.device)  # (B, Tmax)
+        xs = xs[:, :, 0].to(xs.device)  # (B, Tmax)
         # xs = xs.squeeze(-1).to(xs.device)  # (B, Tmax)
 
         if x_masks is not None:
