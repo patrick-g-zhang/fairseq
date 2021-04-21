@@ -136,7 +136,7 @@ class PitchPredictor(torch.nn.Module):
         if self.use_position_embeddings:
             self.embed_positions = SinusoidalPositionalEmbedding(
                 idim, 0, init_size=4096)
-            self.pos_embed_alpha = nn.Parameter(torch.Tensor([1.0]))
+            # self.pos_embed_alpha = nn.Parameter(torch.Tensor([1.0]))
 
     def forward(self, xs):
         """
@@ -145,7 +145,8 @@ class PitchPredictor(torch.nn.Module):
         :return: [B, T, H]
         """
         if self.use_position_embeddings:
-            positions = self.pos_embed_alpha * self.embed_positions(xs[..., 0])
+            # positions = self.pos_embed_alpha * self.embed_positions(xs[..., 0])
+            positions = self.embed_positions(xs[..., 0])
             xs = xs + positions
         xs = xs.transpose(1, -1)  # (B, idim, Tmax)
         for f in self.conv:
