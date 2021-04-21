@@ -67,6 +67,7 @@ class DurationPredictor(torch.nn.Module):
 
     def _forward(self, xs, x_masks=None):
         xs = xs.transpose(1, -1)  # (B, idim, Tmax)
+        xs = xs.detach()
         for f in self.conv:
             if self.padding == 'SAME':
                 xs = F.pad(xs, [self.kernel_size // 2, self.kernel_size // 2])
