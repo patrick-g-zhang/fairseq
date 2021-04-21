@@ -178,7 +178,7 @@ class MaskedLmLoss(FairseqCriterion):
                     _, loss_f0 = phoneme_pitch_loss(pitch_pred, f0)
 
                 loss_f0 = loss_f0 * self.args.prosody_loss_coeff
-                loss += loss_f0
+                # loss += loss_f0
                 logging_output['loss_f0'] = utils.item(
                     loss_f0.data) if reduce else loss_f0.data
 
