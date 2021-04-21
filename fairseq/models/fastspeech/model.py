@@ -1329,7 +1329,7 @@ class FastSpeech2Encoder(FairseqDecoder):
                 bpe=bpe_input,
                 phoneme2bpe=phoneme2bpe
                 )
-
+        pdb.set_trace()
         encoder_outputs = encoder_outputs['encoder_out']  # [T, B, C]
         src_nonpadding = (src_tokens > 0).type(encoder_outputs.dtype).permute(1, 0)[:, :, None]
         encoder_outputs = encoder_outputs * src_nonpadding  # [T, B, C]
