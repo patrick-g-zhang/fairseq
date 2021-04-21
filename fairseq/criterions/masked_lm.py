@@ -146,12 +146,12 @@ class MaskedLmLoss(FairseqCriterion):
             if self.args.prosody_predict:
                 # 增加额外的loss
                 # energy loss
-                energy = sample['target']['energy']
-                loss_energy = energy_loss(
-                    energy_pred, energy) * self.args.prosody_loss_coeff
+                # energy = sample['target']['energy']
+                # loss_energy = energy_loss(
+                    # energy_pred, energy) * self.args.prosody_loss_coeff
                 # loss += loss_energy
-                logging_output['loss_energy'] = utils.item(
-                    loss_energy.data) if reduce else loss_energy.data
+                # logging_output['loss_energy'] = utils.item(
+                    # loss_energy.data) if reduce else loss_energy.data
 
                 # dur loss
                 dur_gt = sample['target']['dur_gt']
@@ -177,13 +177,13 @@ class MaskedLmLoss(FairseqCriterion):
                 else:
                     _, loss_f0 = phoneme_pitch_loss(pitch_pred, f0)
 
-                loss_f0 = loss_f0 * self.args.prosody_loss_coeff
+                # loss_f0 = loss_f0 * self.args.prosody_loss_coeff
                 # loss += loss_f0
-                logging_output['loss_f0'] = utils.item(
-                    loss_f0.data) if reduce else loss_f0.data
+                # logging_output['loss_f0'] = utils.item(
+                    # loss_f0.data) if reduce else loss_f0.data
 
                 # 保证不会被干掉
-                logging_output['pcoeff'] = self.args.prosody_loss_coeff
+                # logging_output['pcoeff'] = self.args.prosody_loss_coeff
 
         else:
             masked_tokens = sample['target'].ne(self.padding_idx)
