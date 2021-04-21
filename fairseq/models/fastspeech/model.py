@@ -63,7 +63,7 @@ class DurationPredictor(torch.nn.Module):
                 LayerNorm2(n_chans, dim=1),
                 torch.nn.Dropout(dropout_rate)
             )]
-        self.linear = torch.nn.Linear(n_chans, 1)
+        self.linear = nn.Linear(n_chans, 1)
 
     def _forward(self, xs, x_masks=None):
         xs = xs.transpose(1, -1)  # (B, idim, Tmax)
@@ -72,7 +72,7 @@ class DurationPredictor(torch.nn.Module):
             xs = F.pad(xs, [self.kernel_size // 2, self.kernel_size // 2])
             xs = f(xs)  # (B, C, Tmax)
             if x_masks is not None:
-                xs = xs * (1 - x_masks.type(xs.dtype)).unsqueeze(1)
+                xs = xs * (1 - x_masks.type(xs.dtype))[:, None, :]
 
         # NOTE: calculate in log domain
         xs = self.linear(xs.transpose(1, 2)).type(xs.dtype).to(xs.device)[:, :, 0]
