@@ -15,7 +15,7 @@ from . import FairseqCriterion, register_criterion
 
 def dur_loss(dur_pred, dur_gt, input):
 
-    nonpadding = (input != 0).type(dur_pred.dtype)
+    nonpadding = (input != 0).type(dur_pred.dtype).to(dur_pred.device)
 
     # 对targets 取对数
     targets = torch.log(dur_gt.type(dur_pred.dtype) + 1.0)
@@ -29,13 +29,13 @@ def dur_loss(dur_pred, dur_gt, input):
 def pitch_loss(p_pred, pitch, uv):
     assert p_pred[..., 0].shape == pitch.shape
     assert p_pred[..., 0].shape == uv.shape
-    nonpadding = (pitch != -200).type(pitch.dtype).reshape(-1)
+    nonpadding = (pitch != -200).type(pitch.dtype).to(pitch.device).reshape(-1)
     uv_loss = (F.binary_cross_entropy_with_logits(
         p_pred[:, :, 1].reshape(-1), uv.reshape(-1), reduction='none') * nonpadding).sum() \
         / nonpadding.sum()
     nonpadding = (pitch != -200).type(pitch.dtype) * \
         (uv == 0).type(pitch.dtype)
-    nonpadding = nonpadding.reshape(-1)
+    nonpadding = nonpadding.to(pitch.device).reshape(-1)
 
     f0_loss = (F.l1_loss(
         p_pred[:, :, 0].reshape(-1), pitch.reshape(-1), reduction='none') * nonpadding).sum() \
@@ -46,7 +46,7 @@ def pitch_loss(p_pred, pitch, uv):
 def phoneme_pitch_loss(p_pred, pitch):
     assert p_pred[..., 0].shape == pitch.shape
 
-    nonpadding = (pitch != -200).type(pitch.dtype).reshape(-1)
+    nonpadding = (pitch != -200).type(pitch.dtype).to(pitch.device).reshape(-1)
     uv_loss = None
 
     pitch_loss = (F.l1_loss(
@@ -56,7 +56,7 @@ def phoneme_pitch_loss(p_pred, pitch):
 
 
 def energy_loss(energy_pred, energy):
-    nonpadding = (energy != 0).type(energy.dtype)
+    nonpadding = (energy != 0).type(energy.dtype).to(energy.device)
     loss = (F.mse_loss(energy_pred, energy, reduction='none')
             * nonpadding).sum() / nonpadding.sum()
     return loss
