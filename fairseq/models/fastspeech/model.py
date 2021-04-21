@@ -131,7 +131,7 @@ class PitchPredictor(torch.nn.Module):
             )]
         self.linear = torch.nn.Linear(n_chans, odim)
 
-        self.use_position_embeddings = use_position_embeddings
+        self.use_position_embeddings = False
 
         if self.use_position_embeddings:
             self.embed_positions = SinusoidalPositionalEmbedding(
