@@ -29,7 +29,7 @@ def dur_loss(dur_pred, dur_gt, input):
 def pitch_loss(p_pred, pitch, uv):
     assert p_pred[..., 0].shape == pitch.shape
     assert p_pred[..., 0].shape == uv.shape
-    nonpadding = (pitch != -200).type(pitch.dtype)().reshape(-1)
+    nonpadding = (pitch != -200).type(pitch.dtype).reshape(-1)
     uv_loss = (F.binary_cross_entropy_with_logits(
         p_pred[:, :, 1].reshape(-1), uv.reshape(-1), reduction='none') * nonpadding).sum() \
         / nonpadding.sum()
