@@ -78,7 +78,7 @@ class DurationPredictor(torch.nn.Module):
 
         # NOTE: calculate in log domain
         xs = xs.detach()
-        xs = self.linear(xs.transpose(1, 2)).contiguous()
+        xs = self.linear(xs.transpose(1, 2).contiguous())
         xs = xs[:, :, 0].type(xs.dtype)  # (B, Tmax)
         # xs = xs.squeeze(-1).to(xs.device)  # (B, Tmax)
 
