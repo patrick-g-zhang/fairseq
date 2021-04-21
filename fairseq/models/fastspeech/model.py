@@ -144,17 +144,17 @@ class PitchPredictor(torch.nn.Module):
         :param xs: [B, T, H]
         :return: [B, T, H]
         """
-        if self.use_position_embeddings:
-            # positions = self.pos_embed_alpha * self.embed_positions(xs[..., 0])
-            positions = self.embed_positions(xs[..., 0]).to(xs.device)
-            xs = xs + positions
-        xs = xs.transpose(1, -1)  # (B, idim, Tmax)
-        for f in self.conv:
-            if self.padding == 'SAME':
-                xs = F.pad(xs, [self.kernel_size // 2, self.kernel_size // 2])
-            elif self.padding == 'LEFT':
-                xs = F.pad(xs, [self.kernel_size - 1, 0])
-            xs = f(xs)  # (B, C, Tmax)
+        # if self.use_position_embeddings:
+        #     # positions = self.pos_embed_alpha * self.embed_positions(xs[..., 0])
+        #     positions = self.embed_positions(xs[..., 0]).to(xs.device)
+        #     xs = xs + positions
+        # xs = xs.transpose(1, -1)  # (B, idim, Tmax)
+        # for f in self.conv:
+        #     if self.padding == 'SAME':
+        #         xs = F.pad(xs, [self.kernel_size // 2, self.kernel_size // 2])
+        #     elif self.padding == 'LEFT':
+        #         xs = F.pad(xs, [self.kernel_size - 1, 0])
+        #     xs = f(xs)  # (B, C, Tmax)
 
         # NOTE: calculate in log domain
         xs = self.linear(xs.transpose(1, -1))  # (B, Tmax, H)
