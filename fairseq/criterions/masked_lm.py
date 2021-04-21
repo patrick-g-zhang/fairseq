@@ -59,7 +59,7 @@ def energy_loss(energy_pred, energy):
     nonpadding = (energy != 0).type(energy.dtype).to(energy.device)
     loss = (F.mse_loss(energy_pred, energy, reduction='none')
             * nonpadding).sum() / nonpadding.sum()
-    return loss.detach()
+    return loss
 
 
 @register_criterion('masked_lm')
@@ -149,7 +149,7 @@ class MaskedLmLoss(FairseqCriterion):
                 energy = sample['target']['energy']
                 loss_energy = energy_loss(
                     energy_pred, energy) * self.args.prosody_loss_coeff
-                loss += loss_energy
+                # loss += loss_energy
                 logging_output['loss_energy'] = utils.item(
                     loss_energy.data) if reduce else loss_energy.data
 
