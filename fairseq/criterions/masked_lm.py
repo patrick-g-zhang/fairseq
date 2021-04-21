@@ -146,12 +146,12 @@ class MaskedLmLoss(FairseqCriterion):
             if self.args.prosody_predict:
                 # 增加额外的loss
                 # energy loss
-                # energy = sample['target']['energy']
-                # loss_energy = energy_loss(
-                    # energy_pred, energy) * self.args.prosody_loss_coeff
-                # loss += loss_energy
-                # logging_output['loss_energy'] = utils.item(
-                    # loss_energy.data) if reduce else loss_energy.data
+                energy = sample['target']['energy']
+                loss_energy = energy_loss(
+                    energy_pred, energy) * self.args.prosody_loss_coeff
+                loss += loss_energy
+                logging_output['loss_energy'] = utils.item(
+                    loss_energy.data) if reduce else loss_energy.data
 
                 # dur loss
                 dur_gt = sample['target']['dur_gt']
@@ -177,13 +177,13 @@ class MaskedLmLoss(FairseqCriterion):
                 else:
                     _, loss_f0 = phoneme_pitch_loss(pitch_pred, f0)
 
-                # loss_f0 = loss_f0 * self.args.prosody_loss_coeff
-                # loss += loss_f0
-                # logging_output['loss_f0'] = utils.item(
-                    # loss_f0.data) if reduce else loss_f0.data
+                loss_f0 = loss_f0 * self.args.prosody_loss_coeff
+                loss += loss_f0
+                logging_output['loss_f0'] = utils.item(
+                    loss_f0.data) if reduce else loss_f0.data
 
                 # 保证不会被干掉
-                # logging_output['pcoeff'] = self.args.prosody_loss_coeff
+                logging_output['pcoeff'] = self.args.prosody_loss_coeff
 
         else:
             masked_tokens = sample['target'].ne(self.padding_idx)
@@ -244,25 +244,25 @@ class MaskedLmLoss(FairseqCriterion):
             'sample_size': sample_size,
         }
 
-        # if logging_outputs[0].get('loss_energy', 0) > 0:
-        #     # 需要输出韵律相关的特征
-        #     # 注意在这里不应该除以sample size(number of masked phoneme) 应该除以语音的数量 len(logging_outputs)
-        #     loss_energy = sum(log.get('loss_energy', 0)
-        #                       for log in logging_outputs)
-        #     agg_output['loss_energy'] = loss_energy / \
-        #         len(logging_outputs) / logging_outputs[0]['pcoeff']
+        if logging_outputs[0].get('loss_energy', 0) > 0:
+            # 需要输出韵律相关的特征
+            # 注意在这里不应该除以sample size(number of masked phoneme) 应该除以语音的数量 len(logging_outputs)
+            loss_energy = sum(log.get('loss_energy', 0)
+                              for log in logging_outputs)
+            agg_output['loss_energy'] = loss_energy / \
+                len(logging_outputs) / logging_outputs[0]['pcoeff']
 
-        #     loss_dur = sum(log.get('loss_dur', 0) for log in logging_outputs)
-        #     agg_output['loss_dur'] = loss_dur / \
-        #         len(logging_outputs) / logging_outputs[0]['pcoeff']
+            loss_dur = sum(log.get('loss_dur', 0) for log in logging_outputs)
+            agg_output['loss_dur'] = loss_dur / \
+                len(logging_outputs) / logging_outputs[0]['pcoeff']
 
-        #     loss_f0 = sum(log.get('loss_f0', 0) for log in logging_outputs)
-        #     agg_output['loss_f0'] = loss_f0 / \
-        #         len(logging_outputs) / logging_outputs[0]['pcoeff']
+            loss_f0 = sum(log.get('loss_f0', 0) for log in logging_outputs)
+            agg_output['loss_f0'] = loss_f0 / \
+                len(logging_outputs) / logging_outputs[0]['pcoeff']
 
-        #     if logging_outputs[0].get('loss_uv', 0) > 0:
-        #         loss_uv = sum(log.get('loss_uv', 0) for log in logging_outputs)
-        #         agg_output['loss_uv'] = loss_uv / \
-        #             len(logging_outputs) / logging_outputs[0]['pcoeff']
+            if logging_outputs[0].get('loss_uv', 0) > 0:
+                loss_uv = sum(log.get('loss_uv', 0) for log in logging_outputs)
+                agg_output['loss_uv'] = loss_uv / \
+                    len(logging_outputs) / logging_outputs[0]['pcoeff']
 
         return agg_output
