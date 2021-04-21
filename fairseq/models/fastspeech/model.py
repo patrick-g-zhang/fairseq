@@ -57,11 +57,11 @@ class DurationPredictor(torch.nn.Module):
         for idx in range(n_layers):
             in_chans = idim if idx == 0 else n_chans
             self.conv += [torch.nn.Sequential(
-                torch.nn.Conv1d(in_chans, n_chans, kernel_size,
+                nn.Conv1d(in_chans, n_chans, kernel_size,
                                 stride=1, padding=0),
-                torch.nn.ReLU(),
+                nn.ReLU(),
                 LayerNorm2(n_chans, dim=1),
-                torch.nn.Dropout(dropout_rate)
+                nn.Dropout(dropout_rate)
             )]
         self.linear = nn.Linear(n_chans, 1)
 
@@ -73,9 +73,12 @@ class DurationPredictor(torch.nn.Module):
             xs = f(xs)  # (B, C, Tmax)
             if x_masks is not None:
                 xs = xs * (1 - x_masks.type(xs.dtype))[:, None, :]
-        xs = xs.detach()
+     
         # NOTE: calculate in log domain
-        xs = self.linear(xs.transpose(1, 2)).type(xs.dtype).to(xs.device)[:, :, 0]
+        xs = xs.transpose(1, 2)
+        xs = self.linear(xs).type(xs.dtype).to(xs.device)
+        xs = xs.detach()
+        xs = xs[:, :, 0]
         # xs = xs.squeeze(-1).to(xs.device)  # (B, Tmax)
 
         if x_masks is not None:
