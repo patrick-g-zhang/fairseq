@@ -63,7 +63,7 @@ class DurationPredictor(torch.nn.Module):
                 LayerNorm2(n_chans, dim=1),
                 nn.Dropout(dropout_rate)
             )]
-        self.linear = nn.Linear(n_chans, 1)
+        self.linear = Linear(n_chans, 1)
 
     def _forward(self, xs, x_masks=None):
         xs = xs.transpose(1, -1)  # (B, idim, Tmax)
