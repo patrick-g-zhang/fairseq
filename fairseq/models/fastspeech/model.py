@@ -1355,7 +1355,6 @@ class FastSpeech2Encoder(FairseqDecoder):
         
         # mask
         pad_mask = (src_tokens == 0).to(src_tokens.device)
-        pad_mask = src_tokens == 0
         dur_pred = self.dur_predictor(dur_input, pad_mask)
 
           # 如果在frome层面预测韵律的话，需要展开

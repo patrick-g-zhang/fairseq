@@ -33,9 +33,9 @@ def pitch_loss(p_pred, pitch, uv):
     uv_loss = (F.binary_cross_entropy_with_logits(
         p_pred[:, :, 1].reshape(-1), uv.reshape(-1), reduction='none') * nonpadding).sum() \
         / nonpadding.sum()
-    nonpadding = (pitch != -200).type(pitch.dtype) * \
-        (uv == 0).type(pitch.dtype)
-    nonpadding = nonpadding.to(pitch.device).reshape(-1)
+    nonpadding = ((pitch != -200).type(pitch.dtype).to(pitch.device)) * \
+        ((uv == 0).type(pitch.dtype).to(pitch.device))
+    nonpadding = nonpadding.reshape(-1)
 
     f0_loss = (F.l1_loss(
         p_pred[:, :, 0].reshape(-1), pitch.reshape(-1), reduction='none') * nonpadding).sum() \
