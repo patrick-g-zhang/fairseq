@@ -146,7 +146,7 @@ class PitchPredictor(torch.nn.Module):
         """
         if self.use_position_embeddings:
             # positions = self.pos_embed_alpha * self.embed_positions(xs[..., 0])
-            positions = self.embed_positions(xs[..., 0])
+            positions = self.embed_positions(xs[..., 0]).to(xs.device)
             xs = xs + positions
         xs = xs.transpose(1, -1)  # (B, idim, Tmax)
         for f in self.conv:
