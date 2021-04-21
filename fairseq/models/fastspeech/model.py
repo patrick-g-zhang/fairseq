@@ -72,8 +72,7 @@ class DurationPredictor(torch.nn.Module):
             xs = F.pad(xs, [self.kernel_size // 2, self.kernel_size // 2])
             xs = f(xs)  # (B, C, Tmax)
             if x_masks is not None:
-                pdb.set_trace()
-                xs = xs * (1 - x_masks.type(xs.dtype))[:, None, :].to(xs.device)
+                xs = xs * (1 - x_masks.type(xs.dtype)).unsqueeze(1).to(xs.device)
 
         # NOTE: calculate in log domain
         xs = self.linear(xs.transpose(1, 2).contiguous())
