@@ -18,8 +18,9 @@ def dur_loss(dur_pred, dur_gt, input):
     nonpadding = (input != 0).type(dur_pred.dtype)
 
     # 对targets 取对数
-    targets = torch.log(dur_gt.float() + 1.0)
-    loss = torch.nn.MSELoss(reduction="none")(dur_pred, targets.float())
+    targets = torch.log(dur_gt.type(dur_pred.dtype) + 1.0)
+    loss = torch.nn.MSELoss(reduction="none")(
+        dur_pred, targets.type(dur_pred.dtype))
     loss = (loss * nonpadding).sum() / nonpadding.sum()
 
     return loss
