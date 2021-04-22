@@ -50,6 +50,16 @@ for SPLIT in valid test train; do \
         --workers 80; \
 done
 
+# large data
+for SPLIT in valid test train; do \
+        python -m examples.fastspeech.multiprocessing_bpe_encoder \
+        --vocab-bpe experiments/phoneme_bpe_cn/vocab.10k.bpe \
+        --inputs experiments/news.wiki.qa.ch/${SPLIT}_ch.txt \
+        --outputs experiments/news.wiki.qa.ch/${SPLIT}_ch_no_sep.bpe \
+        --keep-empty \
+        --no-word-sep \
+        --workers 80; \
+done
 
 ```
 
@@ -115,6 +125,16 @@ done
     DESTDIR=experiments/data-bin/news-2017-19.en.bpe.10k.full # output
  ```
  
+   - preprocessing full dataset with vocab size 10k lager chinese
+ ```
+    SRCDICT=experiments/phoneme_bpe_cn/dict_nosep.txt # phoneme dictionary
+    TGTDICT=experiments/phoneme_bpe_cn/bpe_nosep.10k.dict.txt # bpe dictionary
+    TRAINPREF=experiments/news.wiki.qa.ch/train_ch_no_sep.bpe
+    VALIDPREF=experiments/news.wiki.qa.ch/valid_ch_no_sep.bpe
+    TESTPREF=experiments/news.wiki.qa.ch/test_ch_no_sep.bpe
+    DESTDIR=experiments/data-bin/news.wiki.qa.ch.nosep # output
+ ```
+
  - run command
  ```
       python preprocess.py \
@@ -240,6 +260,35 @@ LOG_DIR=/blob/xuta/speech/tts/t-guzhang/fairseq/logs/${ARCH}-BPE-22W-Steps-FP16-
     --optimizer adam --adam-betas '(0.9,0.98)' --adam-eps 1e-6 --clip-norm 0.0 \
     --lr-scheduler polynomial_decay --lr $PEAK_LR --warmup-updates $WARMUP_UPDATES --total-num-update $TOTAL_UPDATES \
     --dropout 0.1 --weight-decay 0.01 \
+    --batch-size $MAX_SENTENCES --update-freq $UPDATE_FREQ  \
+    --max-update $TOTAL_UPDATES --log-format simple --log-interval 1 --dataset-impl dict --two-inputs --no-pad-prepend-token 
+ ```
+
+  #### Full data qa wiki news cn data, 10k size with full data, 
+```
+
+TOTAL_UPDATES=225000    # Total number of training steps
+WARMUP_UPDATES=10000    # Warmup the learning rate over this many updates
+PEAK_LR=0.0005          # Peak learning rate, adjust as needed
+TOKENS_PER_SAMPLE=512  # Max sequence length
+MAX_POSITIONS=512       # Num. positional embeddings (usually same as above)
+MAX_SENTENCES=10        # Number of sequences per batch (batch size)
+UPDATE_FREQ=16          # Increase the batch size 16x
+ARCH=fastspeech_large
+CON_MASK=4
+
+SAVE_DIR=/blob/xuta/speech/tts/t-guzhang/fairseq/checkpoints/${ARCH}-BPE-12W-Steps-FP16-10k-cn-rpe-nosep-aml
+DATA_DIR=/blob/xuta/speech/tts/t-guzhang/fairseq/experiments/data-bin/news.wiki.qa.ch.nosep
+LOG_DIR="logs/fastspeech-Test"
+```
+
+ ```
+ python  /blob/xuta/speech/tts/t-guzhang/fairseq/train.py $DATA_DIR \
+    --task masked_lm --criterion masked_lm --save-dir $SAVE_DIR\
+    --arch $ARCH --sample-break-mode complete --tokens-per-sample $TOKENS_PER_SAMPLE \
+    --optimizer adam --adam-betas '(0.9,0.98)' --adam-eps 1e-6 --clip-norm 0.0 \
+    --lr-scheduler polynomial_decay --lr $PEAK_LR --warmup-updates $WARMUP_UPDATES --total-num-update $TOTAL_UPDATES \
+    --dropout 0.1 --weight-decay 0.01 --no-word-sep --not-use-position-embeddings --use-relative-position \
     --batch-size $MAX_SENTENCES --update-freq $UPDATE_FREQ  \
     --max-update $TOTAL_UPDATES --log-format simple --log-interval 1 --dataset-impl dict --two-inputs --no-pad-prepend-token 
  ```

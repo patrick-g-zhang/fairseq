@@ -165,7 +165,7 @@ done
 ```
 
  ```
- python -m pdb /blob/xuta/speech/tts/t-guzhang/fairseq/train.py $DATA_DIR \
+ python /blob/xuta/speech/tts/t-guzhang/fairseq/train.py --fp16 $DATA_DIR \
     --task masked_lm --criterion masked_lm --save-dir $SAVE_DIR\
     --arch $ARCH --sample-break-mode complete --tokens-per-sample $TOKENS_PER_SAMPLE \
     --optimizer adam --adam-betas '(0.9,0.98)' --adam-eps 1e-6 --clip-norm 0.0 \

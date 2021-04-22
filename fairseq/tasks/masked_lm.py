@@ -145,6 +145,7 @@ class MaskedLMTask(FairseqTask):
             phoneme_prosody=self.args.phoneme_prosody,
         )
 
+
         print('| loaded {} blocks from: {}'.format(len(dataset), split_path))
 
         # prepend beginning-of-sentence token (<s>, equiv. to [CLS] in BERT)
