@@ -87,7 +87,6 @@ def main(args):
                 src_dict = task.load_dictionary(args.srcdict)
                 src_dict.save(dict_path(args.lang))
         else:
-            pdb.set_trace()
             assert args.trainpref, "--trainpref must be set if --srcdict is not specified"
             src_dict = build_dictionary(
                 [train_path(args.source_lang)], src=True)
@@ -96,7 +95,9 @@ def main(args):
     def make_binary_dataset(vocab, input_prefix, output_prefix, lang, num_workers, vocabb=None):
         print("| [{}] Phoneme Dictionary: {} types".format(
             lang, len(vocab) - 1))
-        print("| [{}] BPE Dictionary: {} types".format(lang, len(vocabb) - 1))
+        if vocabb is not None:
+            print("| [{}] BPE Dictionary: {} types".format(
+                lang, len(vocabb) - 1))
         n_seq_tok = [0, 0]
 
         def merge_result(worker_result):
