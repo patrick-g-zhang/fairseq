@@ -39,6 +39,7 @@ class TokenBlockDataset(FairseqDataset):
         block_size,
         pad=0,
         eos=2,
+        include_targets=False,
         break_mode=None,
         document_sep_len=1,
         two_inputs=False,
@@ -90,6 +91,7 @@ class TokenBlockDataset(FairseqDataset):
             block_to_dataset_index)
         self.pad = pad
         self.eos = eos
+        self.include_targets = include_targets
 
     @property
     def slice_indices(self):
