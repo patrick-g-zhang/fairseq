@@ -37,6 +37,8 @@ class TokenBlockDataset(FairseqDataset):
         dataset,
         sizes,
         block_size,
+        pad=0,
+        eos=2,
         break_mode=None,
         document_sep_len=1,
         two_inputs=False,
@@ -86,6 +88,8 @@ class TokenBlockDataset(FairseqDataset):
         self._sizes = plasma_utils.PlasmaArray(self._sizes)
         self._block_to_dataset_index = plasma_utils.PlasmaArray(
             block_to_dataset_index)
+        self.pad = pad
+        self.eos = eos
 
     @property
     def slice_indices(self):
@@ -299,6 +303,25 @@ class TokenBlockDataset(FairseqDataset):
             length = slice_e - slice_s
             s, e = start_offset, start_offset + length
             item = buffer[s:e]
+
+            if self.include_targets:
+                # *target* is the original sentence (=item)
+                # *source* is shifted right by 1 (maybe left-padded with eos)
+                # *past_target* is shifted right by 2 (left-padded as needed)
+                if s == 0:
+                    source = torch.cat(
+                        [item.new([self.eos]), buffer[0: e - 1]])
+                    past_target = torch.cat(
+                        [item.new([self.pad, self.eos]), buffer[0: e - 2]]
+                    )
+                else:
+                    source = buffer[s - 1: e - 1]
+                    if s == 1:
+                        past_target = torch.cat(
+                            [item.new([self.eos]), buffer[0: e - 2]])
+                    else:
+                        past_target = buffer[s - 2: e - 2]
+                return source, item, past_target
 
         return item
 
