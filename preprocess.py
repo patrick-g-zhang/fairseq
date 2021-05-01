@@ -85,6 +85,7 @@ def main(args):
             else:
                 src_dict = task.load_dictionary(args.srcdict)
                 src_dict.save(dict_path(args.lang))
+                src_dict_p = None
 
     def make_binary_dataset(vocab, input_prefix, output_prefix, lang, num_workers, vocabb=None):
         print("| [{}] Phoneme Dictionary: {} types".format(
