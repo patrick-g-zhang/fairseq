@@ -85,7 +85,6 @@ def main(args):
             else:
                 src_dict = task.load_dictionary(args.srcdict)
                 src_dict.save(dict_path(args.lang))
-                src_dict_p = None
 
     def make_binary_dataset(vocab, input_prefix, output_prefix, lang, num_workers, vocabb=None):
         print("| [{}] Phoneme Dictionary: {} types".format(
@@ -219,7 +218,10 @@ def main(args):
                 make_dataset(vocab, testpref, outprefix,
                              lang, num_workers=args.workers, vocabb=vocabb)
 
-    make_all(args.source_lang, src_dict_p, src_dict_b)
+    if args.two_inputs:
+        make_all(args.source_lang, src_dict_p, src_dict_b)
+    else:
+        make_all(args.source_lang, src_dict)
 
     print("| Wrote preprocessed data to {}".format(args.destdir))
 
