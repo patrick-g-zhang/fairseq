@@ -63,6 +63,7 @@ class TokenBlockDataset(FairseqDataset):
         self.prosody_predict = prosody_predict
         self.phoneme_prosody = phoneme_prosody
 
+        pdb.set_trace()
         assert len(dataset) == len(sizes)
         assert len(dataset) > 0
 
