@@ -60,7 +60,6 @@ def main(args):
     if target and not args.tgtdict and os.path.exists(dict_path(args.target_lang)):
         raise FileExistsError(dict_path(args.target_lang))
 
-    pdb.set_trace()
     if args.joined_dictionary:
 
         assert not args.srcdict or not args.tgtdict, \
@@ -87,6 +86,12 @@ def main(args):
             else:
                 src_dict = task.load_dictionary(args.srcdict)
                 src_dict.save(dict_path(args.lang))
+        else:
+            pdb.set_trace()
+            assert args.trainpref, "--trainpref must be set if --srcdict is not specified"
+            src_dict = build_dictionary(
+                [train_path(args.source_lang)], src=True)
+            src_dict.save(dict_path(args.source_lang))
 
     def make_binary_dataset(vocab, input_prefix, output_prefix, lang, num_workers, vocabb=None):
         print("| [{}] Phoneme Dictionary: {} types".format(
