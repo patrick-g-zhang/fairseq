@@ -50,6 +50,7 @@ def main(args, init_distributed=False):
 
     # Build model and criterion
 
+    pdb.set_trace()
     model = task.build_model(args)
     criterion = task.build_criterion(args)
     print(model)
