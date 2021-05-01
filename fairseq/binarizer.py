@@ -78,7 +78,8 @@ class Binarizer:
                 )
                 nseq += 1
                 ntok += len(ids)
-                consumer(ids)
+                if len(ids) > 0:
+                    consumer(ids)
                 line = f.readline()
         return {'nseq': nseq, 'nunk': sum(replaced.values()), 'ntok': ntok, 'replaced': replaced}
 
