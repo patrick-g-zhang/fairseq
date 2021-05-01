@@ -17,6 +17,7 @@ from fairseq.data import (
     TruncatedDictionary,
 )
 from fairseq.tasks import FairseqTask, register_task
+import pdb
 
 
 @register_task("language_modeling")
@@ -55,7 +56,8 @@ class LanguageModelingTask(FairseqTask):
         # fmt: off
         parser.add_argument('data', help='path to data directory')
         parser.add_argument('--sample-break-mode', default='none',
-                            choices=['none', 'complete', 'complete_doc', 'eos'],
+                            choices=['none', 'complete',
+                                     'complete_doc', 'eos'],
                             help='If omitted or "none", fills each sample with tokens-per-sample '
                                  'tokens. If set to "complete", splits samples only at the end '
                                  'of sentence, but may include multiple sentences per sample. '
@@ -168,7 +170,7 @@ class LanguageModelingTask(FairseqTask):
             raise FileNotFoundError(
                 "Dataset not found: {} ({})".format(split, split_path)
             )
-
+        pdb.set_trace()
         dataset = TokenBlockDataset(
             dataset,
             dataset.sizes,
