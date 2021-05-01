@@ -21,7 +21,6 @@ import pdb
 
 
 def main(args):
-    pdb.set_trace()
     utils.import_user_module(args)
 
     print(args)
@@ -60,6 +59,8 @@ def main(args):
         raise FileExistsError(dict_path(args.source_lang))
     if target and not args.tgtdict and os.path.exists(dict_path(args.target_lang)):
         raise FileExistsError(dict_path(args.target_lang))
+
+    pdb.set_trace()
     if args.joined_dictionary:
 
         assert not args.srcdict or not args.tgtdict, \
