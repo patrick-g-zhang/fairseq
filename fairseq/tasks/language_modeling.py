@@ -170,7 +170,6 @@ class LanguageModelingTask(FairseqTask):
             raise FileNotFoundError(
                 "Dataset not found: {} ({})".format(split, split_path)
             )
-        pdb.set_trace()
         dataset = TokenBlockDataset(
             dataset,
             dataset.sizes,

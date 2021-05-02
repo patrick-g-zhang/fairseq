@@ -381,7 +381,6 @@ class LSTMDecoder(FairseqIncrementalDecoder):
         """
         Similar to *forward* but only return features.
         """
-        pdb.set_trace()
         encoder_padding_mask = encoder_out['encoder_padding_mask']
         encoder_out = encoder_out['encoder_out']
 
