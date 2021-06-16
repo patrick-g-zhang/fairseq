@@ -12,56 +12,6 @@ from fairseq import utils
 
 from . import FairseqCriterion, register_criterion
 
-
-def dur_loss(dur_pred, dur_gt, input):
-
-    nonpadding = (input != 0).type(dur_pred.dtype).to(dur_pred.device)
-
-    # 对targets 取对数
-    targets = torch.log(dur_gt.type(dur_pred.dtype) + 1.0)
-    loss = torch.nn.MSELoss(reduction="none")(
-        dur_pred, targets.type(dur_pred.dtype))
-    loss = (loss * nonpadding).sum() / nonpadding.sum()
-
-    return loss
-
-
-def pitch_loss(p_pred, pitch, uv):
-    assert p_pred[..., 0].shape == pitch.shape
-    assert p_pred[..., 0].shape == uv.shape
-    nonpadding = (pitch != -200).type(pitch.dtype).to(pitch.device).reshape(-1)
-    uv_loss = (F.binary_cross_entropy_with_logits(
-        p_pred[:, :, 1].reshape(-1), uv.reshape(-1), reduction='none') * nonpadding).sum() \
-        / nonpadding.sum()
-    nonpadding = ((pitch != -200).type(pitch.dtype).to(pitch.device)) * \
-        ((uv == 0).type(pitch.dtype).to(pitch.device))
-    nonpadding = nonpadding.reshape(-1)
-
-    f0_loss = (F.l1_loss(
-        p_pred[:, :, 0].reshape(-1), pitch.reshape(-1), reduction='none') * nonpadding).sum() \
-        / nonpadding.sum()
-    return uv_loss, f0_loss
-
-
-def phoneme_pitch_loss(p_pred, pitch):
-    assert p_pred[..., 0].shape == pitch.shape
-
-    nonpadding = (pitch != -200).type(pitch.dtype).to(pitch.device).reshape(-1)
-    uv_loss = None
-
-    pitch_loss = (F.l1_loss(
-        p_pred[:, :, 0].reshape(-1), pitch.reshape(-1), reduction='none') * nonpadding).sum() \
-        / nonpadding.sum()
-    return uv_loss, pitch_loss
-
-
-def energy_loss(energy_pred, energy):
-    nonpadding = (energy != 0).type(energy.dtype).to(energy.device)
-    loss = (F.mse_loss(energy_pred, energy, reduction='none')
-            * nonpadding).sum() / nonpadding.sum()
-    return loss
-
-
 @register_criterion('masked_lm')
 class MaskedLmLoss(FairseqCriterion):
     """
@@ -86,18 +36,13 @@ class MaskedLmLoss(FairseqCriterion):
             phoneme_masked_tokens = sample['target']['phoneme'].ne(
                 self.padding_idx)
             sample_size = phoneme_masked_tokens.int().sum().item()
+            bpe_sample_size = bpe_masked_tokens.int().sum().item()
             # (Rare case) When all tokens are masked, the model results in empty
             # tensor and gives CUDA error.
             if sample_size == 0:
                 phoneme_masked_tokens = None
 
-            if self.args.prosody_predict:
-                # 如果是做韵律预测 要会有多个输出
-                logitps, logitbs, dur_pred, pitch_pred, energy_pred = model(**sample['net_input'], masked_tokens=phoneme_masked_tokens,
-                                                                            bpe_masked_tokens=bpe_masked_tokens)
-
-            else:
-                logitps, logitbs = model(**sample['net_input'], masked_tokens=phoneme_masked_tokens,
+            logitps, logitbs = model(**sample['net_input'], masked_tokens=phoneme_masked_tokens,
                                          bpe_masked_tokens=bpe_masked_tokens)
 
             targets = model.get_targets(sample, [logitps])
@@ -141,49 +86,8 @@ class MaskedLmLoss(FairseqCriterion):
                 'ntokens': sample['ntokens'],
                 'nsentences': sample['nsentences'],
                 'sample_size': sample_size,
+                'bpe_sample_size': bpe_sample_size,
             }
-
-            if self.args.prosody_predict:
-                # 增加额外的loss
-                # energy loss
-                energy = sample['target']['energy']
-                loss_energy = energy_loss(
-                    energy_pred, energy) * self.args.prosody_loss_coeff
-                loss += loss_energy
-                logging_output['loss_energy'] = utils.item(
-                    loss_energy.data) if reduce else loss_energy.data
-
-                # dur loss
-                dur_gt = sample['target']['dur_gt']
-                loss_dur = dur_loss(
-                    dur_pred, dur_gt, sample['net_input']['src_tokens']['phoneme']) * self.args.prosody_loss_coeff
-                loss += loss_dur
-                logging_output['loss_dur'] = utils.item(
-                    loss_dur.data) if reduce else loss_dur.data
-
-                # pitch loss
-
-                f0 = sample['target']['f0']
-
-                # 如果不是phoneme prosody 那么需要保存
-                if not self.args.phoneme_prosody:
-                    uv = sample['target'].get('uv', None)
-                    loss_uv, loss_f0 = pitch_loss(pitch_pred, f0, uv)
-                    loss_uv = loss_uv * self.args.prosody_loss_coeff
-                    loss += loss_uv
-                    logging_output['loss_uv'] = utils.item(
-                        loss_uv.data) if reduce else loss_uv.data
-
-                else:
-                    _, loss_f0 = phoneme_pitch_loss(pitch_pred, f0)
-
-                loss_f0 = loss_f0 * self.args.prosody_loss_coeff
-                loss += loss_f0
-                logging_output['loss_f0'] = utils.item(
-                    loss_f0.data) if reduce else loss_f0.data
-
-                # 保证不会被干掉
-                logging_output['pcoeff'] = self.args.prosody_loss_coeff
 
         else:
             masked_tokens = sample['target'].ne(self.padding_idx)
@@ -231,6 +135,7 @@ class MaskedLmLoss(FairseqCriterion):
         ntokens = sum(log.get('ntokens', 0) for log in logging_outputs)
         nsentences = sum(log.get('nsentences', 0) for log in logging_outputs)
         sample_size = sum(log.get('sample_size', 0) for log in logging_outputs)
+        bpe_sample_size = sum(log.get('bpe_sample_size', 0) for log in logging_outputs)
 
         agg_output = {
             'loss': loss / sample_size / math.log(2),
@@ -238,31 +143,11 @@ class MaskedLmLoss(FairseqCriterion):
             'loss_b': loss_b / sample_size / math.log(2),
             'nll_loss': sum(log.get('nll_loss', 0) for log in logging_outputs) / sample_size / math.log(2) if ntokens > 0 else 0.,
             'nll_loss_p': sum(log.get('nll_loss_p', 0) for log in logging_outputs) / sample_size / math.log(2) if ntokens > 0 else 0.,
-            'nll_loss_b': sum(log.get('nll_loss_b', 0) for log in logging_outputs) / sample_size / math.log(2) if ntokens > 0 else 0.,
+            'nll_loss_b': sum(log.get('nll_loss_b', 0) for log in logging_outputs) / bpe_sample_size / math.log(2) if bpe_sample_size > 0 else 0.,
             'ntokens': ntokens,
             'nsentences': nsentences,
             'sample_size': sample_size,
+            'bpe_sample_size': bpe_sample_size,
         }
-
-        if logging_outputs[0].get('loss_energy', 0) > 0:
-            # 需要输出韵律相关的特征
-            # 注意在这里不应该除以sample size(number of masked phoneme) 应该除以语音的数量 len(logging_outputs)
-            loss_energy = sum(log.get('loss_energy', 0)
-                              for log in logging_outputs)
-            agg_output['loss_energy'] = loss_energy / \
-                len(logging_outputs) / logging_outputs[0]['pcoeff']
-
-            loss_dur = sum(log.get('loss_dur', 0) for log in logging_outputs)
-            agg_output['loss_dur'] = loss_dur / \
-                len(logging_outputs) / logging_outputs[0]['pcoeff']
-
-            loss_f0 = sum(log.get('loss_f0', 0) for log in logging_outputs)
-            agg_output['loss_f0'] = loss_f0 / \
-                len(logging_outputs) / logging_outputs[0]['pcoeff']
-
-            if logging_outputs[0].get('loss_uv', 0) > 0:
-                loss_uv = sum(log.get('loss_uv', 0) for log in logging_outputs)
-                agg_output['loss_uv'] = loss_uv / \
-                    len(logging_outputs) / logging_outputs[0]['pcoeff']
 
         return agg_output

@@ -141,10 +141,7 @@ class MaskedLMTask(FairseqTask):
             self.args.tokens_per_sample - 1,  # one less for <s>
             break_mode=self.args.sample_break_mode,
             two_inputs=self.args.two_inputs,
-            prosody_predict=self.args.prosody_predict,
-            phoneme_prosody=self.args.phoneme_prosody,
         )
-
 
         print('| loaded {} blocks from: {}'.format(len(dataset), split_path))
 
@@ -188,8 +185,6 @@ class MaskedLMTask(FairseqTask):
                 freq_weighted_replacement=self.args.freq_weighted_replacement,
                 mask_whole_words=self.args.mask_whole_words,
                 no_word_sep=self.args.no_word_sep,
-                prosody_predict=self.args.prosody_predict,
-                phoneme_prosody=self.args.phoneme_prosody,
             )
 
         with data_utils.numpy_seed(self.args.seed + epoch):
@@ -235,8 +230,6 @@ class MaskedLMTask(FairseqTask):
                                 src_dataset,
                                 pad_idx=self.phoneme_dictionary.pad(),
                                 left_pad=False,
-                                prosody_predict=self.args.prosody_predict,
-                                phoneme_prosody=self.args.phoneme_prosody,
 
                             ),
                             'src_lengths': DictNumelDataset(src_dataset, reduce=False),
@@ -245,8 +238,6 @@ class MaskedLMTask(FairseqTask):
                             tgt_dataset,
                             pad_idx=self.phoneme_dictionary.pad(),
                             left_pad=False,
-                            prosody_predict=self.args.prosody_predict,
-                            phoneme_prosody=self.args.phoneme_prosody,
                             is_target=True,
                         ),
                         'nsentences': NumSamplesDataset(),
