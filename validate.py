@@ -1,5 +1,4 @@
 #!/usr/bin/env python3 -u
-#!/usr/bin/env python3 -u
 # Copyright (c) Facebook, Inc. and its affiliates.
 #
 # This source code is licensed under the MIT license found in the
@@ -11,6 +10,7 @@ from fairseq import checkpoint_utils, options, progress_bar, utils
 
 
 def main(args, override_args=None):
+    pdb.set_trace()
     utils.import_user_module(args)
 
     use_fp16 = args.fp16
