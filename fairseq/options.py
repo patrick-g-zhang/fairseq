@@ -262,15 +262,6 @@ def add_preprocess_args(parser):
     group.add_argument("--indexed-dataset", action="store_true",
                        help="indexed dataset")
 
-    # 添加prosody predict 参数为了保证适应输入
-    group.add_argument("--prosody-predict", action="store_true",
-                       help="predict prosody")
-    group.add_argument("--phoneme-prosody", action="store_true",
-                       help="phoneme level prosody")
-    # 需要给预测韵律前面加一个系数
-    group.add_argument("--prosody-loss-coeff", default=1,
-                       type=int, help="prosody loss coeffiencent")
-
     # fmt: on
     return parser
 
@@ -295,11 +286,6 @@ def add_dataset_args(parser, train=False, gen=False):
                        help="two inputs")
     group.add_argument("--indexed-dataset", action="store_true",
                        help="indexed dataset")
-    group.add_argument("--prosody-predict", action="store_true",
-                       help="prosody predict")
-    # add new arguments for phoneme level prosody pretraining
-    group.add_argument("--phoneme-prosody", action="store_true",
-                       help="phoneme level prosody")
     group.add_argument("--no-word-sep", action="store_true",
                        help="no word split")
     if train:
@@ -323,9 +309,6 @@ def add_dataset_args(parser, train=False, gen=False):
                                 ' (defaults to --max-sentences)')
         group.add_argument('--curriculum', default=0, type=int, metavar='N',
                            help='don\'t shuffle batches for first N epochs')
-        # 需要给预测韵律前面加一个系数
-        group.add_argument("--prosody-loss-coeff", default=1,
-                           type=int, help="prosody loss coeffiencent")
 
     if gen:
         group.add_argument('--gen-subset', default='test', metavar='SPLIT',
