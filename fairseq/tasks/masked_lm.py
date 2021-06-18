@@ -185,7 +185,7 @@ class MaskedLMTask(FairseqTask):
                 random_token_prob=self.args.random_token_prob,
                 freq_weighted_replacement=self.args.freq_weighted_replacement,
                 mask_whole_words=self.args.mask_whole_words,
-                no_word_sep=self.args.no_word_sep,
+                # no_word_sep=self.args.no_word_sep,
             )
 
         with data_utils.numpy_seed(self.args.seed + epoch):
