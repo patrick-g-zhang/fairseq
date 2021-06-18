@@ -10,7 +10,6 @@ from fairseq import checkpoint_utils, options, progress_bar, utils
 import pdb
 
 def main(args, override_args=None):
-    pdb.set_trace()
     utils.import_user_module(args)
 
     use_fp16 = args.fp16
@@ -73,6 +72,8 @@ def main(args, override_args=None):
         )
 
         log_outputs = []
+        pdb.set_trace()
+
         for i, sample in enumerate(progress):
             sample = utils.move_to_cuda(sample) if use_cuda else sample
             _loss, _sample_size, log_output = task.valid_step(sample, model, criterion)
