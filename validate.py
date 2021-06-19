@@ -71,17 +71,21 @@ def main(args, override_args=None):
             no_progress_bar='simple'
         )
 
-        log_outputs = []
+        total_cor_phoneme_num = 0
+        total_cor_bpe_num = 0
 
+        total_sample_size = 0
+        total_bpe_sample_size = 0
+        pdb.set_trace()
         for i, sample in enumerate(progress):
             sample = utils.move_to_cuda(sample) if use_cuda else sample
             log_output = task.mlm_eval_step(sample, model, criterion)
-            progress.log(log_output, step=i)
-            log_outputs.append(log_output)
+            total_cor_bpe_num += log_output['cor_bpe_num']
+            total_cor_phoneme_num += log_output['cor_phoneme_num']
+            total_sample_size += log_output['sample_size']
+            total_bpe_sample_size += log_output['bpe_sample_size']
 
-        log_output = task.aggregate_logging_outputs(log_outputs, criterion)
-
-        progress.print(log_output, tag=subset, step=i)
+        pdb.set_trace()
 
 
 def cli_main():
