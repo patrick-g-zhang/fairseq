@@ -149,12 +149,13 @@ class MaskedLmLoss(FairseqCriterion):
             targets_p = targets['phoneme']
             targets_b = targets['bpe']
 
-            cor_phoneme_num = targets_p == preds_p
-            cor_bpe_num = targets_b == preds_b
 
             if sample_size != 0:
                 targets_p = targets_p[phoneme_masked_tokens]
                 targets_b = targets_b[bpe_masked_tokens]
+
+            cor_phoneme_num = targets_p == preds_p
+            cor_bpe_num = targets_b == preds_b
 
             logging_output = {
                 'ntokens': sample['ntokens'],
