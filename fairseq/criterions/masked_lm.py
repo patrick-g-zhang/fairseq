@@ -128,79 +128,79 @@ class MaskedLmLoss(FairseqCriterion):
 
 
 
-        def inference(self, model, sample, reduce=True):
-            if self.args.two_inputs:
-                # 多个输入
-                bpe_masked_tokens = sample['target']['bpe'].ne(self.padding_idx)
-                phoneme_masked_tokens = sample['target']['phoneme'].ne(
-                    self.padding_idx)
-                sample_size = phoneme_masked_tokens.int().sum().item()
-                bpe_sample_size = bpe_masked_tokens.int().sum().item()
-                # (Rare case) When all tokens are masked, the model results in empty
-                # tensor and gives CUDA error.
-                if sample_size == 0:
-                    phoneme_masked_tokens = None
+    def inference(self, model, sample, reduce=True):
+        if self.args.two_inputs:
+            # 多个输入
+            bpe_masked_tokens = sample['target']['bpe'].ne(self.padding_idx)
+            phoneme_masked_tokens = sample['target']['phoneme'].ne(
+                self.padding_idx)
+            sample_size = phoneme_masked_tokens.int().sum().item()
+            bpe_sample_size = bpe_masked_tokens.int().sum().item()
+            # (Rare case) When all tokens are masked, the model results in empty
+            # tensor and gives CUDA error.
+            if sample_size == 0:
+                phoneme_masked_tokens = None
 
-                logitps, logitbs = model(**sample['net_input'], masked_tokens=phoneme_masked_tokens,
-                                             bpe_masked_tokens=bpe_masked_tokens)
-                preds_p = torch.argmax(logitps, dim=1)
-                preds_b = torch.argmax(logitbs, dim=1)
-                targets = model.get_targets(sample, [logitps])
-                targets_p = targets['phoneme']
-                targets_b = targets['bpe']
+            logitps, logitbs = model(**sample['net_input'], masked_tokens=phoneme_masked_tokens,
+                                         bpe_masked_tokens=bpe_masked_tokens)
+            preds_p = torch.argmax(logitps, dim=1)
+            preds_b = torch.argmax(logitbs, dim=1)
+            targets = model.get_targets(sample, [logitps])
+            targets_p = targets['phoneme']
+            targets_b = targets['bpe']
 
-                cor_phoneme_num = targets_p == preds_p
-                cor_bpe_num = targets_b == preds_b
+            cor_phoneme_num = targets_p == preds_p
+            cor_bpe_num = targets_b == preds_b
 
-                if sample_size != 0:
-                    targets_p = targets_p[phoneme_masked_tokens]
-                    targets_b = targets_b[bpe_masked_tokens]
+            if sample_size != 0:
+                targets_p = targets_p[phoneme_masked_tokens]
+                targets_b = targets_b[bpe_masked_tokens]
 
-                logging_output = {
-                    'ntokens': sample['ntokens'],
-                    'nsentences': sample['nsentences'],
-                    'sample_size': sample_size,
-                    'bpe_sample_size': bpe_sample_size,
-                    'cor_phoneme_num': cor_phoneme_num,
-                    'cor_bpe_num': cor_bpe_num,
-                }
+            logging_output = {
+                'ntokens': sample['ntokens'],
+                'nsentences': sample['nsentences'],
+                'sample_size': sample_size,
+                'bpe_sample_size': bpe_sample_size,
+                'cor_phoneme_num': cor_phoneme_num,
+                'cor_bpe_num': cor_bpe_num,
+            }
 
-            else:
-                masked_tokens = sample['target'].ne(self.padding_idx)
-                sample_size = masked_tokens.int().sum().item()
+        else:
+            masked_tokens = sample['target'].ne(self.padding_idx)
+            sample_size = masked_tokens.int().sum().item()
 
-                # (Rare case) When all tokens are masked, the model results in empty
-                # tensor and gives CUDA error.
-                if sample_size == 0:
-                    masked_tokens = None
-                # pdb.set_trace()
+            # (Rare case) When all tokens are masked, the model results in empty
+            # tensor and gives CUDA error.
+            if sample_size == 0:
+                masked_tokens = None
+            # pdb.set_trace()
 
-                logits = model(**sample['net_input'],
-                               masked_tokens=masked_tokens)
-                targets = model.get_targets(sample, [logits])
+            logits = model(**sample['net_input'],
+                           masked_tokens=masked_tokens)
+            targets = model.get_targets(sample, [logits])
 
-                if sample_size != 0:
-                    targets = targets[masked_tokens]
+            if sample_size != 0:
+                targets = targets[masked_tokens]
 
-                loss = F.nll_loss(
-                    F.log_softmax(
-                        logits.view(-1, logits.size(-1)),
-                        dim=-1,
-                        dtype=torch.float32,
-                    ),
-                    targets.view(-1),
-                    reduction='sum',
-                    ignore_index=self.padding_idx,
-                )
+            loss = F.nll_loss(
+                F.log_softmax(
+                    logits.view(-1, logits.size(-1)),
+                    dim=-1,
+                    dtype=torch.float32,
+                ),
+                targets.view(-1),
+                reduction='sum',
+                ignore_index=self.padding_idx,
+            )
 
-                logging_output = {
-                    'loss': utils.item(loss.data) if reduce else loss.data,
-                    'nll_loss': utils.item(loss.data) if reduce else loss.data,
-                    'ntokens': sample['ntokens'],
-                    'nsentences': sample['nsentences'],
-                    'sample_size': sample_size,
-                }
-            return logging_output
+            logging_output = {
+                'loss': utils.item(loss.data) if reduce else loss.data,
+                'nll_loss': utils.item(loss.data) if reduce else loss.data,
+                'ntokens': sample['ntokens'],
+                'nsentences': sample['nsentences'],
+                'sample_size': sample_size,
+            }
+        return logging_output
 
 
     @staticmethod
