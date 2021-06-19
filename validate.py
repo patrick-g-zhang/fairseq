@@ -72,7 +72,6 @@ def main(args, override_args=None):
         )
 
         log_outputs = []
-        pdb.set_trace()
 
         for i, sample in enumerate(progress):
             sample = utils.move_to_cuda(sample) if use_cuda else sample
