@@ -76,7 +76,7 @@ def main(args, override_args=None):
 
         for i, sample in enumerate(progress):
             sample = utils.move_to_cuda(sample) if use_cuda else sample
-            log_output = task.valid_step(sample, model, criterion)
+            log_output = task.mlm_eval_step(sample, model, criterion)
             progress.log(log_output, step=i)
             log_outputs.append(log_output)
 
