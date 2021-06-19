@@ -42,7 +42,6 @@ class MaskedLmLoss(FairseqCriterion):
             if sample_size == 0:
                 phoneme_masked_tokens = None
 
-            pdb.set_trace()
             logitps, logitbs = model(**sample['net_input'], masked_tokens=phoneme_masked_tokens,
                                          bpe_masked_tokens=bpe_masked_tokens)
 
@@ -150,7 +149,6 @@ class MaskedLmLoss(FairseqCriterion):
                 targets_p = targets['phoneme']
                 targets_b = targets['bpe']
 
-                pdb.set_trace()
                 cor_phoneme_num = targets_p == preds_p
                 cor_bpe_num = targets_b == preds_b
 

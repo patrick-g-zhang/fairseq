@@ -280,6 +280,7 @@ class FairseqTask(object):
 
     def mlm_eval_step(self, sample, model, criterion):
         model.eval()
+        pdb.set_trace()
         with torch.no_grad():
             logging_output = criterion.inference(model, sample)
         return logging_output
