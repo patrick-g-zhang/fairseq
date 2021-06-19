@@ -604,6 +604,61 @@ class Trainer(object):
 
         return logging_output
 
+
+    def mlm_eval_step(self, sample, raise_oom=False):
+        """Do forward pass in evaluation mode."""
+        with torch.no_grad():
+            self.model.eval()
+            self.criterion.eval()
+
+            sample = self._prepare_sample(sample)
+            if sample is None:
+                sample = self._prepare_sample(self._dummy_batch)
+                ignore_results = True
+            else:
+                ignore_results = False
+
+            try:
+                logging_output = self.task.mlm_eval_step(
+                    sample, self.model, self.criterion
+                )
+            except RuntimeError as e:
+                if "out of memory" in str(e):
+                    self._log_oom(e)
+                    if not raise_oom:
+                        print(
+                            "| WARNING: ran out of memory in validation step, retrying batch"
+                        )
+                        for p in self.model.parameters():
+                            if p.grad is not None:
+                                p.grad = None  # free some memory
+                        if self.cuda:
+                            torch.cuda.empty_cache()
+                        return self.valid_step(sample, raise_oom=True)
+                raise e
+
+            if ignore_results:
+                logging_output, sample_size = {}, 0
+
+        # gather logging outputs from all replicas
+        if self.args.distributed_world_size > 1:
+            logging_output, sample_size = zip(
+                *distributed_utils.all_gather_list([logging_output, sample_size])
+            )
+            logging_output = list(logging_output)
+            sample_size = list(sample_size)
+        else:
+            logging_output = [logging_output]
+            sample_size = [sample_size]
+
+        # aggregate logging outputs and sample sizes
+        logging_output = self.task.aggregate_logging_outputs(
+            logging_output, self.get_criterion()
+        )
+
+        return logging_output
+
+
     def dummy_train_step(self, dummy_batch):
         """Dummy training step for warming caching allocator."""
         self.train_step(dummy_batch, dummy_batch=True)

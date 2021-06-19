@@ -277,6 +277,14 @@ class FairseqTask(object):
             loss, sample_size, logging_output = criterion(model, sample)
         return loss, sample_size, logging_output
 
+
+    def mlm_eval_step(self, sample, model, criterion):
+        model.eval()
+        with torch.no_grad():
+            logging_output = criterion.inference(model, sample)
+        return logging_output
+
+
     def inference_step(self, generator, models, sample, prefix_tokens=None):
         with torch.no_grad():
             return generator.generate(models, sample, prefix_tokens=prefix_tokens)
