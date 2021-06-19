@@ -156,7 +156,7 @@ class MaskedLmLoss(FairseqCriterion):
 
 
             cor_phoneme_num = torch.sum(targets_p == preds_p).cpu().item()
-            cor_bpe_num = torch.sum(targets_b == preds_b).cpu().items()
+            cor_bpe_num = torch.sum(targets_b == preds_b).cpu().item()
 
             logging_output = {
                 'ntokens': sample['ntokens'],
