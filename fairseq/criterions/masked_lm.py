@@ -36,7 +36,6 @@ class MaskedLmLoss(FairseqCriterion):
             bpe_masked_tokens = sample['target']['bpe'].ne(self.padding_idx)
             phoneme_masked_tokens = sample['target']['phoneme'].ne(
                 self.padding_idx)
-            pdb.set_trace()
             sample_size = phoneme_masked_tokens.int().sum().item()
             bpe_sample_size = bpe_masked_tokens.int().sum().item()
             # (Rare case) When all tokens are masked, the model results in empty

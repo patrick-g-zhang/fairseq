@@ -81,7 +81,6 @@ class MaskTokensDataset(BaseWrapperDataset):
         self.return_masked_tokens = return_masked_tokens
         self.seed = seed
         self.mask_prob = mask_prob
-        pdb.set_trace()
         self.leave_unmasked_prob = leave_unmasked_prob
         self.random_token_prob = random_token_prob
         self.mask_whole_words = mask_whole_words
