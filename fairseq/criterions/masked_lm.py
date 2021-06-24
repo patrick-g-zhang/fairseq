@@ -12,6 +12,7 @@ from fairseq import utils
 
 from . import FairseqCriterion, register_criterion
 
+
 @register_criterion('masked_lm')
 class MaskedLmLoss(FairseqCriterion):
     """
@@ -41,9 +42,7 @@ class MaskedLmLoss(FairseqCriterion):
             # (Rare case) When all tokens are masked, the model results in empty
             # tensor and gives CUDA error.
             if sample_size == 0:
-                pdb.set_trace()
                 phoneme_masked_tokens = None
-                bpe_masked_tokens = None
                 assert bpe_sample_size == 0
 
             logitps, logitbs = model(**sample['net_input'], masked_tokens=phoneme_masked_tokens,
