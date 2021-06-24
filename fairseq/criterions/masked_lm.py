@@ -40,8 +40,10 @@ class MaskedLmLoss(FairseqCriterion):
             # (Rare case) When all tokens are masked, the model results in empty
             # tensor and gives CUDA error.
             if sample_size == 0:
+                pdb.set_trace()
                 phoneme_masked_tokens = None
                 bpe_masked_tokens = None
+                assert bpe_sample_size == 0
 
             logitps, logitbs = model(**sample['net_input'], masked_tokens=phoneme_masked_tokens,
                                          bpe_masked_tokens=bpe_masked_tokens)
@@ -53,6 +55,7 @@ class MaskedLmLoss(FairseqCriterion):
             if sample_size != 0:
                 targets_p = targets_p[phoneme_masked_tokens]
                 targets_b = targets_b[bpe_masked_tokens]
+                assert bpe_sample_size == 0
 
             loss_p = F.nll_loss(
                 F.log_softmax(
