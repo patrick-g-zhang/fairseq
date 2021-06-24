@@ -1031,7 +1031,6 @@ class FastSpeech2Encoder(FairseqDecoder):
         # decoder以及prosody predictor维度大小
         self.decoder_embed_dim = args.decoder_embed_dim
 
-
         self.encoder_attention_heads = args.encoder_attention_heads
         self.has_relative_attention_bias = args.has_relative_attention_bias
         self.use_relative_position = args.use_relative_position
@@ -1068,11 +1067,11 @@ class FastSpeech2Encoder(FairseqDecoder):
 
         if self.args.two_inputs:
             self.bpe_lm_head = RobertaLMHead(
-            embed_dim=args.encoder_embed_dim,
-            output_dim=len(dictionary_b),
-            activation_fn=args.activation_fn,
-            weight=self.bpe_encoder_embed_tokens.weight,
-        )
+                embed_dim=args.encoder_embed_dim,
+                output_dim=len(dictionary_b),
+                activation_fn=args.activation_fn,
+                weight=self.bpe_encoder_embed_tokens.weight,
+            )
 
     def forward(self, src_tokens, features_only=False, return_all_hiddens=False, masked_tokens=None, bpe_masked_tokens=None, **unused):
         """
@@ -1097,7 +1096,6 @@ class FastSpeech2Encoder(FairseqDecoder):
             bpe_input = src_tokens['bpe']
             phoneme2bpe = src_tokens['phoneme2bpe']
 
-            pdb.set_trace()
             x = self.extract_features(
                     phoneme_input, bpe_input=bpe_input, phoneme2bpe=phoneme2bpe)
             x = self.output_layer(x, masked_tokens=masked_tokens, phoneme2bpe=phoneme2bpe, bpe_masked_tokens=bpe_masked_tokens)
@@ -1137,6 +1135,9 @@ class FastSpeech2Encoder(FairseqDecoder):
             bpe_features = features.new_zeros(
                 B,  T + 1, self.encoder_embed_dim).scatter_add_(1, phoneme2bpe[:,:, None].repeat(1, 1, self.encoder_embed_dim), features)
             bpe_features = bpe_features[:, 1:, :]
+            bpe_sample_size = bpe_masked_tokens.int().sum().item()
+            if bpe_sample_size == 0:
+                bpe_masked_tokens = None
             return self.lm_head(features, masked_tokens), self.bpe_lm_head(bpe_features, bpe_masked_tokens)
         else:
             return self.lm_head(features, masked_tokens)
