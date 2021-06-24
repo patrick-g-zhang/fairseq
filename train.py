@@ -304,6 +304,7 @@ def distributed_main(i, args, start_rank=0):
 
 
 def cli_main():
+    pdb.set_trace()
     parser = options.get_training_parser()
     args = options.parse_args_and_arch(parser)
 
