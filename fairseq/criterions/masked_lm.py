@@ -146,20 +146,23 @@ class MaskedLmLoss(FairseqCriterion):
             pdb.set_trace()
             logitps, logitbs = model(**sample['net_input'], masked_tokens=phoneme_masked_tokens,
                                          bpe_masked_tokens=bpe_masked_tokens)
-            preds_p = torch.argmax(logitps, dim=1)
-            preds_b = torch.argmax(logitbs, dim=1)
-            targets = model.get_targets(sample, [logitps])
-            targets_p = targets['phoneme']
-            targets_b = targets['bpe']
-
 
             if sample_size != 0:
+                preds_p = torch.argmax(logitps, dim=1)
+                preds_b = torch.argmax(logitbs, dim=1)
+                targets = model.get_targets(sample, [logitps])
+                targets_p = targets['phoneme']
+                targets_b = targets['bpe']
+
                 targets_p = targets_p[phoneme_masked_tokens]
                 targets_b = targets_b[bpe_masked_tokens]
 
 
-            cor_phoneme_num = torch.sum(targets_p == preds_p).cpu().item()
-            cor_bpe_num = torch.sum(targets_b == preds_b).cpu().item()
+                cor_phoneme_num = torch.sum(targets_p == preds_p).cpu().item()
+                cor_bpe_num = torch.sum(targets_b == preds_b).cpu().item()
+            else:
+                cor_phoneme_num = 0 
+                cor_bpe_num = 0
 
             logging_output = {
                 'ntokens': sample['ntokens'],
