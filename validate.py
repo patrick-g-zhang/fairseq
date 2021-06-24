@@ -89,6 +89,7 @@ def main(args, override_args=None):
 
 
 def cli_main():
+    pdb.set_trace()
     parser = options.get_validation_parser()
     args = options.parse_args_and_arch(parser)
 
