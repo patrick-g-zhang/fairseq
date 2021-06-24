@@ -1074,7 +1074,6 @@ class FastSpeech2Encoder(FairseqDecoder):
             weight=self.bpe_encoder_embed_tokens.weight,
         )
 
-
     def forward(self, src_tokens, features_only=False, return_all_hiddens=False, masked_tokens=None, bpe_masked_tokens=None, **unused):
         """
         Args:
@@ -1092,26 +1091,24 @@ class FastSpeech2Encoder(FairseqDecoder):
                   is a list of hidden states.
         """
 
-
         if self.args.two_inputs:
-        # bpe和phoneme同时作为输入
+            # bpe和phoneme同时作为输入
             phoneme_input = src_tokens['phoneme']
             bpe_input = src_tokens['bpe']
             phoneme2bpe = src_tokens['phoneme2bpe']
 
-
+            pdb.set_trace()
             x = self.extract_features(
                     phoneme_input, bpe_input=bpe_input, phoneme2bpe=phoneme2bpe)
-            x = self.output_layer(x, masked_tokens=masked_tokens, phoneme2bpe=phoneme2bpe,bpe_masked_tokens=bpe_masked_tokens)
-            
+            x = self.output_layer(x, masked_tokens=masked_tokens, phoneme2bpe=phoneme2bpe, bpe_masked_tokens=bpe_masked_tokens)
+
         else:
-        # 单个input
+            # 单个input
             x = self.extract_features(
                 src_tokens, )
             if not features_only:
                 x = self.output_layer(x, masked_tokens=masked_tokens)
         return x
-
 
     def extract_features(self, src_tokens, bpe_input=None, phoneme2bpe=None, **unused):
 

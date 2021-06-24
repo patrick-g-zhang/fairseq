@@ -155,6 +155,7 @@ class MaskedLMTask(FairseqTask):
         # mask_whole_words = get_whole_word_mask(self.args, self.source_dictionary) \
         #     if self.args.mask_whole_words else None
 
+        pdb.set_trace()
         if not self.args.two_inputs:
             src_dataset, tgt_dataset = MaskTokensDataset.apply_mask(
                 dataset,
@@ -186,7 +187,7 @@ class MaskedLMTask(FairseqTask):
                 mask_whole_words=self.args.mask_whole_words,
                 # no_word_sep=self.args.no_word_sep,
             )
-
+        
         with data_utils.numpy_seed(self.args.seed + epoch):
             shuffle = np.random.permutation(len(src_dataset))
 
