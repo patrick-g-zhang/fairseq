@@ -1131,6 +1131,7 @@ class FastSpeech2Encoder(FairseqDecoder):
 
     def output_layer(self, features, masked_tokens=None, bpe_masked_tokens=None, phoneme2bpe=None, **unused):
         if self.args.two_inputs:
+            pdb.set_trace()
             B, T = bpe_masked_tokens.size()
 
             # aggerate the features
