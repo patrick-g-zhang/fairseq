@@ -42,7 +42,6 @@ class MaskedLmLoss(FairseqCriterion):
             # tensor and gives CUDA error.
             if sample_size == 0:
                 phoneme_masked_tokens = None
-                assert bpe_sample_size == 0
 
             logitps, logitbs = model(**sample['net_input'], masked_tokens=phoneme_masked_tokens,
                                          bpe_masked_tokens=bpe_masked_tokens)
