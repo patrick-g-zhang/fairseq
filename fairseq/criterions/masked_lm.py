@@ -54,7 +54,6 @@ class MaskedLmLoss(FairseqCriterion):
             if sample_size != 0:
                 targets_p = targets_p[phoneme_masked_tokens]
                 targets_b = targets_b[bpe_masked_tokens]
-                assert bpe_sample_size == 0
 
             loss_p = F.nll_loss(
                 F.log_softmax(
