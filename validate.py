@@ -9,6 +9,7 @@ import torch
 from fairseq import checkpoint_utils, options, progress_bar, utils
 import pdb
 
+
 def main(args, override_args=None):
     utils.import_user_module(args)
 
@@ -85,7 +86,9 @@ def main(args, override_args=None):
             total_sample_size += log_output['sample_size']
             total_bpe_sample_size += log_output['bpe_sample_size']
 
-        pdb.set_trace()
+        print(
+            f"phoneme corr {total_cor_phoneme_num / total_sample_size}, correct phonemes {total_cor_phoneme_num}, totak phonemes {total_sample_size}")
+        print(f"bpe corr {total_cor_bpe_num / total_bpe_sample_size}, correct bpes {total_cor_bpe_num}, total_bpe_sample_size {total_bpe_sample_size}")
 
 
 def cli_main():
@@ -94,7 +97,8 @@ def cli_main():
 
     # only override args that are explicitly given on the command line
     override_parser = options.get_validation_parser()
-    override_args = options.parse_args_and_arch(override_parser, suppress_defaults=True)
+    override_args = options.parse_args_and_arch(
+        override_parser, suppress_defaults=True)
 
     main(args, override_args)
 
